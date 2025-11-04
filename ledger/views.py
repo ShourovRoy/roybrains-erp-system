@@ -56,9 +56,6 @@ class TransactionListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
 
-        print("start: ", self.request.GET.get('from'))
-        print("end: ", self.request.GET.get('to'))
-
         if self.request.GET.get('from') and self.request.GET.get('to'):
             l_list = TransactionLedger.objects.filter(
                 business=self.request.user,

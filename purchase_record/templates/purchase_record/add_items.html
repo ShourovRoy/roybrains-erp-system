@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <div class="card shadow p-2">
+                    <h2 class="text-center">Add Purchase Items. {{request.GET.ledger_id}}</h2>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.management_form }} 
+            
+                        <div class="py-2">
+                            <label class="form-label" for="id_supplier">
+                                {{form.product_name.label}}
+                            </label>
+                            {{form.product_name}}
+                        </div>
+            
+                        <div class="py-2">
+                            <label class="form-label" for="id_supplier">
+                                {{form.quantity.label}}
+                            </label>
+                            {{form.quantity}}
+                        </div>
+            
+                        <div class="py-2">
+                            <label class="form-label" for="id_supplier">
+                                {{form.weight.label}}
+                            </label>
+                            {{form.weight}}
+                        </div>
+            
+                        <div class="py-2">
+                            <label class="form-label" for="id_supplier">
+                                {{form.weight_label.label}}
+                            </label>
+                            {{form.weight_label}}
+                        </div>
+            
+                        <div class="py-2">
+                            <label class="form-label" for="id_supplier">
+                                {{form.unit_price.label}}
+                            </label>
+                            {{form.unit_price}}
+                        </div>
+            
+                        <button class="btn btn-primary" type="submit">Add Item</button>
+                    </form>
+                </div>
+
+            </div>
+            <div class="col-6">
+                
+                <div class="card shadow-sm p-3">
+                    <table class="table table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Supplier</th>
+                                <td>{{ voucher.supplier }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Date</th>
+                                <td>{{ voucher.date }}</td>
+                            </tr>
+                         
+                            <tr>
+                                <th scope="row">Total Amount</th>
+                                <td>{{ voucher.total_amount }}</td>
+                            </tr>
+                           
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card mt-4 p-0">
+                    <table class="table table-sm table-bordered align-middle text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Unit</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                                <tr>
+                                    <td>{{ item.product_name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.unit_price }}</td>
+                                    <td>{{ item.item_price }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        <div class="py-2">
+          
+                <a href="{% url 'complete_voucher' voucher.pk %}?ledger_id={{request.GET.ledger_id}}" class="btn btn-success w-100" type="submit">Finalize Purchase Voucher</a>
+          
+        </div>
+        
+    </div>
+</section>
+
+{% endblock content %}

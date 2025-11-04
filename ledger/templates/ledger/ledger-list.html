@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1>Ledger List</h1>
+        <form action="" method="get">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" name="ledger_search_q" class="form-control" placeholder="Search by Name, Phone or Address" value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-2 row gap-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    {% if searched %}
+                        <a href="{% url 'ledger-list' %}" class="btn btn-secondary">Show all</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Phone</th>
+                    <th>Note</th>
+                    <th>Account Type</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ledger in ledgers %}
+              
+                    <tr>
+                        <td>{{ ledger.id }}</td>
+                        <td>{{ ledger.account_name }}</td>
+                        <td>{{ ledger.address }}</td>
+                        <td>{{ ledger.phone_number }}</td>
+                        <td>{{ ledger.note }}</td>
+                        <td>{{ ledger.account_type }}</td>
+                        <td>{{ ledger.balance }}</td>
+                        <td>{{ ledger.status }}</td>
+                        <td>
+                            <a href="{% url 'ledger-transaction-list' ledger.id %}" class="btn btn-primary btn-sm">View Transactions</a>
+                        </td>
+                    </tr>
+        
+                {% empty %}
+                <tr>
+                    <td colspan="4">No ledgers available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+    </div>
+</section>
+{% endblock content %}

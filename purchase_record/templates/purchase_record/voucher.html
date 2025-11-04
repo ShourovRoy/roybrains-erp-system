@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1>Search Vendors to create Voucher</h1>
+
+        <form method="GET" class="d-flex mb-4" action="{% url 'voucher_search_ledger_account' %}">
+            <input type="text" name="ledger_search_q" class="form-control me-2" placeholder="Search by name, phone, or address" value="{{ request.GET.q }}">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        {% comment %} show ledger list with continue button {% endcomment %}
+        <div class="mt-4">
+            {% if ledgers %}
+                <h2>Found {{ ledgers.count }} vendor accounts Results</h2>
+                <ul class="list-group">
+                    {% for ledger in ledgers %}
+                        <li class="list-group-item">
+                            {{ ledger.account_name }} - {{ ledger.address }} - {{ ledger.phone_number }}
+                            <a href="{% url 'create_voucher' %}?ledger_id={{ ledger.id }}" class="btn btn-primary btn-sm float-end">Create Voucher</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                {% if searched %}
+                    <p>No results found.</p>
+                
+                    <a class="btn btn-primary" href="{% url 'create_voucher' %}">Create New Account with Voucher</a>
+                    <a class="btn btn-danger" href="{% url 'voucher_search_ledger_account' %}">Reset Search</a>
+                {% else %}
+                    <a class="btn btn-secondary" href="{% url 'create_voucher' %}">Create New Account with Voucher</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+
+

@@ -1,0 +1,95 @@
+# ========================================
+# Python
+# ========================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# ========================================
+# Django
+# ========================================
+# SQLite database
+db.sqlite3
+db.sqlite3-journal
+
+# Logs
+*.log
+
+# Media and static files (generated)
+media/
+staticfiles/
+static/
+
+# Local settings
+# (Uncomment if you have sensitive info like API keys in settings_local.py)
+# settings_local.py
+
+# Django migrations (optional if auto-generated often)
+# **/migrations/*.py
+# !**/migrations/__init__.py
+
+# ========================================
+# Environment variables
+# ========================================
+*.env
+.env.*
+
+# ========================================
+# IDEs and editors
+# ========================================
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# ========================================
+# OS-specific
+# ========================================
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ========================================
+# Others
+# ========================================
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# celery
+celerybeat-schedule
+celerybeat.pid

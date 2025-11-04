@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<section class="container my-5">
+    <h2 class="mb-4 text-primary">Transaction Details</h2>
+
+    {% comment %} filter {% endcomment %}
+    <form method="get" class="mb-3 d-flex align-items-end gap-2">
+    <div>
+        <label>From:</label>
+        <input type="date" name="from" value="{{ from }}" class="form-control">
+    </div>
+    <div>
+        <label>To:</label>
+        <input type="date" name="to" value="{{ to }}" class="form-control">
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Filter</button>
+    {% if request.GET.from or request.GET.to %}
+        <a class="btn btn-danger" href="{% url 'ledger-transaction-list' ledger_id %}">Reset Filter</a>
+    {% endif %}
+    </form>
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Debit</th>
+                    <th scope="col">Credit</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.date }}</td>
+                    <td>{{ transaction.description }}</td>
+                    <td class="text-danger fw-semibold">{{ transaction.debit }}</td>
+                    <td class="text-success fw-semibold">{{ transaction.credit }}</td>
+                    <td>{{ transaction.balance }}</td>
+                    <td>
+                        {{ transaction.status}}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="py-4">
+        <nav aria-label="Pagination">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page=1">&laquo; First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active"><span class="page-link">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span></li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+        </nav>
+    </div>
+</section>
+
+{% endblock content %}

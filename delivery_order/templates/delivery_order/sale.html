@@ -1,0 +1,23 @@
+{% extends 'base.html' %} {% block content %}
+
+<section class="py-5">
+  <div class="container">
+    <h1>Start your sales by searching for accounts</h1>
+
+    {% comment %} form to search accounts {% endcomment %}
+    <form method="GET">
+      <label class="form-label" for="account">Search Account</label>
+      <input
+        id="account"
+        type="text"
+        class="form-control"
+        name="account_search"
+        placeholder="Start typing to search accounts..."
+        value="{{ request.GET.account_search }}"
+      />
+      <button class="btn btn-primary mt-3" type="submit">Search</button>
+    </form>
+  </div>
+</section>
+
+{% endblock content %}

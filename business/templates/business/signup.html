@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block style %}
+form {
+            background: #fff;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+{% endblock style %}
+
+{% block content %}
+    <form method="POST" action="{% url 'business_signup' %}" >
+        {% csrf_token %}
+        <h2>Register Business</h2>
+
+        <label for="business_name">Business Name</label>
+        <input type="text" id="business_name" name="business_name" maxlength="255" required>
+
+        <label for="business_address">Business Address</label>
+        <textarea id="business_address" name="business_address" rows="3" required></textarea>
+
+        <label for="contact_number">Contact Number</label>
+        <input type="tel" id="contact_number" name="contact_number" maxlength="15" required>
+
+        <label for="owner_name">Owner Name</label>
+        <input type="text" id="owner_name" name="owner_name" maxlength="255" required>
+
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" minlength="8" required>
+
+        <button type="submit">Register</button>
+    </form>
+{% endblock %}

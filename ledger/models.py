@@ -25,6 +25,14 @@ class Ledger(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['business', 'account_name', 'account_type'],
+                name='unique_account_name_per_type_per_business'
+            )
+        ]
+
     def __str__(self):
         return f"{self.account_name} - {self.account_type} - {self.balance}"
     
@@ -39,6 +47,8 @@ class Transaction(models.Model):
     balance = models.FloatField(default=0.00, blank=True, null=True)
     status = models.CharField(max_length=50, choices=ACCOUNT_STATUS_CHOICES, default="Balanced", blank=True, null=True)
     date = models.DateTimeField()
+
+    
 
     def __str__(self):
         return f"{self.ledger.account_name} - {self.ledger.account_type} - Debit: {self.debit} Credit: {self.credit} Balance: {self.balance}"

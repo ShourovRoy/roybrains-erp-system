@@ -38,17 +38,17 @@
         </thead>
         <tbody>
             {% for item in inventories %}
-            <tr>
-                <td>{{ item.product_name }}</td>
-                <td>{{ item.weight }}</td>
-                <td>{{ item.unit_label }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>
-                    <a href="{% url 'inventory_detail' item.id %}" class="btn btn-primary btn-sm">
-                        Take Action
-                    </a>
-                </td>
-            </tr>
+              <tr>
+                  <td>{{ item.product_name }}</td>
+                  <td>{{ item.weight }}</td>
+                  <td>{{ item.unit_label }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>
+                      <a href="{% url 'inventory_detail' item.id %}" class="btn btn-primary btn-sm">
+                          Take Action
+                      </a>
+                  </td>
+              </tr>
             {% empty %}
             <tr>
                 <td colspan="5" class="text-muted">No inventory items found.</td>

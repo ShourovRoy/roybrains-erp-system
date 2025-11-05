@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from .models import PurchaseVoucher, PurchaseItem
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import PurchaseVoucherForm, PurchaseFormSet, PurchaseItemForm
@@ -162,15 +162,20 @@ class PurchaseVoucherCreateView(LoginRequiredMixin, CreateView):
 
             if ledger is None:
                 # create ledger entry with account creation
-                ledger = Ledger.objects.create(
-                    business=self.request.user,
-                    account_name=self.object.supplier,
-                    address=self.object.address,
-                    phone_number=self.object.phone_number,
-                    account_type="Vendor",
-                    status="Balanced",
-                    note="No dues"
-                )
+                try:
+                    ledger = Ledger.objects.create(
+                        business=self.request.user,
+                        account_name=self.object.supplier,
+                        address=self.object.address,
+                        phone_number=self.object.phone_number,
+                        account_type="Vendor",
+                        status="Balanced",
+                        note="No dues"
+                    )
+                except IntegrityError:
+                    transaction.set_rollback(True)
+                    messages.error(self.request, "Ledger with this account name already exists. Please use a different name.")
+                    return redirect(self.request.path)
             return redirect(f'{reverse("add_purchase_item", kwargs={"pk": self.object.pk})}?ledger_id={ledger.pk}')
 
 # complete the purchase voucher

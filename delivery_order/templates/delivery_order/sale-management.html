@@ -1,0 +1,47 @@
+{% extends 'base.html' %} {% block content %}
+
+<section class="py-5">
+  <div class="container">
+    <h1>Start your sales by searching for accounts</h1>
+
+    {% comment %} form to search accounts {% endcomment %}
+    <form method="GET">
+      <label class="form-label" for="account">Search Account</label>
+      <input
+        id="account"
+        type="text"
+        class="form-control"
+        name="account_search"
+        placeholder="Start typing to search accounts..."
+        value="{{ request.GET.account_search }}"
+      />
+      <button class="btn btn-primary mt-3" type="submit">Search</button>
+
+    </form>
+
+    {% comment %} display search results {% endcomment %}
+    <div class="mt-4">
+      {% if accounts %}
+        <h2>Search Results</h2>
+      {% endif %}
+      {% for account in accounts %}
+        <ul class="list-group">
+          <li class="list-group-item">
+            {{ account.account_name }}
+            <a href="" class="btn btn-primary btn-sm float-end">Start Delivery Order</a>
+          </li>
+        </ul>
+      {% empty %}
+        {% if searched %}
+          <p class="list-group-item">No accounts found.</p>
+          <a class="btn btn-danger" href="{% url 'sale_management' %}">Reset Search</a>
+          <a class="btn btn-info" href="">Start with new</a>
+        {% endif %}
+      {% endfor %}
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock content %}

@@ -9,6 +9,7 @@ class LedgerListView(LoginRequiredMixin, ListView):
     model = Ledger
     template_name = 'ledger/ledger-list.html'
     context_object_name = 'ledgers'
+    login_url = "/login/"
 
 
     def get_queryset(self):

@@ -178,7 +178,7 @@ class PurchaseVoucherCreateView(LoginRequiredMixin, CreateView):
                     return redirect(self.request.path)
             return redirect(f'{reverse("add_purchase_item", kwargs={"pk": self.object.pk})}?ledger_id={ledger.pk}')
 
-# complete the purchase voucher
+#TODO: need to work on this view later to implement payment reference complete the purchase voucher
 class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
     model = PurchaseVoucher
     template_name = 'purchase_record/voucher-details.html'

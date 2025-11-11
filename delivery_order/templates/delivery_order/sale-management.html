@@ -28,14 +28,14 @@
         <ul class="list-group">
           <li class="list-group-item">
             {{ account.account_name }}
-            <a href="" class="btn btn-primary btn-sm float-end">Start Delivery Order</a>
+            <a href="{% url 'create_delivery_order' %}" class="btn btn-primary btn-sm float-end">Start Delivery Order</a>
           </li>
         </ul>
       {% empty %}
         {% if searched %}
           <p class="list-group-item">No accounts found.</p>
           <a class="btn btn-danger" href="{% url 'sale_management' %}">Reset Search</a>
-          <a class="btn btn-info" href="">Start with new</a>
+          <a class="btn btn-info" href="{% url 'create_delivery_order' %}">Start with new</a>
         {% endif %}
       {% endfor %}
 

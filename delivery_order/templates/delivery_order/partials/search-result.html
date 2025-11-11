@@ -1,0 +1,47 @@
+{% if products %}
+<div class="card mt-3 shadow-sm">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">Search Results</h5>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-hover table-striped mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Weight</th>
+          <th scope="col">Available</th>
+          <th scope="col" class="text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ product.product_name }}</td>
+          <td>{{ product.weight }} kg</td>
+          <td>{{ product.quantity }}</td>
+          <td class="text-center">
+            <button 
+              type="button" 
+              id="add_more_product" 
+              class="add-more-product btn btn-sm btn-success"
+              data-name="{{ product.product_name }}"
+              data-weight="{{ product.weight }}"
+              data-quantity="{{ product.quantity }}"
+            >
+              Add Now
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-warning mt-3 text-center">
+  No products found matching your search.
+</div>
+{% endif %}
+

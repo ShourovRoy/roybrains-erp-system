@@ -1,4 +1,5 @@
 from django.db import models
+from ledger.models import Transaction as LedgerTransaction
 
 # Create your models here.
 class DeliveryOrder(models.Model):
@@ -9,10 +10,11 @@ class DeliveryOrder(models.Model):
     address = models.CharField(max_length=300, blank=False, null=False)
     total_price = models.FloatField(default=0.0)
     date = models.DateTimeField(null=True, blank=True)
-    is_paid = models.BooleanField(default=False)
+    is_paid = models.BooleanField(default=False, blank=True, null=True)
     previous_due = models.FloatField(default=0.0)
     grand_total = models.FloatField(default=0.0)
-
+    payment_amount = models.FloatField(default=0.0, blank=True, null=True)
+    due_amount = models.FloatField(default=0.0, blank=True, null=True)
 
 
     def __str__(self):
@@ -43,3 +45,17 @@ class DeliveryOrderItem(models.Model):
 
     def __str__(self):
         return f"Item {self.product_name} for Order {self.delivery_order.id}"
+    
+    def save(self, **kwargs):
+
+        LedgerTransaction.objects.create(
+            business=self.business,
+            ledger=self.delivery_order.ledger,
+            sell_voucher=self.delivery_order,
+            description=f"Sold {self.product_name} ({self.quantity} bags of {self.weight}{self.unit_label}: {self.total_weight})",
+            debit=self.total_price,
+            credit=0.0,
+            date=self.delivery_order.date,
+        )
+
+        return super().save(**kwargs)

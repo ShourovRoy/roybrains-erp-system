@@ -40,6 +40,7 @@ class Ledger(models.Model):
 class Transaction(models.Model):
     business = models.ForeignKey("business.BusinessUser", on_delete=models.CASCADE)
     ledger = models.ForeignKey("ledger.Ledger", on_delete=models.CASCADE)
+    sell_voucher = models.ForeignKey("delivery_order.DeliveryOrder", on_delete=models.CASCADE, blank=True, null=True, unique=False)
     purchase_voucher = models.ForeignKey("purchase_record.PurchaseVoucher", on_delete=models.CASCADE, blank=True, null=True, unique=False)
     description = models.TextField(max_length=500, blank=True, null=True)
     debit = models.FloatField(default=0.00)

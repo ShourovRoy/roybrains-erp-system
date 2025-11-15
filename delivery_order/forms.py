@@ -10,13 +10,13 @@ from .models import DeliveryOrder, DeliveryOrderItem, weight, unit_label
 
 class DeliveryOrderForm(ModelForm):
     date = DateTimeField(widget=DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}), required=True)
-    account_name = CharField(widget=TextInput(attrs={'class': 'form-control', 'type': 'text'}), required=True)
-    address = CharField(widget=TextInput(attrs={'class': 'form-control', 'type': 'text'}), required=True)
-    total_price = FloatField(widget=NumberInput(attrs={'class': 'form-control', 'type': 'number'}), )
-    is_paid = BooleanField(widget=CheckboxInput(attrs={'class': 'form-check-input'}), )
-    previous_due = FloatField(widget=NumberInput(attrs={'class': 'form-control', 'type': 'number'}), )
-    grand_total = FloatField(widget=NumberInput(attrs={'class': 'form-control', 'type': 'number'}), )
-    phone_number = CharField(widget=TextInput(attrs={'class': 'form-control', 'type': 'tel'}))
+    account_name = CharField(widget=TextInput(attrs={'class': 'form-control', 'type': 'text', 'placeholder': 'Customer name'}), required=True)
+    address = CharField(widget=TextInput(attrs={'class': 'form-control', 'type': 'text', 'placeholder': 'Address'}), required=True)
+    total_price = FloatField(initial=0.0, widget=NumberInput(attrs={'class': 'form-control', 'type': 'number', 'readonly': 'readonly'}), )
+    is_paid = BooleanField(widget=CheckboxInput(attrs={'class': 'form-check-input'}), required=False)
+    previous_due = FloatField(initial=0.0, widget=NumberInput(attrs={'class': 'form-control', 'type': 'number', 'readonly': 'readonly'}), )
+    grand_total = FloatField(initial=0.0,widget=NumberInput(attrs={'class': 'form-control', 'type': 'number', 'readonly': 'readonly'}), )
+    phone_number = CharField(widget=TextInput(attrs={'class': 'form-control', 'type': 'tel', 'placeholder': '01XXXXXXXXX'}))
     
     class Meta:
         model = DeliveryOrder
@@ -29,12 +29,18 @@ class DeliveryOrderForm(ModelForm):
             'is_paid',
             'previous_due',
             'grand_total',
+            'payment_amount',
+            'due_amount',
         ]
+        widgets = {
+            'payment_amount': NumberInput(attrs={'class': 'form-control'}),
+            'due_amount': NumberInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+        }
 
 class DeliveryOrderItemForm(ModelForm):
     product_name = CharField(widget=TextInput(attrs={'class': 'form-control py-2'}))
     quantity = IntegerField(widget=NumberInput(attrs={'type': 'number', 'class': 'form-control'}))
-    weight = FloatField(widget=Select(attrs={'class': 'form-select'}, choices=weight), required=True)
+    weight = FloatField(initial=0.0, widget=NumberInput(attrs={'class': 'form-control', 'type': 'number'}), required=True)
     unit_label = CharField(widget=Select(attrs={'class': 'form-select'}, choices=unit_label), required=True)
     class Meta:
         model = DeliveryOrderItem

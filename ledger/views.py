@@ -15,7 +15,6 @@ class LedgerListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
 
         query = self.request.GET.get('ledger_search_q', '')
-        print("search_query",query)
         ledger = [];
         if query:
             ledger = Ledger.objects.annotate(

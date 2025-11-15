@@ -19,6 +19,8 @@
                     <h1>Create Delivery Order</h1>
                     {{form.management_form}}
 
+                    <input type="hidden" name="ledger_id" value="{{request.GET.ledger_id}}">
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="py-2">
@@ -85,6 +87,23 @@
                                 {{form.grand_total}}
                             </div>
                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="py-2 col-md-6">
+                            <label for="" class="form-label">
+                                {{form.payment_amount.label}}
+                            </label>
+                            {{form.payment_amount}}
+                        </div>
+
+                        <div class="py-2 col-md-6">
+                            <label for="" class="form-label">
+                                {{form.due_amount.label}}
+                            </label>
+                            {{form.due_amount}}
+                        </div>
+                        
                     </div>
 
                     <div class="py-2">
@@ -327,14 +346,48 @@
         if (orderTotalPriceInput) {
             orderTotalPriceInput.value = totalProductsBill.toFixed(2);
         }
+
+        const orderPreviousDueInput = document.getElementById("id_previous_due");
+        const orderGrandTotalInput = document.getElementById("id_grand_total");
+        if (orderGrandTotalInput && orderPreviousDueInput) {
+            
+            orderGrandTotalInput.value = Number(orderPreviousDueInput.value) + totalProductsBill;
+            
+        }
         
+
+        {% comment %} update due amount {% endcomment %}
+        calculateDueAmount()
 
     }
 
+    {% comment %} calculate due amount {% endcomment %}
+    function calculateDueAmount() {
+        const payment_amount_input = document.getElementById("id_payment_amount")
+
+        const currentPaymentInputValue = payment_amount_input.value
+        const orderGrandTotalInput = document.getElementById("id_grand_total");
+
+        document.getElementById("id_due_amount").value = Number(orderGrandTotalInput.value) - currentPaymentInputValue
+
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
         setupAddMoreButtons();
         setupDeleteButtonHandler();
+
+        {% comment %} listen the paid amount input field {% endcomment %}
+        const payment_amount_input = document.getElementById("id_payment_amount")
+        const orderPreviousDueInput = document.getElementById("id_previous_due");
+        const orderGrandTotalInput = document.getElementById("id_grand_total");
+        if (orderGrandTotalInput && orderPreviousDueInput) {
+            
+            orderGrandTotalInput.value = Number(orderPreviousDueInput.value) + 0;
+            
+        }
+        if(payment_amount_input){
+            payment_amount_input.addEventListener("input", calculateDueAmount)
+        }
     });
     document.body.addEventListener("htmx:afterSwap", setupAddMoreButtons);
 </script>

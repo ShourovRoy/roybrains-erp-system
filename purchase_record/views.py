@@ -35,7 +35,7 @@ class PurchaseVoucherLedgerAccountSearchView(LoginRequiredMixin, ListView):
             similarity=TrigramSimilarity('account_name', query) + TrigramSimilarity('address', query) + TrigramSimilarity('phone_number', query)
         ).filter(
             business=self.request.user,
-            similarity__gt=0.3,
+            similarity__gt=0.2,
             account_type="Vendor",
         ).order_by('-similarity')
     

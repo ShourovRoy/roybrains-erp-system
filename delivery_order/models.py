@@ -1,5 +1,7 @@
 from django.db import models
 from ledger.models import Transaction as LedgerTransaction
+from inventory.models import Inventory
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class DeliveryOrder(models.Model):
@@ -48,6 +50,21 @@ class DeliveryOrderItem(models.Model):
     
     def save(self, **kwargs):
 
+
+        # deduct from inventory
+        try:
+            inventory_product = Inventory.objects.select_for_update().get(business= self.business, product_name=self.product_name)
+            if inventory_product.quantity < self.quantity:
+                raise ValidationError(
+                f"Insufficient inventory for '{self.product_name}'. Available: {inventory_product.quantity}, Requested: {self.quantity}"
+            ) 
+            inventory_product.quantity -= self.quantity
+            inventory_product.save()
+
+        except Inventory.DoesNotExist:
+            raise ValidationError(f"'{self.product_name}' is not available in inventory.") 
+
+        # create ledger transaction
         LedgerTransaction.objects.create(
             business=self.business,
             ledger=self.delivery_order.ledger,

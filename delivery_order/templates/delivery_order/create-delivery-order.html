@@ -247,6 +247,7 @@
                     const productQty = button.dataset.quantity;
                     const productId = button.dataset.id;
 
+
                     const currentProductForms = document.getElementsByClassName("product-form");
                     let currentFormCount = currentProductForms.length;
 
@@ -272,15 +273,21 @@
 
                     if (nameInput) nameInput.value = productName;
                     if (weightInput) weightInput.value = productWeight;
-                    if (qtyInput) qtyInput.value = 1;
+                    if (qtyInput) qtyInput.value = 0;
                     if (priceInput) priceInput.value = "";
 
                     // Update total when quantity or price changes
                     [qtyInput, priceInput].forEach(input => {
                         input.addEventListener("input", function() {
                             const qty = parseFloat(qtyInput.value) || 0;
-                            const price = parseFloat(priceInput.value) || 0;
-                            totalInput.value = (qty * price).toFixed(2);
+                            if (qty > Number(productQty)) {
+                                alert(`${productName} has ${productQty} but you are trying to sell ${qty}`)
+                                qtyInput.value = 0
+                            } else {
+
+                                const price = parseFloat(priceInput.value) || 0;
+                                totalInput.value = (qty * price).toFixed(2);
+                            }
                             calculateTotalPrice()
                         });
                     });
@@ -365,10 +372,17 @@
     function calculateDueAmount() {
         const payment_amount_input = document.getElementById("id_payment_amount")
 
-        const currentPaymentInputValue = payment_amount_input.value
-        const orderGrandTotalInput = document.getElementById("id_grand_total");
+        if (Number(payment_amount_input.value) < 0 ) {
+            alert("Payment amount can not be negative")
+            payment_amount_input.value = 0.0
+        } else {
 
-        document.getElementById("id_due_amount").value = Number(orderGrandTotalInput.value) - currentPaymentInputValue
+            const currentPaymentInputValue = payment_amount_input.value
+            const orderGrandTotalInput = document.getElementById("id_grand_total");
+    
+            document.getElementById("id_due_amount").value = Number(orderGrandTotalInput.value) - currentPaymentInputValue
+        }
+
 
     }
 
@@ -380,9 +394,11 @@
         const payment_amount_input = document.getElementById("id_payment_amount")
         const orderPreviousDueInput = document.getElementById("id_previous_due");
         const orderGrandTotalInput = document.getElementById("id_grand_total");
-        if (orderGrandTotalInput && orderPreviousDueInput) {
+        const currentDueInput = document.getElementById("id_due_amount");
+        if (orderGrandTotalInput && orderPreviousDueInput && currentDueInput) {
             
             orderGrandTotalInput.value = Number(orderPreviousDueInput.value) + 0;
+            currentDueInput.value = orderGrandTotalInput.value
             
         }
         if(payment_amount_input){

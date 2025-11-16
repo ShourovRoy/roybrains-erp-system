@@ -98,9 +98,10 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
 
         account_details = None
 
-        with transaction.atomic():
+        
 
-            try:
+        try:
+            with transaction.atomic():
                 # TODO: work from here 14-11-25 handle previous due and current amount paid or not 
                 if ledger_id:
                     account_details = Ledger.objects.get(pk=int(ledger_id), business=self.request.user)
@@ -155,12 +156,12 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
 
 
 
-            except Exception as e :
-                messages.warning(request=self.request, message=f"{e}")
+        except Exception as e :
+            messages.warning(request=self.request, message=f"{e}")
                 
-                return self.form_invalid(form)
+            return self.form_invalid(form)
 
-            return redirect("create_delivery_order")
+        return redirect("create_delivery_order")
 
 
 

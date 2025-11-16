@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Inventory
+from .models import Inventory, SalesLog
 # Register your models here.
 
 class QuestionAdmin(admin.ModelAdmin):
@@ -9,3 +9,4 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Inventory, QuestionAdmin)
+admin.site.register(SalesLog)

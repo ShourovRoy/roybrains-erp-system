@@ -27,3 +27,15 @@ class Inventory(models.Model):
     def __str__(self):
         
         return self.product_name
+    
+# sales log
+class SalesLog(models.Model):
+    business = models.ForeignKey("business.BusinessUser", on_delete=models.CASCADE)
+    product = models.ForeignKey("Inventory", on_delete=models.CASCADE)
+
+    quantity_sold = models.IntegerField(null=False, blank=False)
+    date = models.DateTimeField() 
+
+
+    def __str__(self):
+        return f"{self.product.product_name} - {self.quantity_sold} on {self.date}"

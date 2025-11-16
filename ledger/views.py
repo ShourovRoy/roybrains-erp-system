@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views.generic import ListView
 from .models import Ledger, Transaction as TransactionLedger
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -15,20 +14,17 @@ class LedgerListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
 
         query = self.request.GET.get('ledger_search_q', '')
-        ledger = [];
+        ledger = []
         if query:
             ledger = Ledger.objects.annotate(
             similarity=TrigramSimilarity('account_name', query) + TrigramSimilarity('address', query) + TrigramSimilarity('phone_number', query)
         ).filter(
             business=self.request.user,
             similarity__gt=0.2,
-            account_type="Vendor",
         ).order_by('-similarity')
         else:
-            ledger = super().get_queryset().filter(business=self.request.user).order_by('account_name', 'id')
+            ledger = super().get_queryset().filter(business=self.request.user).order_by('updated_at')
 
-
-        print("ledger",ledger)
         return ledger
     
     def get_context_data(self, **kwargs):

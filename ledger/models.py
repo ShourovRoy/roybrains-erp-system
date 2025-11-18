@@ -58,12 +58,10 @@ class Transaction(models.Model):
     def save(self, **kwargs):
 
         ledger_entries = Transaction.objects.filter(ledger=self.ledger, business=self.business,).order_by('date', 'id').exclude(pk=self.pk)
-        for entry in ledger_entries:
-            print("Balance Entry: ", entry.balance)
 
         last_balance = ledger_entries.last().balance if ledger_entries.exists() else 0.00
         self.balance = last_balance + (self.debit - self.credit)
-        print("last balance:",last_balance, "debit:", self.debit, "credit:", self.credit, "new balance:", self.balance)
+       
         self.status = "Dr" if self.balance > 0 else "Cr" if self.balance < 0 else "Balanced"
 
         note = self.ledger.note

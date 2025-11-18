@@ -102,7 +102,7 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
 
         try:
             with transaction.atomic():
-                # TODO: work from here 14-11-25 handle previous due and current amount paid or not 
+                
                 if ledger_id:
                     account_details = Ledger.objects.get(pk=int(ledger_id), business=self.request.user)
 
@@ -127,7 +127,6 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
                 if formset.is_valid():
                     items = formset.save(commit=False)
                     for item in items:
-                        print(f"Price: {item.price}, Quantity: {item.quantity}, sum: {item.price * item.quantity}")
                         item.business = self.request.user
                         item.delivery_order = self.object
                         item.total_weight = item.quantity * item.weight
@@ -139,7 +138,6 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
                     # update total
                     
                     self.object.grand_total = (self.object.previous_due or 0) + self.object.total_price
-                    print(self.object.ledger, account_details.id)
                     self.object.save()
 
                     # insert ledger transaction if any amount is paid
@@ -153,6 +151,8 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
                             credit=float(self.object.payment_amount),
                             date=self.object.date
                         )
+                    
+                    messages.success(request=self.request, message=f"Delivery Order has been created.")
 
 
 

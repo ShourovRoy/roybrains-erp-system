@@ -279,15 +279,15 @@
                     // Update total when quantity or price changes
                     [qtyInput, priceInput].forEach(input => {
                         input.addEventListener("input", function() {
-                            const qty = parseFloat(qtyInput.value) || 0;
+                            let qty = parseFloat(qtyInput.value) || 0;
                             if (qty > Number(productQty)) {
                                 alert(`${productName} has ${productQty} but you are trying to sell ${qty}`)
                                 qtyInput.value = 0
-                            } else {
+                                qty = 0
+                            } 
 
-                                const price = parseFloat(priceInput.value) || 0;
-                                totalInput.value = (qty * price).toFixed(2);
-                            }
+                            const price = parseFloat(priceInput.value) || 0;
+                            totalInput.value = (qty * price).toFixed(2);
                             calculateTotalPrice()
                         });
                     });

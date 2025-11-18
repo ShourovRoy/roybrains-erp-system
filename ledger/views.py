@@ -23,7 +23,7 @@ class LedgerListView(LoginRequiredMixin, ListView):
             similarity__gt=0.2,
         ).order_by('-similarity')
         else:
-            ledger = super().get_queryset().filter(business=self.request.user).order_by('updated_at')
+            ledger = super().get_queryset().filter(business=self.request.user).order_by('-created_at')
 
         return ledger
     

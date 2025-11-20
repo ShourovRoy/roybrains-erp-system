@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="py-5">
+    <div class="container">
+        <h1>Create new ledger account</h1>
+        <form action="{% url 'create-ledger' %}" method="post">
+            {% csrf_token %}
+            {{form.form_management}}
+
+            <div class="py-2">
+                <label class="form-label" for="">{{form.account_name.label}}</label>
+                {{form.account_name}}
+            </div>
+
+            <div class="py-2">
+                <label class="form-label" for="">{{form.phone_number.label}}</label>
+                {{form.phone_number}}
+            </div>
+
+            <div class="py-2">
+                <label class="form-label" for="">{{form.account_type.label}}</label>
+                {{form.account_type}}
+            </div>
+
+            <div class="py-2 branch">
+                <label class="form-label" for="">{{form.branch.label}}</label>
+                {{form.branch}}
+            </div>
+
+            <div class="py-2">
+                <label class="form-label" for="">{{form.address.label}}</label>
+                {{form.address}}
+            </div>
+
+            <div class="py-2">
+                <button class="btn btn-primary" type="submit">Create new account</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        let branch = document.querySelector(".branch")
+        let branchInput = document.getElementById("id_branch")
+        let accountTypeInput = document.getElementById("id_account_type");
+
+        branch.style.display = "none"
+        branch.removeAttribute("required")
+
+        if (accountTypeInput) {
+            accountTypeInput.addEventListener("input", () => {
+                let accountTypeValue = document.getElementById("id_account_type").value;
+                
+                if (accountTypeValue === "Bank") {
+                    branch.style.display = "inline"
+                    branchInput.setAttribute("required", true)
+                } else {
+                    branch.style.display = "none"
+                    branchInput.removeAttribute("required")
+                }
+
+            })
+        }
+
+    })
+</script>
+
+{% endblock content %}

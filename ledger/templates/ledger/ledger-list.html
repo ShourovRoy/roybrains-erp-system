@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<section class="py-4">
+    <div class="container">
+        <a class="btn btn-warning w-full" href="{% url 'create-ledger' %}">Create New Ledger</a>
+    </div>
+</section>
 <section class="py-5">
     <div class="container">
         <h1>Ledger List</h1>
-        <form action="" method="get">
+        <form method="get">
             <div class="row mb-3">
                 <div class="col-md-4">
                     <input type="text" name="ledger_search_q" class="form-control" placeholder="Search by Name, Phone or Address" value="{{ request.GET.search }}">

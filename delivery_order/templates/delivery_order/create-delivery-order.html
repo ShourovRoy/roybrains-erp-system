@@ -395,15 +395,18 @@
         const orderPreviousDueInput = document.getElementById("id_previous_due");
         const orderGrandTotalInput = document.getElementById("id_grand_total");
         const currentDueInput = document.getElementById("id_due_amount");
+        
         if (orderGrandTotalInput && orderPreviousDueInput && currentDueInput) {
             
             orderGrandTotalInput.value = Number(orderPreviousDueInput.value) + 0;
             currentDueInput.value = orderGrandTotalInput.value
             
         }
+        
         if(payment_amount_input){
             payment_amount_input.addEventListener("input", calculateDueAmount)
         }
+        
     });
     document.body.addEventListener("htmx:afterSwap", setupAddMoreButtons);
 </script>

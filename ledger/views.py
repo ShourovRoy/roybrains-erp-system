@@ -2,6 +2,8 @@ from django.views.generic import ListView, CreateView
 from .models import Ledger, Transaction as TransactionLedger
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
+from django.db.models import Value
+from django.db.models.functions import Coalesce
 from .forms import LedgerForm
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -18,19 +20,19 @@ class LedgerListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
 
         query = self.request.GET.get('ledger_search_q', '')
-        print(query)
 
         ledger = []
 
         if query:
             
             ledger = super().get_queryset().annotate(
-                similarity=TrigramSimilarity('account_name', query) + TrigramSimilarity('address', query) 
+                similarity=TrigramSimilarity('account_name', query) + TrigramSimilarity(Coalesce('address', Value('')), query) + TrigramSimilarity(Coalesce('branch', Value('')), query)
+                + TrigramSimilarity(Coalesce('phone_number', Value('')), query)
             ).filter(
                 business=self.request.user,
                 similarity__gt=0.2,
             )
-            print(ledger)
+
         else:
             ledger = super().get_queryset().filter(business=self.request.user).order_by('-created_at')
 

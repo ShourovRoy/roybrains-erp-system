@@ -12,13 +12,15 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'voucher_search_ledger_account' %}">Voucher</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'ledger-list' %}">Ledger Accounts</a>
+        </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <button class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Sale Force
-          </a>
+          </button>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="{% url 'sale_management' %}">Sale Management</a></li>
-            <li><a class="dropdown-item" href="{% url 'ledger-list' %}">Ledger Accounts</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="#">Something else here</a></li>
           </ul>

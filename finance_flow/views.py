@@ -11,11 +11,12 @@ from django.db import transaction
 from datetime import datetime
 # Create your views here.
 
-
+# financial control panel
 class FinanceFlowView(LoginRequiredMixin,TemplateView):
     template_name = "finance_flow/finance-flow-control.html"
     login_url = "/login/"
 
+# search accounts
 class FincialAccountSearchView(LoginRequiredMixin, ListView):
     template_name = "finance_flow/partials/account-search-result.html"
     model = Ledger
@@ -35,6 +36,7 @@ class FincialAccountSearchView(LoginRequiredMixin, ListView):
             )
         return super().get_queryset().none
 
+# financial inflow panel
 class FinancialInflowView(LoginRequiredMixin, DetailView):
     login_url = "/login"
     model = Ledger
@@ -91,6 +93,7 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
             messages.error(request=self.request, message="Something went wrong! Try again")
             return redirect("financial-inflow-cash", pk=ledger_id)
 
+# financial bank in flow search
 class FinancialBankInFlow(LoginRequiredMixin, DetailView):
     login_url = "/login/"
     model = Ledger
@@ -120,6 +123,7 @@ class FinancialBankInFlow(LoginRequiredMixin, DetailView):
         return context
     
 
+# financial bank in flow action
 class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
     login_url = "/login/"
     template_name = "finance_flow/incoming-full-bank-deposite.html"

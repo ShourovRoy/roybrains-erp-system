@@ -2,9 +2,19 @@
 
 
 {% block content %}
+
+
 <section class="py-5">
     <div class="container">
-        <h1>Control Panel</h1>
+        <h1>Financial Control Panel</h1>
+        
+        <label class="form-label" for="">Search Account</label>
+        <input  hx-trigger="keyup changed delay:500ms" hx-get="{% url 'finance-flow-search' %}" hx-target="#toitoi" class="form-control" type="search" name="search_query" id="" placeholder="start typeing to search account.." >
+
+
+        <div id="toitoi">
+
+        </div>
     </div>
 </section>
 

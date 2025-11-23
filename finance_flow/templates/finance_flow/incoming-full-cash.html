@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section>
+    <form action="" method="post">
+
+        {% csrf_token %}
+
+        <label for="">{{request.GET.pk}}</label>
+        <input type="number" name="amount" id="" step="0.01" placeholder="Enter the amount">
+        <input type="datetime-local" name="datetime">
+        <button type="submit">Take money full in cash</button>
+
+    </form>
+</section>
+
+{% endblock content %}

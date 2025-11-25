@@ -33,7 +33,7 @@
         <div class="py-4 row ">
             <a href="{% url 'financial-inflow-cash' ledger.pk %}" class="btn btn-md btn-primary">Take money in Cash Deposite</a>
             <a href="{% url 'financial-inflow-bank' ledger.pk %}" class="btn btn-md btn-info">Take money in Bank Deposite</a>
-            <button class="btn btn-md btn-success">Take both in Cash and Bank</button>
+            <a href="{% url 'fnancial-inflow-partial' ledger.pk %}" class="btn btn-md btn-success">Take both in Cash and Bank</a>
         </div>
     </div>
 </section>

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import FinanceFlowView, FincialAccountSearchView, FinancialInflowView, FinancialCashInFlow, FinancialBankInFlow, FinancialBankInflowActionView, FinancialPartialInflowView, FinancialPartialInflowActionView, FinancialOutflowView, FinancialOutflowInCashView
+from .views import FinanceFlowView, FincialAccountSearchView, FinancialInflowView, FinancialCashInFlow, FinancialBankInFlow, FinancialBankInflowActionView, FinancialPartialInflowView, FinancialPartialInflowActionView, FinancialOutflowView, FinancialOutflowInCashView, FinancialOutflowBankSearchView, FinancialOutflowBankActionView
 
 urlpatterns = [
     path('finance-flow/', FinanceFlowView.as_view(), name="finance-flow"),
@@ -12,5 +12,7 @@ urlpatterns = [
     path('financial-inflow/partial/<int:pk>/<int:bank_id>/', FinancialPartialInflowActionView.as_view(), name="fnancial-inflow-partial-action"),
 
     path('financial-outflow/<int:pk>/', FinancialOutflowView.as_view(), name="financial-outflow"),
-    path('financial-outflow/send-cash/<int:pk>', FinancialOutflowInCashView.as_view(), name="financial-outflow-cash"),
+    path('financial-outflow/send-cash/<int:pk>/', FinancialOutflowInCashView.as_view(), name="financial-outflow-cash"),
+    path('financial-outflow/bank-out/<int:pk>/', FinancialOutflowBankSearchView.as_view(), name="financial-outflow-bank-search"),
+    path('financial-outflow/bank-out/<int:pk>/<int:bank_id>', FinancialOutflowBankActionView.as_view(), name="financial-outflow-bank-action"),
 ]

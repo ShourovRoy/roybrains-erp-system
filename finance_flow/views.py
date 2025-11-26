@@ -376,4 +376,101 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form);
 
 
+# give full money bank serach
+class FinancialOutflowBankSearchView(LoginRequiredMixin, DetailView):
+    login_url = "/login"
+    template_name = "finance_flow/outgoing-full-bank-search.html"
+    model = Ledger
+    context_object_name = "account"
+
+    def get_object(self, queryset = ...):
+        account_id = int(self.kwargs['pk'])
+
+        return get_object_or_404(self.model, business=self.request.user, pk=account_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         
+        query = self.request.GET.get("search_bank", None)
+       
+        if query:
+            banks = Ledger.objects.annotate(
+                similarity=TrigramSimilarity("account_name", query),
+            ).filter(business=self.request.user, similarity__gt=0.3, branch__isnull=False, ).exclude(branch="").order_by("-similarity")
+
+            context['items'] = banks
+        else:
+             context['items'] = []
+        return context
+    
+
+class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
+    login_url = "/login/"
+    model = LedgerTransaction
+    fields = []
+    template_name = "finance_flow/outgoing-full-bank-out.html"
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        bank_id = int(self.kwargs["bank_id"])
+        account_id = int(self.kwargs["pk"])
+
+        context['account'] = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
+        context['bank_details'] = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
+
+
+        return context
+    
+
+    def form_valid(self, form):
+
+        amount = float(self.request.POST.get("amount"))
+        date_time = self.request.POST.get("datetime")
+
+        account_id = int(self.kwargs["pk"])
+        bank_id = int(self.kwargs["bank_id"])
+
+        try:
+            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            form.add_error(None, "Invalid date format.")
+            return self.form_invalid(form)
+
+
+
+        try:
+        
+            with transaction.atomic():
+                account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
+                bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
+
+                # create the ledger transactions
+                # account debit
+                self.model.objects.create(
+                    business=self.request.user,
+                    ledger=account_ledger,
+                    description=f"Transferred from {bank_ledger.account_name} - {bank_ledger.branch}",
+                    date=date_time,
+                    debit=float(amount),
+                    credit=0.0
+                )
+
+                # bank debit
+                self.model.objects.create(
+                    business=self.request.user,
+                    ledger=bank_ledger,
+                    description=f"Money has been sent to {account_ledger.account_name} - {account_ledger.address}",
+                    date=date_time,
+                    credit=float(amount),
+                    debit=0.0
+                )
+
+                messages.success(request=self.request, message="Action done successfully")
+                return redirect("ledger-transaction-list", pk=account_id)
+
+        except Exception as e:
+            print(e)
+            messages.error(request=self.request, message="Action failed! Try again.")
+            return self.form_invalid(form)

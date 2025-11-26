@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="py-5 bg-gradient">
+    <div class="container">
+
+        <!-- Account Header -->
+        <div class="mb-4">
+            <h3 class="fw-bold">{{ account.account_name }}</h3>
+            <p class="text-muted mb-0">{{ account.address }}</p>
+        </div>
+
+        <!-- Search Form -->
+        <form action="{% url 'financial-outflow-bank-search' account.pk %}" method="get">
+            <label for="bank" class="form-label fw-semibold">Search Bank</label>
+
+            <div class="input-group">
+                <input 
+                    class="form-control" 
+                    type="search"
+                    name="search_bank"
+                    id="bank"
+                    placeholder="Type bank name..."
+                >
+                <button class="btn btn-primary" type="submit">
+                    Search
+                </button>
+            </div>
+        </form>
+
+    </div>
+</section>
+
+
+<!-- Results Section -->
+<section class="py-4">
+    <div class="container">
+
+        {% if items %}
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white fw-semibold">
+                Search Results
+            </div>
+
+            <ul class="list-group list-group-flush">
+                {% for item in items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    
+                    <div>
+                        <h6 class="fw-bold mb-1">{{ item.account_name }}</h6>
+                        <p class="text-muted small mb-1">
+                            Branch: {{ item.branch }} <br>
+                            Address: {{ item.address }}
+                        </p>
+                        <span class="badge bg-success px-3 py-2">
+                            Balance: {{ item.balance }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <a href="{% url 'financial-outflow-bank-action' account.pk item.pk %}" class="btn btn-outline-primary btn-sm">
+                            Give from this bank
+                        </a>
+                    </div>
+
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center mt-4">
+            No results found.
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock content %}

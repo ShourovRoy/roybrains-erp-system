@@ -33,7 +33,7 @@
         {% comment %} form to deposite money {% endcomment %}
         <div class="py-4 row ">
             <a href="{% url 'financial-outflow-cash' ledger.pk %}" class="btn btn-md btn-primary">Give money in Cash Deposite</a>
-            <a href="" class="btn btn-md btn-info">Give money in Bank Deposite</a>
+            <a href="{% url 'financial-outflow-bank-search' ledger.pk %}" class="btn btn-md btn-info">Give money in Bank Deposite</a>
             <a href="" class="btn btn-md btn-success">Give both in Cash and Bank</a>
         </div>
     </div>

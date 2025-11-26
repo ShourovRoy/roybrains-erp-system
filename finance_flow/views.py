@@ -222,8 +222,6 @@ class FinancialPartialInflowView(LoginRequiredMixin, DetailView):
              context['items'] = []
         return context
     
-
-
 # financial bank and cash inflow action
 class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailView):
     login_url = "/login/"
@@ -308,3 +306,74 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
             print(e)
             messages.error(request=self.request, message="Action failed please try again!")
             return redirect("fnancial-inflow-partial-action", pk=account_id, bank_id=bank_id)
+        
+
+
+# finance outflow starts here
+# finance outflow view
+class FinancialOutflowView(LoginRequiredMixin, DetailView):
+    template_name = "finance_flow/financial-outgoing-flow.html"
+    model = Ledger
+    login_url = "/login/"
+    context_object_name = "ledger"
+
+    def get_object(self, queryset = ...):
+        try:
+            account_id = int(self.kwargs["pk"])
+            return get_object_or_404(self.model, business=self.request.user, pk=account_id)
+        except Exception as e:
+            print(e)
+            messages.warning(request=self.request, message="Invalid account id!")
+            return redirect("finance-flow")
+        
+# give full money in cash view
+class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
+    login_url = "/login/"
+    model = LedgerTransaction
+    fields = []
+    template_name = "finance_flow/outgoing-full-cash.html"
+
+    def form_valid(self, form):
+
+        try:
+            account_id = int(self.kwargs["pk"])
+        except Exception as e:
+            print(e)
+            messages.warning(request=self.request, message="Invalid account id!")
+        
+        try:
+            
+            # extract data from form
+            cash_amount = float(self.request.POST.get("cash_amount", 0.0))
+            date_time = self.request.POST.get("datetime", None)
+
+            if date_time:
+                date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+            else:
+                messages.error(request=self.request, message="Need a date to complete the action!")
+                return self.form_invalid(form)
+
+            with transaction.atomic():
+                # get ledger details 
+                ledger_details = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
+
+                # make ledger entry
+                LedgerTransaction.objects.create(
+                    business=self.request.user, 
+                    ledger=ledger_details,
+                    debit=cash_amount,
+                    credit=0.0,
+                    description="Cash given in liquide",
+                    date=date_time,
+                )
+
+                messages.success(request=self.request, message=f"Cash given sucessfully to {ledger_details.account_name} - {ledger_details.address}")
+
+                return redirect("ledger-transaction-list", pk=ledger_details.pk)
+
+        except Exception as e:
+            messages.error(request=self.request, message="Something went wrong!")  
+            return self.form_invalid(form);
+
+
+        

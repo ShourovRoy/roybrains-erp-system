@@ -22,7 +22,7 @@
             <td>{{ account.note }}</td>
             <td>{{ account.address }}</td>
             <td><a class="btn btn-sm btn-primary" href="{% url 'financial-inflow' account.pk %}">Take Money</a></td>
-            <td><a class="btn btn-sm btn-warning" href="">Give Money</a></td>
+            <td><a class="btn btn-sm btn-warning" href="{% url 'financial-outflow' account.pk %}">Give Money</a></td>
         </tr>
         {% endfor %}
     </tbody>

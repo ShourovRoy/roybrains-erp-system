@@ -13,4 +13,5 @@ urlpatterns = [
     path('', include('delivery_order.urls')),
     path('', include('ledger.urls')),
     path('', include('finance_flow.urls')),
+    path('', include('internal_banking.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

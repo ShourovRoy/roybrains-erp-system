@@ -1,8 +1,67 @@
 {% extends 'internal_banking/internal_banking_base.html' %}
 
-
 {% block internal_banking_content %}
 
-<h1>Internal Banking Control Panel</h1>
+<div class="container py-4">
+
+    <!-- Search Bar -->
+    <form action="{% url 'internal_banking_control_panel' %}" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="search" 
+                   name="search_bank" 
+                   class="form-control bg-dark text-light border-secondary" 
+                   placeholder="Search bank..."
+                   value="{{ request.GET.search_bank }}">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <!-- Bank Results -->
+    {% if banks %}
+        <div class="row g-4">
+            {% for bank in banks %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card bg-dark border-secondary shadow-sm h-100">
+
+                        <div class="card-body text-light">
+                            <h5 class="fw-bold">{{ bank.account_name }}</h5>
+
+                            <p class="mb-1 text-muted"><strong class="text-light">Branch:</strong> {{ bank.branch }}</p>
+
+                            <p class="mb-1 text-muted">
+                                <strong class="text-light">Balance:</strong> 
+                                <span class="badge bg-success text-dark">{{ bank.balance }}</span>
+                            </p>
+
+                            <p class="mb-1 text-muted">
+                                <strong class="text-light">Status:</strong> {{ bank.status }}
+                            </p>
+
+                            {% if bank.note %}
+                                <p class="small text-secondary mt-2">{{ bank.note }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-footer bg-dark border-secondary text-center">
+                            <a href="" 
+                               class="btn btn-outline-danger btn-sm me-2">
+                                Withdraw
+                            </a>
+
+                            <a href="" 
+                               class="btn btn-outline-info btn-sm">
+                                Deposit
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center">No banks found!</div>
+    {% endif %}
+
+</div>
 
 {% endblock internal_banking_content %}

@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'purchase_record',
     'delivery_order',
     'ledger',
-    'finance_flow'
+    'finance_flow',
+    'internal_banking',
 ]
 
 MIDDLEWARE = [

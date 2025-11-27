@@ -474,3 +474,117 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
             print(e)
             messages.error(request=self.request, message="Action failed! Try again.")
             return self.form_invalid(form)
+
+
+# search partial outflow search with bank and cash
+class FinancialPartialOutflowSearchView(LoginRequiredMixin, DetailView):
+    login_url = "/login/"
+    template_name = "finance_flow/outgoing-partial-flow-search.html"
+    model = Ledger
+    context_object_name = "account"
+
+    def get_object(self, queryset = None):
+        account_id = int(self.kwargs['pk'])
+
+        return get_object_or_404(self.model, business=self.request.user, pk=account_id)
+    
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        query = self.request.GET.get("search_bank", None)
+       
+        if query:
+            banks = Ledger.objects.annotate(
+                similarity=TrigramSimilarity("account_name", query),
+            ).filter(business=self.request.user, similarity__gt=0.3, branch__isnull=False, ).exclude(branch="").order_by("-similarity")
+
+            context['items'] = banks
+        else:
+             context['items'] = []
+        return context
+    
+
+# partial outflow with bank and cash action
+class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailView):
+    login_url = "/login/"
+    model = Ledger
+    template_name = "finance_flow/outgoing-partial-flow-action.html"
+    fields = []
+    context_object_name = "account"
+
+    def get_object(self, queryset = ...):
+        account_id = int(self.kwargs["pk"])
+        return get_object_or_404(self.model, business=self.request.user, pk=account_id);
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        bank_id = int(self.kwargs["bank_id"])
+
+        context['bank_details'] = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
+
+        return context;
+
+    def form_valid(self, form):
+
+        account_id = int(self.request.POST.get("account_id"))
+        bank_id = int(self.request.POST.get("bank_id"))
+
+
+        # get the cash amount and bank amount
+        cash_amount = float(self.request.POST.get("cash_amount", 0.0))
+        bank_amount = float(self.request.POST.get("bank_amount", 0.0))
+
+        # get the date
+        date_time = self.request.POST.get("datetime")
+
+        try:
+            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            form.add_error(None, "Invalid date format.")
+            return self.form_invalid(form)
+        
+        try:
+
+
+            with transaction.atomic():
+                account_ledger = get_object_or_404(self.model, business=self.request.user, pk=account_id)
+                bank_ledger = get_object_or_404(self.model, business=self.request.user, pk=bank_id)
+                
+                # accounts credit in cash
+                LedgerTransaction.objects.create(
+                    business=self.request.user,
+                    ledger=account_ledger,
+                    description="Cash given in liquide",
+                    credit=0.0,
+                    debit=cash_amount,
+                    date=date_time,
+                )
+                LedgerTransaction.objects.create(
+                    business=self.request.user,
+                    ledger=account_ledger,
+                    description=f"Given from {bank_ledger.account_name} - {bank_ledger.branch}",
+                    credit=0.0,
+                    debit=bank_amount,
+                    date=date_time,
+                )
+
+                # bank debit 
+                LedgerTransaction.objects.create(
+                    business=self.request.user,
+                    ledger=bank_ledger,
+                    description=f"Money given to {account_ledger.account_name} - {account_ledger.address}",
+                    credit=bank_amount,
+                    debit=0.0,
+                    date=date_time,
+                )
+
+                messages.info(request=self.request, message="Ledger transaction has been sucessfull.")
+
+                return redirect("financial-outflow", pk=account_id)
+
+        except Exception as e:
+            print(e)
+            messages.error(request=self.request, message="Action failed please try again!")
+            return redirect("fnancial-inflow-partial-action", pk=account_id, bank_id=bank_id)
+        

@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from datetime import datetime
+from utils.helper import encode_date_time
 # Create your views here.
 
 # financial control panel
@@ -65,7 +66,7 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
         date_time = self.request.POST.get("datetime")
         
         try:
-            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+            date_time = encode_date_time(date_time)
         except ValueError:
             form.add_error(None, "Invalid date format.")
             return self.form_invalid(form)
@@ -151,7 +152,7 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
         bank_id = int(self.kwargs["bank_id"])
 
         try:
-            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+            date_time = encode_date_time(date_time)
         except ValueError:
             form.add_error(None, "Invalid date format.")
             return self.form_invalid(form)
@@ -256,7 +257,7 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
         date_time = self.request.POST.get("datetime")
 
         try:
-            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+            date_time = encode_date_time(date_time)
         except ValueError:
             form.add_error(None, "Invalid date format.")
             return self.form_invalid(form)
@@ -348,7 +349,7 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
             date_time = self.request.POST.get("datetime", None)
 
             if date_time:
-                date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+                date_time = encode_date_time(date_time)
             else:
                 messages.error(request=self.request, message="Need a date to complete the action!")
                 return self.form_invalid(form)
@@ -433,7 +434,7 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
         bank_id = int(self.kwargs["bank_id"])
 
         try:
-            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+            date_time = encode_date_time(date_time)
         except ValueError:
             form.add_error(None, "Invalid date format.")
             return self.form_invalid(form)
@@ -539,7 +540,7 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
         date_time = self.request.POST.get("datetime")
 
         try:
-            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+            date_time = encode_date_time(date_time)
         except ValueError:
             form.add_error(None, "Invalid date format.")
             return self.form_invalid(form)

@@ -4,8 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from ledger.models import Ledger, Transaction as LedgerTransaction
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
-from datetime import datetime
 from django.db import transaction
+from utils.helper import encode_date_time
 # Create your views here.
 
 # Internal banking control panel view
@@ -52,7 +52,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
     
 
         try:
-            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+            date_time = encode_date_time(date_time)
         except Exception as e:
             print(e)
             messages.error(request=self.request, message="Invalid date!")
@@ -111,7 +111,7 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
     
 
         try:
-            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+            date_time = date_time = encode_date_time(date_time)
         except Exception as e:
             print(e)
             messages.error(request=self.request, message="Invalid date!")

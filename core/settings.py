@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'ledger',
     'finance_flow',
     'internal_banking',
+    'cashbook',
 ]
 
 MIDDLEWARE = [

@@ -14,4 +14,5 @@ urlpatterns = [
     path('', include('ledger.urls')),
     path('', include('finance_flow.urls')),
     path('', include('internal_banking.urls')),
+    path('', include('cashbook.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

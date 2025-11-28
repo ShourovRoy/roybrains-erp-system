@@ -83,3 +83,62 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
             messages.success(request=self.request, message=f"{withdraw_amount} from {bank_details_ledger.account_name} has been withdrawn.")
             return redirect("internal_banking_withdraw", bank_details_ledger.pk)
         
+# Internal banking deposite
+class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
+    login_url = "/login/"
+    model = LedgerTransaction
+    fields = []
+    context_object_name = "bank_details"
+    template_name = "internal_banking/internal-banking-deposite.html"
+
+    def get_object(self, queryset = ...):
+
+        bank_id = int(self.kwargs["bank_id"])
+
+        return get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
+    
+
+    def form_valid(self, form):
+
+        bank_id = int(self.kwargs["bank_id"])
+
+        deposite_amount = float(self.request.POST.get("deposite_amount", 0.0));
+        date_time = self.request.POST.get("datetime", None)
+
+        if date_time is None:
+            messages.error(request=self.request, message="Date is required!")
+            return self.form_invalid(form);
+    
+
+        try:
+            date_time = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+        except Exception as e:
+            print(e)
+            messages.error(request=self.request, message="Invalid date!")
+            return self.form_invalid(form);
+
+
+        if deposite_amount < 1:
+            messages.warning(request=self.request, message="You can't make empty transaction!")
+            return self.form_invalid(form) 
+
+
+
+        bank_details_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
+
+        # if we are withdrawing then it will credit from the bank balance in out book
+        with transaction.atomic():
+            self.model.objects.create(
+                business=self.request.user,
+                ledger=bank_details_ledger,
+                debit=deposite_amount,
+                credit=0.0,
+                description="Cash deposite",
+                date=date_time
+            )
+
+            # TODO: credit the cashbook
+
+            messages.success(request=self.request, message=f"{deposite_amount} at {bank_details_ledger.account_name} has been despiste.")
+            return redirect("internal_banking_withdraw", bank_details_ledger.pk)
+        

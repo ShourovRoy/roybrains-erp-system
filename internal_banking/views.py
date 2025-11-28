@@ -8,7 +8,7 @@ from datetime import datetime
 from django.db import transaction
 # Create your views here.
 
-
+# Internal banking control panel view
 class InternalBankingControlPanelView(LoginRequiredMixin, ListView):
     login_url = "/login/"
     template_name = 'internal_banking/control-panel.html'
@@ -24,7 +24,7 @@ class InternalBankingControlPanelView(LoginRequiredMixin, ListView):
 
         return self.model.objects.filter(business=self.request.user).exclude(branch=None)
     
-
+# Internal banking withdraw view
 class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
     login_url = "/login/"
     model = LedgerTransaction

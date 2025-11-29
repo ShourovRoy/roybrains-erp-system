@@ -89,8 +89,8 @@ class PurchaseItemAddView(LoginRequiredMixin, CreateView, ListView, DetailView):
             preds = Inventory.objects.annotate(similarity=TrigramSimilarity("product_name", form.instance.product_name)).filter(
                 similarity__gt=0.5,
                 weight=form.instance.weight,
-                unit_label=form.instance.weight_label
-
+                unit_label=form.instance.weight_label,
+                business=self.request.user,
             ).order_by("-similarity");
             
             # update inventory if exists

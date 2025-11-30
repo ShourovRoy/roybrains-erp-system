@@ -32,6 +32,8 @@ class Inventory(models.Model):
 class SalesLog(models.Model):
     business = models.ForeignKey("business.BusinessUser", on_delete=models.CASCADE)
     product = models.ForeignKey("Inventory", on_delete=models.CASCADE)
+    weight = models.FloatField(choices=weight, null=True, blank=True)
+    unit_label = models.CharField(max_length=10, choices=unit_label, null=True, blank=True)
 
     quantity_sold = models.IntegerField(null=False, blank=False)
     date = models.DateTimeField() 

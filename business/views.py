@@ -4,6 +4,7 @@ from .models import BusinessUser
 from django.views import View
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 class BusinessSignupView(TemplateView):
@@ -53,3 +54,13 @@ class BusinessLoginView(View):
             return redirect('/inventory')
         else:
             return render(request, 'business/login.html')
+        
+
+# logout view
+class BusinessLogoutView(LoginRequiredMixin, View):
+    login_url = '/login/'
+
+    def get(self, request):
+        logout(request)
+        return redirect('business_login')
+    

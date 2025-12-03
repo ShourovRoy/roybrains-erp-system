@@ -1,39 +1,73 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid" >
+  <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'home' %}">Navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{% url 'inventory' %}">Inventory</a>
+          <a
+            class="nav-link active"
+            aria-current="page"
+            href="{% url 'inventory' %}"
+            >Inventory</a
+          >
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'voucher_search_ledger_account' %}">Voucher</a>
+          <a class="nav-link" href="{% url 'voucher_search_ledger_account' %}"
+            >Voucher</a
+          >
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'ledger-list' %}">Ledger Accounts</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'internal_banking_control_panel' %}">Internal Banking</a>
+          <a class="nav-link" href="{% url 'internal_banking_control_panel' %}"
+            >Internal Banking</a
+          >
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'finance-flow' %}">Finance Flow</a>
         </li>
         <li class="nav-item dropdown">
-          <button class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <button
+            class="nav-link dropdown-toggle"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
             Sale Force
           </button>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'sale_management' %}">Sale Management</a></li>
-            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" href="{% url 'sale_management' %}"
+                >Sale Management</a
+              >
+            </li>
+            <li><hr class="dropdown-divider" /></li>
             <li><a class="dropdown-item" href="#">Something else here</a></li>
           </ul>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'business_logout' %}">Logout</a>
+        </li>
       </ul>
       <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
+        <input
+          class="form-control me-2"
+          type="search"
+          placeholder="Search"
+          aria-label="Search"
+        />
         <button class="btn btn-outline-success" type="submit">Search</button>
       </form>
     </div>

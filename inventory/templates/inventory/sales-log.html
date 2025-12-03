@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1>Sales Log</h1>
+        
+        <form action="{% url 'sales_log' %}" method="get" class="mb-3">
+            <label for="date">Filter by Date:</label>
+            <input type="date" name="date" id="date" value="{{ selected_date }}">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            <a href="{% url 'sales_log' %}" class="btn btn-secondary btn-sm">Clear</a>
+        </form>
+        
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Product Name</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sales_log in sales_logs %}
+            <tr>
+              <td>{{ sales_log.product.product_name }}</td>
+              <td>{{ sales_log.quantity_sold }}</td>
+              <td>{{ sales_log.date|date:"Y-m-d" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-muted">No sales found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+</section>
+{% endblock content %}

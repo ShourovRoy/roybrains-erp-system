@@ -1,11 +1,10 @@
-from django.shortcuts import render
 from django.views.generic import ListView, DetailView, UpdateView, CreateView
-from .models import Inventory
+from .models import Inventory, SalesLog
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
-from django.shortcuts import redirect
 from django.contrib.postgres.search import TrigramSimilarity
+from django.utils.dateparse import parse_date
+from datetime import date
 # Create your views here.
 
 # TODO: create inventory create view
@@ -60,3 +59,35 @@ class InventoryUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         return super().get_queryset().filter(business=self.request.user)
     
+# get the sales log view
+class SalesLogView(LoginRequiredMixin, ListView):
+    model = SalesLog
+    template_name = 'inventory/sales-log.html'
+    context_object_name = 'sales_logs'
+    login_url = '/login/'
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(business=self.request.user)
+        selected_date = self.request.GET.get("date")
+
+        # If no date is provided → use today's date
+        if not selected_date:
+            selected_date = date.today().isoformat()
+
+        parsed_date = parse_date(selected_date)
+
+        if parsed_date:
+            qs = qs.filter(date__date=parsed_date)
+
+        return qs.order_by("-date")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Keep selected date in the form
+        context["selected_date"] = self.request.GET.get(
+            "date", 
+            date.today().isoformat()
+        )
+
+        return context

@@ -2,6 +2,7 @@ from django.db import models
 from ledger.models import Transaction as LedgerTransaction
 from inventory.models import Inventory
 from django.core.exceptions import ValidationError
+from inventory.models import SalesLog
 
 # Create your models here.
 class DeliveryOrder(models.Model):
@@ -60,6 +61,26 @@ class DeliveryOrderItem(models.Model):
             ) 
             inventory_product.quantity -= self.quantity
             inventory_product.save()
+
+            # current day sale log action
+            sale_obj, sale_created = SalesLog.objects.get_or_create(
+                business=self.business,
+                product=inventory_product,
+                date__date=self.delivery_order.date,
+                defaults={
+                    "weight": self.weight,
+                    "unit_label": self.unit_label,
+                    "quantity_sold": self.quantity,
+                    "date": self.delivery_order.date
+                }
+            )
+
+            
+            if not sale_created:
+                sale_obj.quantity_sold += self.quantity
+                sale_obj.save()
+
+            
 
         except Inventory.DoesNotExist:
             raise ValidationError(f"'{self.product_name}' is not available in inventory.") 

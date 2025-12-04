@@ -2,14 +2,16 @@ from django.db import models
 
 # TODO: work on cash book
 # TODO: challange, per day cashbook with previous day balance 
+
 # Create your models here.
 class CashBook(models.Model):
     business = models.ForeignKey("business.BusinessUser", on_delete=models.CASCADE)
     cash_amount = models.FloatField(default=0.0, blank=True, null=True)
+    bank_amount = models.FloatField(default=0.0, blank=True, null=True)
     status = models.CharField(max_length=10, blank=False, null=False)
     note = models.CharField(max_length=255, blank=True, null=True)
 
-    date = models.DateField()
+    date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -30,4 +32,8 @@ class CashTransaction(models.Model):
     credit = models.FloatField(default=0.0)
 
 
-    date = models.DateField()
+    date = models.DateTimeField()
+
+
+    def __str__(self):
+        return str(self.debit)

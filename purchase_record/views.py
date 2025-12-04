@@ -11,7 +11,8 @@ from ledger.models import Ledger, Transaction as LedgerTransaction
 from django.urls import reverse
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
-
+from cashbook.models import CashTransaction, CashBook
+from datetime import timedelta
 # Create your views here.
 
      
@@ -209,23 +210,76 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
             messages.error(request, "This voucher has already been completed.")
             return redirect("create_voucher")
         
-        voucher.is_completed = True
-        voucher.save()
+        try: 
+            with transaction.atomic():
+                
+                voucher.is_completed = True
+                voucher.save()
 
 
-        # update ledger entry if purchased in cash
-        if voucher.is_purchased_in_cash:
-            ledger = LedgerTransaction.objects.create(
-                business=self.request.user, 
-                purchase_voucher=voucher,
-                ledger=ledger,
-                description=f"Cash payment voucher no: {voucher.pk}",
-                debit=float(voucher.total_amount),
-                date=voucher.date,
-            )
+                # update ledger entry if purchased in cash
+                if voucher.is_purchased_in_cash:
+                    ledger = LedgerTransaction.objects.create(
+                        business=self.request.user, 
+                        purchase_voucher=voucher,
+                        ledger=ledger,
+                        description=f"Cash payment voucher no: {voucher.pk}",
+                        debit=float(voucher.total_amount),
+                        date=voucher.date,
+                    )
+
+                    # TODO: need to check if cash available in cashbook or not
+
+                    voucher_formate_date = voucher.date.date()
+
+                    # get today's cash book
+                    cash_book = CashBook.objects.filter(
+                        business=self.request.user,
+                        date__date=voucher_formate_date
+                    ).first()
+
+
+                    if not cash_book:
+                        # get previous cash book
+                        yesterday = voucher_formate_date - timedelta(days=1)
+                        previous_cash_book = CashBook.objects.filter(
+                            business=self.request.user,
+                            date__date__lt=yesterday
+                        ).order_by('-date').first()
+
+                        opening_cash_balance = previous_cash_book.cash_amount if previous_cash_book else 0.0
+                        opening_bank_balance = previous_cash_book.bank_amount if previous_cash_book else 0.0
+
+
+                        cash_book = CashBook.objects.create(
+                            business=self.request.user,
+                            date=voucher.date,
+                            cash_amount=opening_cash_balance,
+                            bank_amount=opening_bank_balance,
+                            status="Opening",
+                        )
+
+                    # make cash book entry
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Cash Payment to {voucher.supplier} for voucher no: {voucher.pk} ",
+                        date=voucher.date,
+                        credit=float(voucher.total_amount),
+                        debit=0.0,
+                    )
+
+                    # TODO: neeed to work here to update cash book balance
+                
+                messages.success(request, "Purchase voucher completed successfully.")
+                
+                return super().get(request, *args, **kwargs)
         
-        return super().get(request, *args, **kwargs)
-    
+        except Exception as e:
+            print(e)
+            messages.error(request, f"An error occurred while completing the voucher: {str(e)}")
+            return redirect("create_voucher")
+
     def get_queryset(self):
         items = PurchaseItem.objects.filter(voucher_id=int(self.kwargs['pk']), business=self.request.user)
         return items

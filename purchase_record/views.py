@@ -228,8 +228,6 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                         date=voucher.date,
                     )
 
-                    # TODO: need to check if cash available in cashbook or not
-
                     voucher_formate_date = voucher.date.date()
 
                     # get today's cash book
@@ -241,10 +239,10 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
 
                     if not cash_book:
                         # get previous cash book
-                        yesterday = voucher_formate_date - timedelta(days=1)
+                        
                         previous_cash_book = CashBook.objects.filter(
                             business=self.request.user,
-                            date__date__lt=yesterday
+                            date__date__lt=voucher_formate_date
                         ).order_by('-date').first()
 
                         opening_cash_balance = previous_cash_book.cash_amount if previous_cash_book else 0.0
@@ -258,6 +256,11 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                             bank_amount=opening_bank_balance,
                             status="Opening",
                         )
+
+                    # check if cash is sufficient
+                    if cash_book.cash_amount < float(voucher.total_amount):
+                        raise ValueError("Insufficient cash in cash book to complete this purchase voucher.")
+                       
 
                     # make cash book entry
                     CashTransaction.objects.create(
@@ -279,7 +282,7 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
         
         except Exception as e:
             print(e)
-            messages.error(request, f"An error occurred while completing the voucher: {str(e)}")
+            messages.error(request, f"An error occurred: {str(e)}")
             return redirect("create_voucher")
 
     def get_queryset(self):

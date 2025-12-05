@@ -269,7 +269,9 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                         debit=0.0,
                     )
 
-                    # TODO: neeed to work here to update cash book balance
+                    # deduct cash from cash book
+                    cash_book.cash_amount -= float(voucher.total_amount)
+                    cash_book.save()
                 
                 messages.success(request, "Purchase voucher completed successfully.")
                 

@@ -1,5 +1,4 @@
-from django.shortcuts import render
-from django.views.generic import CreateView, ListView, DetailView, UpdateView
+from django.views.generic import CreateView, ListView, DetailView
 from .models import PurchaseVoucher, PurchaseItem
 from django.db import transaction, IntegrityError
 from django.shortcuts import redirect
@@ -11,9 +10,7 @@ from ledger.models import Ledger, Transaction as LedgerTransaction
 from django.urls import reverse
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
-from cashbook.models import CashTransaction, CashBook
-from datetime import timedelta
-from utils.helper import parse_date_else_today_string
+from cashbook.models import CashTransaction
 from utils.helper import get_cashbook_on_date_or_previous
 # Create your views here.
 

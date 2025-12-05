@@ -13,6 +13,8 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from cashbook.models import CashTransaction, CashBook
 from datetime import timedelta
+from utils.helper import parse_date_else_today_string
+from utils.helper import get_cashbook_on_date_or_previous
 # Create your views here.
 
      
@@ -147,37 +149,59 @@ class PurchaseVoucherCreateView(LoginRequiredMixin, CreateView):
         return initial
 
     def form_valid(self, form):
-        with transaction.atomic():
-            form.instance.business = self.request.user
-            self.object = form.save()
+        try:
+            with transaction.atomic():
+                form.instance.business = self.request.user
+
+                # check if voucher is creating with cash purchase
+
+                if form.instance.is_purchased_in_cash:
+                    voucher_creation_date = form.cleaned_data.get('date', None)
+
+                    # check cashbook available on the given date else get previous lastest date cashbook
+                    cash_book = get_cashbook_on_date_or_previous(self.request.user, voucher_creation_date.date())
+
+                    # check if cash is sufficient
+
+                    if cash_book.cash_amount <= 0.0:
+                        raise ValueError("Insufficient cash in cash book to create this purchase voucher.")
 
 
-            ledger_id = self.request.POST.get('ledger_id')
-            ledger = None
+                self.object = form.save()
 
-            if ledger_id:
-                try:
-                    ledger = Ledger.objects.get(pk=int(ledger_id), business=self.request.user)
-                except (Ledger.DoesNotExist, ValueError):
-                    ledger = None
 
-            if ledger is None:
-                # create ledger entry with account creation
-                try:
-                    ledger = Ledger.objects.create(
-                        business=self.request.user,
-                        account_name=self.object.supplier,
-                        address=self.object.address,
-                        phone_number=self.object.phone_number,
-                        account_type="Vendor",
-                        status="Balanced",
-                        note="No dues"
-                    )
-                except IntegrityError:
-                    transaction.set_rollback(True)
-                    messages.error(self.request, "Ledger with this account name already exists. Please use a different name.")
-                    return redirect(self.request.path)
-            return redirect(f'{reverse("add_purchase_item", kwargs={"pk": self.object.pk})}?ledger_id={ledger.pk}')
+                ledger_id = self.request.POST.get('ledger_id')
+                ledger = None
+
+                if ledger_id:
+                    try:
+                        ledger = Ledger.objects.get(pk=int(ledger_id), business=self.request.user)
+                    except (Ledger.DoesNotExist, ValueError):
+                        ledger = None
+
+                if ledger is None:
+                    # create ledger entry with account creation
+                    try:
+                        ledger = Ledger.objects.create(
+                            business=self.request.user,
+                            account_name=self.object.supplier,
+                            address=self.object.address,
+                            phone_number=self.object.phone_number,
+                            account_type="Vendor",
+                            status="Balanced",
+                            note="No dues"
+                        )
+                    except IntegrityError:
+                        transaction.set_rollback(True)
+                        messages.error(self.request, "Ledger with this account name already exists. Please use a different name.")
+                        return redirect(self.request.path)
+                return redirect(f'{reverse("add_purchase_item", kwargs={"pk": self.object.pk})}?ledger_id={ledger.pk}')
+        
+        except Exception as e:
+            print(e)
+            messages.error(self.request, f"An error occurred: {str(e)}")
+            return redirect(self.request.path)
+
 
 #TODO: need to work on this view later to implement payment reference complete the purchase voucher
 class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
@@ -230,32 +254,8 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
 
                     voucher_formate_date = voucher.date.date()
 
-                    # get today's cash book
-                    cash_book = CashBook.objects.filter(
-                        business=self.request.user,
-                        date__date=voucher_formate_date
-                    ).first()
-
-
-                    if not cash_book:
-                        # get previous cash book
-                        
-                        previous_cash_book = CashBook.objects.filter(
-                            business=self.request.user,
-                            date__date__lt=voucher_formate_date
-                        ).order_by('-date').first()
-
-                        opening_cash_balance = previous_cash_book.cash_amount if previous_cash_book else 0.0
-                        opening_bank_balance = previous_cash_book.bank_amount if previous_cash_book else 0.0
-
-
-                        cash_book = CashBook.objects.create(
-                            business=self.request.user,
-                            date=voucher.date,
-                            cash_amount=opening_cash_balance,
-                            bank_amount=opening_bank_balance,
-                            status="Opening",
-                        )
+                    # get cashbook on voucher date or previous lastest date
+                    cash_book = get_cashbook_on_date_or_previous(self.request.user, voucher_formate_date)
 
                     # check if cash is sufficient
                     if cash_book.cash_amount < float(voucher.total_amount):

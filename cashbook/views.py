@@ -1,9 +1,15 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import CashBook
 # Create your views here.
 
-class CashbookControlPanelView(LoginRequiredMixin,TemplateView):
-    template_name = 'cashbook/control_panel.html'
+class CashbookControlPanelView(LoginRequiredMixin, ListView):
+    template_name = 'cashbook/cashbook-list.html'
     login_url = '/login/'
+    model = CashBook
+    context_object_name = 'cashbooks'
+    paginate_by = 10
 
+
+    def get_queryset(self):
+        return super().get_queryset().filter(business=self.request.user).order_by('-date')

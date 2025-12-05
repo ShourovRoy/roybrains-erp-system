@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <h2 class="mb-4 fw-bold text-primary">💰 Cashbook Control Panel</h2>
+
+    {% if cashbooks %}
+        <div class="row g-4">
+
+            {% for cashbook in cashbooks %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0">
+                        
+                        <div class="card-header bg-primary text-white">
+                            <strong>{{ cashbook.date|date:"F j, Y" }}</strong>
+                            <span class="badge bg-light text-dark float-end">
+                                {{ cashbook.status }}
+                            </span>
+                        </div>
+
+                        <div class="card-body">
+
+                            <p class="text-muted mb-1">
+                                <i class="bi bi-info-circle"></i>
+                                {{ cashbook.note|default:"No note available" }}
+                            </p>
+
+                            <hr>
+
+                            <p class="mb-1">
+                                <strong>Bank Amount:</strong>
+                                <span class="text-primary fw-semibold">
+                                    {{ cashbook.bank_amount }}
+                                </span>
+                            </p>
+
+                            <p class="mb-0">
+                                <strong>Cash Amount:</strong>
+                                <span class="text-success fw-bold fs-5">
+                                    {{ cashbook.cash_amount }}
+                                </span>
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="alert alert-info mt-4">
+            No cashbook entries available.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock content %}

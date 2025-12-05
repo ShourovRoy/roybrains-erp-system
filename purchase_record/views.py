@@ -46,8 +46,6 @@ class PurchaseVoucherLedgerAccountSearchView(LoginRequiredMixin, ListView):
         return context
 
 
-
-
 # get the PurchaseVoucher details and list of items
 class PurchaseItemAddView(LoginRequiredMixin, CreateView, ListView, DetailView):
     model = PurchaseItem

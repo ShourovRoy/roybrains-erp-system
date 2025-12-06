@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'finance_flow',
     'internal_banking',
     'cashbook',
+    'capital_management',
 ]
 
 MIDDLEWARE = [

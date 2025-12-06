@@ -3,7 +3,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import CashBook
 # Create your views here.
 
-class CashbookControlPanelView(LoginRequiredMixin, ListView):
+
+# Cashbook Control Panel View
+class CashbookListView(LoginRequiredMixin, ListView):
     template_name = 'cashbook/cashbook-list.html'
     login_url = '/login/'
     model = CashBook

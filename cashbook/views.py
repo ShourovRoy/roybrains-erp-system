@@ -15,3 +15,4 @@ class CashbookListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return super().get_queryset().filter(business=self.request.user).order_by('-date')
+

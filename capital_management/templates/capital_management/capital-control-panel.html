@@ -1,0 +1,94 @@
+{% extends 'base.html' %} {% block style %}
+<style>
+  .hidden {
+    display: none;
+  }
+
+  .show {
+    display: block;
+  }
+</style>
+
+{% endblock style %} {% block content %}
+
+<section>
+  <div class="container">
+    <h3>Add Capital</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <form action="" method="post">
+          {% csrf_token %} {{ form.as_p }}
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+
+      <div id="search-bank-div" class="col-md-6 hidden">
+        <label class="form-label" for="">Search Account</label>
+        <input
+          hx-trigger="keyup changed delay:500ms"
+          hx-get="{% url 'capital_management:search_banks' %}"
+          hx-target="#toitoi"
+          class="form-control"
+          type="search"
+          name="search_query"
+          id=""
+          placeholder="start typeing to search account.."
+        />
+        <div id="toitoi"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+
+  function selectBank() {
+    const investmentTypeField = document.getElementById("id_invest_in");
+    let value = investmentTypeField.value;
+    toggleBankSearchDiv(value);
+
+    investmentTypeField.addEventListener("change", function (value) {
+      value = value.target.value;
+      document.querySelector("h3").innerText =
+        value === "bank" ? "Add Bank Capital" : "Add Cash Capital";
+      toggleBankSearchDiv(value);
+    });
+
+
+    if (event.detail.target.id === "toitoi") {
+      const selectBankButtons = document.querySelectorAll(".select-bank");
+      selectBankButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+          const bankId = this.getAttribute("bank-id");
+          console.log("Selected Bank ID:", bankId);
+          document.getElementById("id_bank_account").value = bankId;
+        });
+      });
+    }
+
+    if (value !== "bank") {
+      document.getElementById("id_bank_account").value = "";
+    }
+  }
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    selectBank()
+  });
+
+  document.addEventListener("htmx:afterSwap", (event) => {
+    selectBank()
+  });
+
+  function toggleBankSearchDiv(value) {
+    if (value === "bank") {
+      document.getElementById("search-bank-div").classList.remove("hidden");
+      document.getElementById("search-bank-div").classList.add("show");
+    } else {
+      document.getElementById("search-bank-div").classList.remove("show");
+      document.getElementById("search-bank-div").classList.add("hidden");
+    }
+  }
+</script>
+
+{% endblock content %}

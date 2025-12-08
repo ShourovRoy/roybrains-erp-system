@@ -3,10 +3,11 @@ from django.views.generic import ListView, FormView
 from .models import Capital, CapitalTransaction
 from .forms import CapitalForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from ledger.models import Ledger
+from ledger.models import Ledger, Transaction as LedgerTransaction
 from django.db import transaction
 from django.contrib import messages
 from utils.helper import get_cashbook_on_date_or_previous, encode_date_time
+from cashbook.models import CashTransaction
 # Create your views here.
 
 class AddCapitalView(LoginRequiredMixin, FormView):
@@ -18,7 +19,7 @@ class AddCapitalView(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         # Add any custom processing here if needed
        
-        print("Capital Form Validated:", form.cleaned_data)
+        
 
         bank_details = None
 
@@ -36,14 +37,95 @@ class AddCapitalView(LoginRequiredMixin, FormView):
 
             with transaction.atomic():
 
-                if bank_details:
-                    print(bank_details)
-                else:
-                    cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
-                    print("Using Cash Book:", cash_book)
+                date_time = encode_date_time(form.cleaned_data['date'])
 
+                capital_obj, capital_created = Capital.objects.get_or_create(
+                    business=self.request.user,
+                    defaults={
+                        'balance': 0.0,
+                    }
+                )
+
+
+                # handle bank capital
+                if bank_details:
+
+                    # create bank ledger transaction
+                    LedgerTransaction.objects.create(
+                        business=self.request.user,
+                        ledger=bank_details,
+                        description=f"Capital Investment",
+                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
+                        credit= float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
+                        date=date_time
+                    )
+                    
+                    # create capital transaction
+                    CapitalTransaction.objects.create(
+                        business=self.request.user,
+                        capital=capital_obj,
+                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
+                        credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
+                        description=f"Capital Investment at Bank - {bank_details.account_name}",
+                        date=date_time,
+                    )
+
+                    # get latest cash book
+                    cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
+
+                    # create cash transaction for bank capital
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Capital Investment via Bank - {bank_details.account_name}",
+                        is_bank=True,
+                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
+                        credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
+                        date=date_time
+                    )
+
+                    if form.cleaned_data['transaction_type'] == 'deposit':
+                        cash_book.bank_amount += float(form.cleaned_data['amount'])
+                    else:
+                        cash_book.bank_amount -= float(form.cleaned_data['amount'])
+
+                    cash_book.save()
+                
+                # handle cash capital
+                else:
+
+                    # create capital transaction
+                    CapitalTransaction.objects.create(
+                        business=self.request.user,
+                        capital=capital_obj,
+                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
+                        credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
+                        description=f"Capital Investment in cash",
+                        date=date_time,
+                    )
+
+
+                    cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
+                    
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Capital Investment via Cash",
+                        is_bank=False,
+                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
+                        credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
+                        date=date_time
+                    )
+
+                    if form.cleaned_data['transaction_type'] == 'deposit':
+                        cash_book.cash_amount += float(form.cleaned_data['amount'])
+                    else:
+                        cash_book.cash_amount -= float(form.cleaned_data['amount'])
+
+                    cash_book.save()
 
             return super().form_valid(form)
+        
         except Exception as e:
             print("Error processing capital transaction:", e)
             return self.form_invalid(form)

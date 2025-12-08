@@ -31,12 +31,12 @@ class CashTransaction(models.Model):
     business = models.ForeignKey("business.BusinessUser", on_delete=models.CASCADE)
     cashbook = models.ForeignKey(CashBook, on_delete=models.CASCADE)
     description = models.TextField(max_length=255)
+    is_bank = models.BooleanField(default=False, blank=True, null=True)
     debit = models.FloatField(default=0.0)
     credit = models.FloatField(default=0.0)
-
-
     date = models.DateTimeField()
 
 
     def __str__(self):
         return str(self.debit)
+    

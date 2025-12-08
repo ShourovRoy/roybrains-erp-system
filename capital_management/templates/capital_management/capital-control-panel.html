@@ -18,6 +18,8 @@
       <div class="col-md-6">
         <form action="" method="post">
           {% csrf_token %} {{ form.as_p }}
+          <label for="#bank">Bank Name</label>
+          <input id="bank" type="text" placeholder="Bank name" class="show">
           <button type="submit" class="btn btn-primary">Submit</button>
         </form>
       </div>
@@ -60,8 +62,10 @@
       selectBankButtons.forEach((button) => {
         button.addEventListener("click", function () {
           const bankId = this.getAttribute("bank-id");
+          const bankName = this.getAttribute("bank-name");
           console.log("Selected Bank ID:", bankId);
           document.getElementById("id_bank_account").value = bankId;
+          document.getElementById("bank").value = bankName;
         });
       });
     }
@@ -84,9 +88,13 @@
     if (value === "bank") {
       document.getElementById("search-bank-div").classList.remove("hidden");
       document.getElementById("search-bank-div").classList.add("show");
+      document.getElementById("bank").classList.remove("hidden");
+      document.getElementById("bank").classList.add("show");
     } else {
       document.getElementById("search-bank-div").classList.remove("show");
       document.getElementById("search-bank-div").classList.add("hidden");
+      document.getElementById("bank").classList.remove("show");
+      document.getElementById("bank").classList.add("hidden");
     }
   }
 </script>

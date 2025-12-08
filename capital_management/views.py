@@ -33,7 +33,7 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
             
         try:
 
-            # TODO: 8-12-25 start from here, if bank is present it should create bank transaction else cash transaction. and update the capital accordingly.
+            # start transaction block to invest and withdraw capital in cashbook and bank ledger account
 
             with transaction.atomic():
 

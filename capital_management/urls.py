@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import AddCapitalView, SearchBankListView
+from .views import CapitalDepositWithdrawView, SearchBankListView
 
 app_name = 'capital_management'
 urlpatterns = [
-    path('add/', AddCapitalView.as_view(), name='add_capital'),
+    path('capital/deposite-withdraw/', CapitalDepositWithdrawView.as_view(), name='capital_deposite_withdraw'),
     path('search-banks/', SearchBankListView.as_view(), name='search_banks'),
 ]

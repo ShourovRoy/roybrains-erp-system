@@ -10,11 +10,11 @@ from utils.helper import get_cashbook_on_date_or_previous, encode_date_time
 from cashbook.models import CashTransaction
 # Create your views here.
 
-class AddCapitalView(LoginRequiredMixin, FormView):
+class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
     template_name = 'capital_management/capital-control-panel.html'
     form_class = CapitalForm
     login_url = "/login/"
-    success_url = "/add/"
+    success_url = '/capital/deposite-withdraw/'
 
     def form_valid(self, form):
         # Add any custom processing here if needed
@@ -54,7 +54,7 @@ class AddCapitalView(LoginRequiredMixin, FormView):
                     LedgerTransaction.objects.create(
                         business=self.request.user,
                         ledger=bank_details,
-                        description=f"Capital Investment",
+                        description=f"Capital Investment" if form.cleaned_data['transaction_type'] == 'deposit' else f"Capital Withdrawal",
                         debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
                         credit= float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
                         date=date_time
@@ -66,7 +66,7 @@ class AddCapitalView(LoginRequiredMixin, FormView):
                         capital=capital_obj,
                         debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
                         credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
-                        description=f"Capital Investment at Bank - {bank_details.account_name}",
+                        description=f"Capital Investment at Bank - {bank_details.account_name}" if form.cleaned_data['transaction_type'] == 'deposit' else f"Capital Withdrawal from Bank - {bank_details.account_name}",
                         date=date_time,
                     )
 
@@ -84,6 +84,8 @@ class AddCapitalView(LoginRequiredMixin, FormView):
                         date=date_time
                     )
 
+
+                    # update cash book bank amount
                     if form.cleaned_data['transaction_type'] == 'deposit':
                         cash_book.bank_amount += float(form.cleaned_data['amount'])
                     else:
@@ -100,13 +102,15 @@ class AddCapitalView(LoginRequiredMixin, FormView):
                         capital=capital_obj,
                         debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
                         credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
-                        description=f"Capital Investment in cash",
+                        description="Capital Investment in cash" if form.cleaned_data['transaction_type'] == 'deposit' else "Capital Withdrawal in cash",
                         date=date_time,
                     )
 
 
                     cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
                     
+
+                    # create cash transaction for cash book
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
@@ -117,6 +121,8 @@ class AddCapitalView(LoginRequiredMixin, FormView):
                         date=date_time
                     )
 
+
+                    # update cash book cash amount
                     if form.cleaned_data['transaction_type'] == 'deposit':
                         cash_book.cash_amount += float(form.cleaned_data['amount'])
                     else:

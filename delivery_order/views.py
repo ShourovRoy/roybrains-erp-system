@@ -8,6 +8,8 @@ from .forms import DeliveryOrderForm, DeliveryOrderItemFormSet
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.postgres.search import TrigramSimilarity
+from cashbook.models import CashTransaction
+from utils.helper import get_cashbook_on_date_or_previous
 # Create your views here.
 
 class SaleManagementView(LoginRequiredMixin, ListView):
@@ -151,6 +153,24 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
                             credit=float(self.object.payment_amount),
                             date=self.object.date
                         )
+
+                        # insert the amount in cashbook
+                        cash_book = get_cashbook_on_date_or_previous(self.request.user, self.object.date)
+
+                        # create cash transaction
+                        CashTransaction.objects.create(
+                            business=self.request.user,
+                            cashbook=cash_book,
+                            description=f"Received cash payment for Delivery Order no: {self.object.id} from {account_details.account_name}",
+                            is_bank=False,
+                            debit=float(self.object.payment_amount),
+                            credit=0.00,
+                            date=self.object.date
+                        )
+
+                        # update cash book amount
+                        cash_book.cash_amount += float(self.object.payment_amount)
+                        cash_book.save()
                     
                     messages.success(request=self.request, message=f"Delivery Order has been created.")
 

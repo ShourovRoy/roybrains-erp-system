@@ -138,9 +138,6 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
             
    
 
-        
-    
-
 # search bank list view
 class SearchBankListView(LoginRequiredMixin, ListView):
     template_name = 'capital_management/partials/bank-search-list.html'

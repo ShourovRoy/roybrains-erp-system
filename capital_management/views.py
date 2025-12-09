@@ -46,9 +46,42 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
                     }
                 )
 
+                # get latest cash book
+                cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
+
 
                 # handle bank capital
                 if bank_details:
+                    
+
+                    # check for withdraw amount available or not
+                    if form.cleaned_data['transaction_type'] == 'withdrawal':
+                        if cash_book.bank_amount < float(form.cleaned_data['amount']):
+                            raise ValueError(f"{float(form.cleaned_data['amount'])} is not available in Bank as capital")
+
+
+                    # create cash transaction for bank capital
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Capital Investment via Bank - {bank_details.account_name}" if form.cleaned_data['transaction_type'] == 'deposit' else "Bank capital withdraw",
+                        is_bank=True,
+                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
+                        credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
+                        date=date_time
+                    )
+
+
+                    # update cash book bank amount
+                    if form.cleaned_data['transaction_type'] == 'deposit':
+                        cash_book.bank_amount += float(form.cleaned_data['amount'])
+                    else:
+                        cash_book.bank_amount -= float(form.cleaned_data['amount'])
+
+                    cash_book.save()
+
+                    
+
 
                     # create bank ledger transaction
                     LedgerTransaction.objects.create(
@@ -70,51 +103,22 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
                         date=date_time,
                     )
 
-                    # get latest cash book
-                    cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
-
-                    # create cash transaction for bank capital
-                    CashTransaction.objects.create(
-                        business=self.request.user,
-                        cashbook=cash_book,
-                        description=f"Capital Investment via Bank - {bank_details.account_name}",
-                        is_bank=True,
-                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
-                        credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
-                        date=date_time
-                    )
-
-
-                    # update cash book bank amount
-                    if form.cleaned_data['transaction_type'] == 'deposit':
-                        cash_book.bank_amount += float(form.cleaned_data['amount'])
-                    else:
-                        cash_book.bank_amount -= float(form.cleaned_data['amount'])
-
-                    cash_book.save()
+                    
                 
                 # handle cash capital
                 else:
 
-                    # create capital transaction
-                    CapitalTransaction.objects.create(
-                        business=self.request.user,
-                        capital=capital_obj,
-                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
-                        credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
-                        description="Capital Investment in cash" if form.cleaned_data['transaction_type'] == 'deposit' else "Capital Withdrawal in cash",
-                        date=date_time,
-                    )
+                    # check for withdraw amount available or not
+                    if form.cleaned_data['transaction_type'] == 'withdrawal':
+                        if cash_book.bank_amount < float(form.cleaned_data['amount']):
+                            raise ValueError(f"{float(form.cleaned_data['amount'])} is not available in cash as capital")
 
-
-                    cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
-                    
 
                     # create cash transaction for cash book
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"Capital Investment via Cash",
+                        description=f"Capital Investment via Cash" if form.cleaned_data['transaction_type'] == "deposit" else "Capital Withdrawal in cash",
                         is_bank=False,
                         debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
                         credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
@@ -130,10 +134,24 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
 
                     cash_book.save()
 
+
+                    # create capital transaction
+                    CapitalTransaction.objects.create(
+                        business=self.request.user,
+                        capital=capital_obj,
+                        debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
+                        credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
+                        description="Capital Investment in cash" if form.cleaned_data['transaction_type'] == 'deposit' else "Capital Withdrawal in cash",
+                        date=date_time,
+                    )
+
+
+
             return super().form_valid(form)
         
         except Exception as e:
             print("Error processing capital transaction:", e)
+            messages.error(request=self.request, message=f"Error processing capital transaction: {str(e)}")
             return self.form_invalid(form)
             
    

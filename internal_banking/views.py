@@ -25,6 +25,7 @@ class InternalBankingControlPanelView(LoginRequiredMixin, ListView):
         return self.model.objects.filter(business=self.request.user).exclude(branch=None)
     
 # Internal banking withdraw view
+#TODO: 10-12-25 cashbook integration
 class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
     login_url = "/login/"
     model = LedgerTransaction
@@ -84,6 +85,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
             return redirect("internal_banking_withdraw", bank_details_ledger.pk)
         
 # Internal banking deposite
+#TODO: 10-12-25 cashbook integration
 class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
     login_url = "/login/"
     model = LedgerTransaction

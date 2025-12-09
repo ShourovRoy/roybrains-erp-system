@@ -17,7 +17,7 @@ from utils.helper import get_cashbook_on_date_or_previous
      
 
 
-
+# account search view for voucher creation
 class PurchaseVoucherLedgerAccountSearchView(LoginRequiredMixin, ListView):
     model = Ledger
     template_name = 'purchase_record/voucher.html'
@@ -135,6 +135,7 @@ class PurchaseItemAddView(LoginRequiredMixin, CreateView, ListView, DetailView):
             return self.form_invalid(form)
         
 
+# create the purchase voucher view
 class PurchaseVoucherCreateView(LoginRequiredMixin, CreateView):
     model = PurchaseVoucher
     form_class = PurchaseVoucherForm
@@ -217,6 +218,7 @@ class PurchaseVoucherCreateView(LoginRequiredMixin, CreateView):
 
 
 #TODO: need to work on this view later to implement payment reference complete the purchase voucher
+# Purchase view complete view
 class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
     model = PurchaseVoucher
     template_name = 'purchase_record/voucher-details.html'

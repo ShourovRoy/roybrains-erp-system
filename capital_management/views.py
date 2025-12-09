@@ -10,6 +10,8 @@ from utils.helper import get_cashbook_on_date_or_previous, encode_date_time
 from cashbook.models import CashTransaction
 # Create your views here.
 
+
+# capital invest and withdraw view
 class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
     template_name = 'capital_management/capital-control-panel.html'
     form_class = CapitalForm

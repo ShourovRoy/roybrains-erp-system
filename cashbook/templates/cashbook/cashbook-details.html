@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+
+    <!-- Cashbook Summary Card -->
+    <div class="card bg-dark text-light shadow-sm mb-4 border-secondary">
+      <div class="card-header bg-secondary text-light border-secondary">
+        <h5 class="mb-0">Cashbook Summary – {{ cashbook_details.date|date:"F d, Y" }}</h5>
+      </div>
+
+      <div class="card-body">
+
+        <div class="row mb-3">
+          <!-- Cash Amount -->
+          <div class="col-md-4">
+            <div class="p-3 border rounded bg-secondary bg-opacity-25 border-secondary">
+              <h6 class="text-muted">Cash Amount</h6>
+              <h4 class="text-success fw-bold">{{ cashbook_details.cash_amount }}</h4>
+            </div>
+          </div>
+
+          <!-- Bank Amount -->
+          <div class="col-md-4">
+            <div class="p-3 border rounded bg-secondary bg-opacity-25 border-secondary">
+              <h6 class="text-muted">Bank Amount</h6>
+              <h4 class="text-info fw-bold">{{ cashbook_details.bank_amount }}</h4>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <div class="col-md-4">
+            <div class="p-3 border rounded bg-secondary bg-opacity-25 border-secondary">
+              <h6 class="text-muted">Status</h6>
+              <h4 class="fw-bold">
+                {% if cashbook_details.status == "Opening" %}
+                <span class="badge bg-success">{{ cashbook_details.status }}</span>
+                {% else %}
+                <span class="badge bg-warning text-dark">{{ cashbook_details.status }}</span>
+                {% endif %}
+              </h4>
+            </div>
+          </div>
+        </div>
+
+        {% if cashbook_details.note %}
+        <div class="alert alert-info mt-3">{{ cashbook_details.note }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Transactions List -->
+    <div class="card bg-dark text-light shadow-sm border-secondary">
+      <div class="card-header bg-secondary text-light border-secondary">
+        <h5 class="mb-0">Cash Transactions</h5>
+      </div>
+
+      <div class="card-body p-0">
+
+        {% if entries %}
+        <table class="table table-dark table-striped table-hover mb-0 align-middle">
+          <thead class="table-secondary text-dark">
+            <tr>
+              <th>Description</th>
+              <th>Debit</th>
+              <th>Credit</th>
+              <th>Type</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for entry in entries %}
+            <tr>
+              <td>{{ entry.description }}</td>
+
+              <!-- Debit -->
+              <td class="text-success fw-bold">
+                {% if entry.debit > 0 %} {{ entry.debit }} {% else %}-{% endif %}
+              </td>
+
+              <!-- Credit -->
+              <td class="text-danger fw-bold">
+                {% if entry.credit > 0 %} {{ entry.credit }} {% else %}-{% endif %}
+              </td>
+
+              <!-- Type -->
+              <td>
+                {% if entry.is_bank %}
+                <span class="badge bg-info">Bank</span>
+                {% else %}
+                <span class="badge bg-warning text-dark">Cash</span>
+                {% endif %}
+              </td>
+
+              <td>{{ entry.date|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% else %}
+        <div class="p-4 text-center text-muted">
+          No transactions found for this date.
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock content %}

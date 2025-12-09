@@ -11,7 +11,7 @@
 
             {% for cashbook in cashbooks %}
                 <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm border-0">
+                    <div class="card bg-gradient shadow-sm border-0">
                         
                         <div class="card-header bg-primary text-white">
                             <strong>{{ cashbook.date|date:"F j, Y" }}</strong>
@@ -42,6 +42,11 @@
                                     {{ cashbook.cash_amount }}
                                 </span>
                             </p>
+
+
+                            <div class="py-2">
+                                <a class="btn btn-sm btn-warning w-100" href="{% url 'cashbook:cashbook-detail' cashbook.pk %}">Open Cashbook</a>
+                            </div>
 
                         </div>
                     </div>

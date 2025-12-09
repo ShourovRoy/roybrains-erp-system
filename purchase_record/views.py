@@ -80,6 +80,19 @@ class PurchaseItemAddView(LoginRequiredMixin, CreateView, ListView, DetailView):
                 PurchaseVoucher.objects.filter(pk=voucher.pk, business=self.request.user).delete()
                 return redirect("voucher_search_ledger_account")
             
+
+            # check if the voucher is making payment in cash
+            if voucher.is_purchased_in_cash:
+                cash_book = get_cashbook_on_date_or_previous(self.request.user, voucher.date.date())
+                # check if cash is sufficient
+                total_item_cost = float(int(form.instance.quantity) * (form.instance.unit_price * form.instance.weight))
+                
+                if cash_book.cash_amount < total_item_cost:
+
+                    messages.error(self.request, "Insufficient cash in cash book to add this item to the purchase voucher.")
+
+                    return redirect(self.request.get_full_path())
+            
             form.instance.voucher = voucher
             form.instance.business = self.request.user
             form.save()

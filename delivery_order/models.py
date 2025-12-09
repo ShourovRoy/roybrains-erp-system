@@ -76,11 +76,10 @@ class DeliveryOrderItem(models.Model):
             )
 
 
-            print(sale_obj.quantity_sold)
             
             if not sale_created:
                 sale_obj.quantity_sold += self.quantity
-                print(sale_obj.quantity_sold)
+                
                 sale_obj.save()
 
             

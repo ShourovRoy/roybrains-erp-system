@@ -184,7 +184,6 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
         return redirect("create_delivery_order")
 
 
-
 class SearchInventoryProductView(LoginRequiredMixin, ListView):
     template_name = "delivery_order/partials/search-result.html"
     model = Inventory

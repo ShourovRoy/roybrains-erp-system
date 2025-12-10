@@ -1,11 +1,11 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView, ListView, CreateView, DetailView
+from django.views.generic import ListView, CreateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ledger.models import Ledger, Transaction as LedgerTransaction
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.db import transaction
-from utils.helper import encode_date_time
+from utils.helper import encode_date_time, get_cashbook_on_date_or_previous
+from cashbook.models import CashTransaction
 # Create your views here.
 
 # Internal banking control panel view
@@ -25,7 +25,6 @@ class InternalBankingControlPanelView(LoginRequiredMixin, ListView):
         return self.model.objects.filter(business=self.request.user).exclude(branch=None)
     
 # Internal banking withdraw view
-#TODO: 10-12-25 cashbook integration
 class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
     login_url = "/login/"
     model = LedgerTransaction
@@ -59,30 +58,72 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
             messages.error(request=self.request, message="Invalid date!")
             return self.form_invalid(form);
 
-
-        if withdraw_amount < 1:
+        # check empty transactions
+        if withdraw_amount < 1 or withdraw_amount == 0.0:
             messages.warning(request=self.request, message="You can't make empty transaction!")
             return self.form_invalid(form) 
-
-
-
+        
+        # bank details
         bank_details_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
 
+        # check if withdraw amount is available
+        if bank_details_ledger.balance < withdraw_amount or bank_details_ledger == 0.0:
+            messages.error(request=self.request, message="Insufficiant balance in bank!")
+            return self.form_invalid(form)
+
+
         # if we are withdrawing then it will credit from the bank balance in out book
-        with transaction.atomic():
-            self.model.objects.create(
-                business=self.request.user,
-                ledger=bank_details_ledger,
-                credit=withdraw_amount,
-                debit=0.0,
-                description="withdrawn",
-                date=date_time
-            )
+        try:
+            with transaction.atomic():
 
-            # TODO: debit the cashbook
+                # get cash book
+                cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
+                
+                self.model.objects.create(
+                    business=self.request.user,
+                    ledger=bank_details_ledger,
+                    credit=withdraw_amount,
+                    debit=0.0,
+                    description="Withdrawn",
+                    date=date_time
+                )
 
-            messages.success(request=self.request, message=f"{withdraw_amount} from {bank_details_ledger.account_name} has been withdrawn.")
-            return redirect("internal_banking_withdraw", bank_details_ledger.pk)
+                # credit the cashbook bank
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"withdraw from ${bank_details_ledger.account_name} - {bank_details_ledger.branch}",
+                    credit=withdraw_amount,
+                    debit=0.00,
+                    is_bank=True,
+                    date=date_time,
+                )
+
+                # debit the cashbook cash
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"Cash in",
+                    debit=withdraw_amount,
+                    credit=0.00,
+                    is_bank=False,
+                    date=date_time,
+                )
+
+                # udpate the cashbook balance
+                cash_book.cash_amount += withdraw_amount
+                cash_book.bank_amount -= withdraw_amount
+
+                cash_book.save()
+
+                messages.success(request=self.request, message=f"{withdraw_amount} from {bank_details_ledger.account_name} has been withdrawn.")
+                return redirect("internal_banking_withdraw", bank_details_ledger.pk)
+
+        except Exception as e:
+            print(e)
+            messages.error(request=self.request.user, message=f"Error occoured: {str(e)}")
+            return self.form_invalid(form)
+            
         
 # Internal banking deposite
 #TODO: 10-12-25 cashbook integration

@@ -596,6 +596,15 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
             form.add_error(None, "Invalid date format.")
             return self.form_invalid(form)
         
+        # get cashbook
+        cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
+
+
+        # check if cash amount available in cashbook cash balance 
+        if cash_amount > cash_book.cash_amount or cash_book.cash_amount == 0.0:
+            messages.error(request=self.request, message=f"{cash_amount} is not available in cashbook cash balance!")
+            return redirect("financial-outflow-partial-action", pk=account_id, bank_id=bank_id)
+        
         try:
 
 
@@ -603,7 +612,13 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                 account_ledger = get_object_or_404(self.model, business=self.request.user, pk=account_id)
                 bank_ledger = get_object_or_404(self.model, business=self.request.user, pk=bank_id)
                 
-                # accounts credit in cash
+                # check if bank amount is available in bank account
+                if bank_ledger.balance < bank_amount or bank_ledger.balance == 0.0:
+                    messages.error(request=self.request, message=f"{bank_amount} is not available in {bank_ledger.account_name}")
+                    return redirect("financial-outflow-partial-action", pk=account_id, bank_id=bank_id)
+
+
+                # accounts debit by cash
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
@@ -612,6 +627,8 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                     debit=cash_amount,
                     date=date_time,
                 )
+
+                # accounts debit by bank 
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
@@ -621,7 +638,7 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                     date=date_time,
                 )
 
-                # bank debit 
+                # bank credit or deduct  
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=bank_ledger,
@@ -631,6 +648,36 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                     date=date_time,
                 )
 
+                # cashbook transaction
+                # deduct or credit cash from cashbook cash amount as cash payment
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"Cash payment to {account_ledger.account_name}",
+                    is_bank=False,
+                    debit=0.00,
+                    credit=cash_amount,
+                    date=date_time,
+                ) 
+
+                # deduct or credit cash from cashbook bank amount as bank payment
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"{bank_ledger.account_name} payment to {account_ledger.account_name}",
+                    is_bank=True,
+                    debit=0.00,
+                    credit=bank_amount,
+                    date=date_time,
+                )                 
+
+
+                # update cashbook balance and deduct both cash balance and bank balance
+                cash_book.cash_amount -= cash_amount
+                cash_book.bank_amount -= bank_amount
+
+                cash_book.save()
+
                 messages.info(request=self.request, message="Ledger transaction has been sucessfull.")
 
                 return redirect("financial-outflow", pk=account_id)
@@ -638,5 +685,5 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
         except Exception as e:
             print(e)
             messages.error(request=self.request, message="Action failed please try again!")
-            return redirect("fnancial-inflow-partial-action", pk=account_id, bank_id=bank_id)
+            return redirect("financial-outflow-partial-action", pk=account_id, bank_id=bank_id)
         

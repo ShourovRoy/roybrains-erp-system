@@ -340,10 +340,29 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
 
 
             with transaction.atomic():
+                
+                # get cashbook
+                cash_book = get_cashbook_on_date_or_previous(
+                    business=self.request.user,
+                    date=date_time.date()
+                )
+
+                # check if cash is available in cashbook balance 
+                if cash_book.cash_amount < cash_amount:
+                    messages.error(request=self.request, message=f"{cash_amount} is not available in cashbook cash balance!")
+                    return redirect("fnancial-inflow-partial-action", pk=account_id, bank_id=bank_id)
+
+
                 account_ledger = get_object_or_404(self.model, business=self.request.user, pk=account_id)
                 bank_ledger = get_object_or_404(self.model, business=self.request.user, pk=bank_id)
+
+
+                # check if balance is available in bank account 
+                if bank_ledger.balance < bank_amount or bank_ledger.balance == 0.0:
+                    messages.error(request=self.request, message=f"{bank_amount} is not available in {bank_ledger.account_name} - {bank_ledger.branch}")
+                    return redirect("fnancial-inflow-partial-action", pk=account_id, bank_id=bank_id)
                 
-                # accounts credit in cash
+                # accounts credit for cash
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
@@ -352,10 +371,12 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                     credit=cash_amount,
                     date=date_time,
                 )
+
+                # accounts credit for bank
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
-                    description=f"Deposited in {bank_ledger.account_name} - {bank_ledger.branch}",
+                    description=f"Send in {bank_ledger.account_name} - {bank_ledger.branch}",
                     debit=0.0,
                     credit=bank_amount,
                     date=date_time,
@@ -365,12 +386,39 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=bank_ledger,
-                    description=f"{account_ledger.account_name} - {account_ledger.address} deposited",
+                    description=f"{account_ledger.account_name} - {account_ledger.address}",
                     debit=bank_amount,
                     credit=0.0,
                     date=date_time,
                 )
 
+                # cashbook cash debit
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"Cash in by {account_ledger.account_name} - {account_ledger.address}",
+                    is_bank=False,
+                    debit=cash_amount,
+                    credit=0.00,
+                    date=date_time,
+                )
+                
+                # cashbook bank debit
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"{bank_ledger.account_name} - {bank_ledger.address}",
+                    is_bank=True,
+                    debit=bank_amount,
+                    credit=0.00,
+                    date=date_time,
+                )
+
+                # update cashbook balance
+                cash_book.cash_amount += cash_amount
+                cash_book.bank_amount += bank_amount
+
+                cash_book.save()
 
 
                 messages.info(request=self.request, message="Ledger transaction has been sucessfull.")

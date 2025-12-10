@@ -64,7 +64,12 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
 
         ledger_id = int(self.kwargs["pk"])
 
-        amount = float(self.request.POST.get("amount"))
+        amount = float(self.request.POST.get("amount", float(0.00)))
+
+        if amount is None:
+            messages.error("Can't make empty transaction!")
+            return self.form_invalid(form);
+
         date_time = self.request.POST.get("datetime")
         
         try:
@@ -75,21 +80,56 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
 
         try:
 
+            # check if the amount is empty
+            if amount < 1:
+                messages.error("Can't make empty transaction!")
+                return self.form_invalid(form)
 
+            # get account ledger details
             ledger = Ledger.objects.get(business=self.request.user, pk= ledger_id)
 
+            # check if the ledger account is available
             if ledger:
 
-                self.model.objects.create(
-                    business=self.request.user,
-                    ledger=ledger,
-                    credit=amount,
-                    debit=0.0,
-                    description=f"{ledger.account_name} cash",
-                    date=date_time
-                )
+                with transaction.atomic():
 
-            return redirect("ledger-transaction-list", pk=ledger_id)
+                    # get cashbook
+                    cash_book = get_cashbook_on_date_or_previous(
+                        business=self.request.user,
+                        date=date_time.date()
+                    )
+
+                    # cash debit
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Cash in by {ledger.account_name} - {ledger.address}",
+                        is_bank=False,
+                        debit=amount,
+                        credit=0.00,
+                        date=date_time,
+                    )
+
+                    # accounts credit
+                    self.model.objects.create(
+                        business=self.request.user,
+                        ledger=ledger,
+                        credit=amount,
+                        debit=0.0,
+                        description=f"Cash in",
+                        date=date_time
+                    )
+
+                    # update cash book cash amount
+                    cash_book.cash_amount += amount
+                    cash_book.save()
+
+                    messages.success(request=self.request, message=f"Transaction has been sucessful.")
+                    return redirect("ledger-transaction-list", pk=ledger_id)
+                
+            else:
+                messages.error(request=self.request, message="Invalid account Id! Please search and try again.")
+                return redirect("finance-flow-search")
 
         except Exception as e:
             print(e)

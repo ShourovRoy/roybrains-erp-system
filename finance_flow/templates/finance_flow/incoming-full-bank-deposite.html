@@ -47,7 +47,7 @@
         <form action="{% url 'financial-inflow-bank-action' account.pk bank_details.pk %}" method="post">
             {% csrf_token %}
             <label for="">Amount</label>
-            <input type="number" step="0.01" name="amount" id="" class="form-control" placeholder="1204">
+            <input required type="number" step="0.01" name="amount" id="" class="form-control" placeholder="1204">
             
             
             <input class="form-control" type="datetime-local" name="datetime">

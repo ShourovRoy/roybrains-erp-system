@@ -187,8 +187,16 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
 
-        amount = float(self.request.POST.get("amount"))
+        amount = float(self.request.POST.get("amount", float(0.00)))
         date_time = self.request.POST.get("datetime")
+
+
+        # check if amount is empty
+        if amount < 1 or amount is None:
+            messages.error("Can't make empty transactions!")
+            return self.form_invalid(form);
+
+
 
         account_id = int(self.kwargs["pk"])
         bank_id = int(self.kwargs["bank_id"])
@@ -200,10 +208,18 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
 
 
-
         try:
         
             with transaction.atomic():
+
+                # get cashbook
+                cash_book = get_cashbook_on_date_or_previous(
+                    business=self.request.user,
+                    date=date_time.date()
+                )
+
+
+
                 account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
                 bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
 
@@ -227,6 +243,22 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
                     debit=float(amount),
                     credit=0.0
                 )
+
+                # bank debit
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"{bank_ledger.account_name} - {bank_ledger.address}",
+                    is_bank=True,
+                    debit=amount,
+                    credit=0.00,
+                    date=date_time,
+                )
+
+
+                # update cashbook balance
+                cash_book.bank_amount += amount
+                cash_book.save()
 
                 messages.success(request=self.request, message="Action done successfully")
                 return redirect("ledger-list")

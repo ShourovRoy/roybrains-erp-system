@@ -432,7 +432,7 @@ class FinancialOutflowBankSearchView(LoginRequiredMixin, DetailView):
              context['items'] = []
         return context
     
-
+# give full money in bank action view 
 class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
     login_url = "/login/"
     model = LedgerTransaction
@@ -466,7 +466,10 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
         except ValueError:
             form.add_error(None, "Invalid date format.")
             return self.form_invalid(form)
+        
 
+        # get cashbook
+        cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
 
 
         try:
@@ -475,6 +478,11 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
                 account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
                 bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
 
+                # check if the payment bank amount available in cashbook or not
+                if bank_ledger.balance < amount or bank_ledger.balance == 0.0:
+                    messages.error(request=self.request, message=f"{amount} is not available in cashbook bank!")
+                    return self.form_invalid(form);
+            
                 # create the ledger transactions
                 # account debit
                 self.model.objects.create(
@@ -486,7 +494,7 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
                     credit=0.0
                 )
 
-                # bank debit
+                # bank credit
                 self.model.objects.create(
                     business=self.request.user,
                     ledger=bank_ledger,
@@ -495,6 +503,21 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
                     credit=float(amount),
                     debit=0.0
                 )
+
+                # credit from cashbook bank transaction
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"{bank_ledger.account_name} transafer payment to {account_ledger.account_name} - {account_ledger.address}",
+                    is_bank=True,
+                    debit=0.00,
+                    credit=amount,
+                    date=date_time,
+                )
+
+                # deduct bank amount from cash book
+                cash_book.bank_amount -= amount;
+                cash_book.save()
 
                 messages.success(request=self.request, message="Action done successfully")
                 return redirect("ledger-transaction-list", pk=account_id)

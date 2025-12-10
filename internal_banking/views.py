@@ -48,7 +48,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
 
         if date_time is None:
             messages.error(request=self.request, message="Date is required!")
-            return self.form_invalid(form);
+            return redirect("internal_banking_withdraw", bank_id)
     
 
         try:
@@ -56,12 +56,12 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
         except Exception as e:
             print(e)
             messages.error(request=self.request, message="Invalid date!")
-            return self.form_invalid(form);
+            return redirect("internal_banking_withdraw", bank_id)
 
         # check empty transactions
         if withdraw_amount < 1 or withdraw_amount == 0.0:
             messages.warning(request=self.request, message="You can't make empty transaction!")
-            return self.form_invalid(form) 
+            return redirect("internal_banking_withdraw", bank_id)
         
         # bank details
         bank_details_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
@@ -69,7 +69,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
         # check if withdraw amount is available
         if bank_details_ledger.balance < withdraw_amount or bank_details_ledger == 0.0:
             messages.error(request=self.request, message="Insufficiant balance in bank!")
-            return self.form_invalid(form)
+            return redirect("internal_banking_withdraw", bank_details_ledger.pk)
 
 
         # if we are withdrawing then it will credit from the bank balance in out book
@@ -92,7 +92,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"withdraw from ${bank_details_ledger.account_name} - {bank_details_ledger.branch}",
+                    description=f"withdraw from {bank_details_ledger.account_name} - {bank_details_ledger.branch}",
                     credit=withdraw_amount,
                     debit=0.00,
                     is_bank=True,
@@ -122,17 +122,18 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
         except Exception as e:
             print(e)
             messages.error(request=self.request.user, message=f"Error occoured: {str(e)}")
-            return self.form_invalid(form)
+            return redirect("internal_banking_withdraw", bank_details_ledger.pk)
             
         
 # Internal banking deposite
-#TODO: 10-12-25 cashbook integration
 class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
     login_url = "/login/"
     model = LedgerTransaction
     fields = []
     context_object_name = "bank_details"
     template_name = "internal_banking/internal-banking-deposite.html"
+
+
 
     def get_object(self, queryset = ...):
 
@@ -150,7 +151,7 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
 
         if date_time is None:
             messages.error(request=self.request, message="Date is required!")
-            return self.form_invalid(form);
+            return redirect("internal_banking_deposite", bank_id)
     
 
         try:
@@ -158,30 +159,71 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
         except Exception as e:
             print(e)
             messages.error(request=self.request, message="Invalid date!")
-            return self.form_invalid(form);
+            return redirect("internal_banking_deposite", bank_id)
 
 
         if deposite_amount < 1:
             messages.warning(request=self.request, message="You can't make empty transaction!")
-            return self.form_invalid(form) 
+            return redirect("internal_banking_deposite", bank_id) 
 
 
 
         bank_details_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
 
-        # if we are withdrawing then it will credit from the bank balance in out book
-        with transaction.atomic():
-            self.model.objects.create(
-                business=self.request.user,
-                ledger=bank_details_ledger,
-                debit=deposite_amount,
-                credit=0.0,
-                description="Cash deposite",
-                date=date_time
-            )
+        try:
+            # if we are withdrawing then it will credit from the bank balance in out book
+            with transaction.atomic():
 
-            # TODO: credit the cashbook
+                # get cash book
+                cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
 
-            messages.success(request=self.request, message=f"{deposite_amount} at {bank_details_ledger.account_name} has been despiste.")
-            return redirect("internal_banking_withdraw", bank_details_ledger.pk)
-        
+
+                # check if the cash is avialable in the cashbook to deposit into the bank
+                if deposite_amount > cash_book.cash_amount:
+                    raise ValueError(f"{deposite_amount} amount is not available in the cashbook cash!")
+
+                self.model.objects.create(
+                    business=self.request.user,
+                    ledger=bank_details_ledger,
+                    debit=deposite_amount,
+                    credit=0.0,
+                    description="Cash deposite",
+                    date=date_time
+                )
+
+                # debit the cashbook bank
+                CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Deposit cash",
+                        debit=deposite_amount,
+                        credit=0.00,
+                        is_bank=True,
+                        date=date_time,
+                    )
+
+                # credit the cashbook cash
+                CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Deposit to {bank_details_ledger.account_name} - {bank_details_ledger.branch}",
+                        credit=deposite_amount,
+                        debit=0.00,
+                        is_bank=False,
+                        date=date_time,
+                )
+
+                # udpate the cashbook balance
+                cash_book.cash_amount -= deposite_amount
+                cash_book.bank_amount += deposite_amount
+
+                cash_book.save()
+
+                messages.success(request=self.request, message=f"{deposite_amount} at {bank_details_ledger.account_name} has been despiste.")
+                return redirect("internal_banking_deposite", bank_details_ledger.pk)
+            
+
+        except Exception as e:
+            print(e)
+            messages.error(request=self.request, message=f"Error: {str(e)}")
+            return redirect("internal_banking_deposite", bank_details_ledger.pk)

@@ -10,6 +10,8 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from datetime import datetime
 from utils.helper import encode_date_time
+from utils.helper import get_cashbook_on_date_or_previous
+from cashbook.models import CashTransaction
 # Create your views here.
 
 # financial control panel
@@ -341,6 +343,7 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
         except Exception as e:
             print(e)
             messages.warning(request=self.request, message="Invalid account id!")
+            return self.form_invalid(form)
         
         try:
             
@@ -353,7 +356,17 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
             else:
                 messages.error(request=self.request, message="Need a date to complete the action!")
                 return self.form_invalid(form)
+            
 
+            # get cashbook
+            cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
+
+            # check if the payment cash available in cashbook or not
+            if cash_book.cash_amount < cash_amount or cash_book.cash_amount == 0.0:
+                messages.error(request=self.request, message=f"{cash_amount} is not available in cashbook cash!")
+                return self.form_invalid(form);
+
+            # start ACID transaction
             with transaction.atomic():
                 # get ledger details 
                 ledger_details = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
@@ -367,6 +380,21 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
                     description="Cash given in liquide",
                     date=date_time,
                 )
+
+                # deduct cash from cashbook
+                CashTransaction.objects.create(
+                    business=self.request.user,
+                    cashbook=cash_book,
+                    description=f"Cash payment to {ledger_details.account_name} - {ledger_details.address}",
+                    is_bank=False,
+                    debit=0.00,
+                    credit=cash_amount,
+                    date=date_time,
+                )
+
+                # update the cash amount in cashbook
+                cash_book.cash_amount -= cash_amount
+                cash_book.save()
 
                 messages.success(request=self.request, message=f"Cash given sucessfully to {ledger_details.account_name} - {ledger_details.address}")
 

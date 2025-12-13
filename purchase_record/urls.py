@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PurchaseVoucherCreateView, PurchaseItemAddView, PurchaseVoucherLedgerAccountSearchView, PurchaseVoucherCompleteView, PurchaseVoucherListView
+from .views import PurchaseVoucherCreateView, PurchaseItemAddView, PurchaseVoucherLedgerAccountSearchView, PurchaseVoucherCompleteView, PurchaseVoucherListView, PurchaseVoucherDetailView
 
 urlpatterns = [
     path('voucher-search-ledger-account/', PurchaseVoucherLedgerAccountSearchView.as_view(), name='voucher_search_ledger_account'),
@@ -7,4 +7,5 @@ urlpatterns = [
     path('add-purchase-item/<int:pk>', PurchaseItemAddView.as_view(), name='add_purchase_item'),
     path('complete-voucher/<int:pk>/', PurchaseVoucherCompleteView.as_view(), name='complete_voucher'),
     path('voucher-list/', PurchaseVoucherListView.as_view(), name="purchase_voucher_list"),
+    path('voucher-details/<int:pk>', PurchaseVoucherDetailView.as_view(), name="purchase_voucher_details"),
 ]

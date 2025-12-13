@@ -15,68 +15,88 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a
-              class="nav-link active"
-              aria-current="page"
-              href="{% url 'inventory' %}"
-              >Inventory</a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'voucher_search_ledger_account' %}"
-              >Voucher</a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'ledger-list' %}">Ledger Accounts</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'internal_banking_control_panel' %}"
-              >Internal Banking</a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'finance-flow' %}">Finance Flow</a>
-          </li>
-          <li class="nav-item dropdown">
-            <button
-              class="nav-link dropdown-toggle"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Sale Force
-            </button>
-            <ul class="dropdown-menu">
-              <li>
-                <a class="dropdown-item" href="{% url 'sale_management' %}"
-                  >Sale Management</a
-                >
-              </li>
-              <li><hr class="dropdown-divider" /></li>
-              <li><a class="dropdown-item" href="{% url 'cashbook:cashbook-control-panel' %}">Cashbook</a></li>
-              <li><a class="dropdown-item" href="{% url 'capital_management:capital_deposite_withdraw' %}">Capital Management</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'sales_log' %}">Sales Log</a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'business_logout' %}">Logout</a>
-          </li>
+        <li class="nav-item">
+          <a
+            class="nav-link active"
+            aria-current="page"
+            href="{% url 'inventory' %}"
+            >Inventory</a
+          >
+        </li>
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href=""
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Purchase Management
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'voucher_search_ledger_account' %}">Create Voucher</a></li>
+            <li><a class="dropdown-item" href="#">Vouchers</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'ledger-list' %}">Ledger Accounts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'internal_banking_control_panel' %}"
+            >Internal Banking</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'finance-flow' %}">Finance Flow</a>
+        </li>
+        <li class="nav-item dropdown">
+          <button
+            class="nav-link dropdown-toggle"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Sale Force
+          </button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="{% url 'sale_management' %}"
+                >Sale Management</a
+              >
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <a
+                class="dropdown-item"
+                href="{% url 'cashbook:cashbook-control-panel' %}"
+                >Cashbook</a
+              >
+            </li>
+            <li>
+              <a
+                class="dropdown-item"
+                href="{% url 'capital_management:capital_deposite_withdraw' %}"
+                >Capital Management</a
+              >
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'sales_log' %}">Sales Log</a>
+        </li>
 
-          
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'business_logout' %}">Logout</a>
+        </li>
 
         {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'business_login' %}">Login</a>
-          </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'business_login' %}">Login</a>
+        </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'business_signup' %}">Signup</a>
-          </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'business_signup' %}">Signup</a>
+        </li>
 
         {% endif %}
       </ul>

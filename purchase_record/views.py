@@ -308,3 +308,16 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
         context = super().get_context_data(**kwargs)
         context['items'] = self.get_queryset()
         return context
+
+
+
+# Purchase voucher list
+class PurchaseVoucherListView(LoginRequiredMixin, ListView):
+    template_name = "purchase_record/voucher-list.html"
+    model = PurchaseVoucher
+    login_url = "/login/"
+    context_object_name = "vouchers"
+
+
+    def get_queryset(self):
+        return super().get_queryset().filter(business=self.request.user, total_amount__gt=0.00).order_by("-date", "id")

@@ -322,7 +322,7 @@ class PurchaseVoucherListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return super().get_queryset().filter(business=self.request.user, total_amount__gt=0.00).order_by("-date", "id")
 
-# TODO: 114-12-25 Purchase voucher detail view
+# Purchase voucher detail view
 class PurchaseVoucherDetailView(LoginRequiredMixin, DetailView):
     template_name = "purchase_record/voucher-details.html"
     model = PurchaseVoucher

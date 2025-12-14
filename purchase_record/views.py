@@ -324,12 +324,21 @@ class PurchaseVoucherListView(LoginRequiredMixin, ListView):
 
 # TODO: 114-12-25 Purchase voucher detail view
 class PurchaseVoucherDetailView(LoginRequiredMixin, DetailView):
-    template_name = "purchase_record/"
+    template_name = "purchase_record/voucher-details.html"
     model = PurchaseVoucher
     login_url = "/login/"
     context_object_name = "voucher"
 
     def get_object(self, queryset = None):
         return get_object_or_404(self.model, business=self.request.user, pk=int(self.kwargs["pk"]))
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        voucher = self.get_object()
+
+        context['purchase_items'] =  PurchaseItem.objects.filter(business=self.request.user, voucher=voucher).order_by("id")
+
+        return context
     
 

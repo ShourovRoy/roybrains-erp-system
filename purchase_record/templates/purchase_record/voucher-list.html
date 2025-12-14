@@ -1,37 +1,34 @@
-{% extends 'base.html' %}
-
+{% extends 'base.html' %} 
 {% block content %}
 
 <section class="py-5">
   <div class="container">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="fw-bold text-light">Purchase Vouchers</h2>
       <span class="text-muted">{{ vouchers|length }} total</span>
     </div>
 
     <div class="row g-4">
-
       {% for voucher in vouchers %}
       <div class="col-lg-4 col-md-6">
-        <div class="card bg-dark text-light shadow-lg h-100 border border-secondary">
-
+        <div
+          class="card bg-dark text-light shadow-lg h-100 border border-secondary"
+        >
           <!-- Card Header -->
-          <div class="card-header d-flex justify-content-between align-items-center border-bottom border-secondary">
-            <h5 class="mb-0 fw-semibold">
-              {{ voucher.supplier }}
-            </h5>
+          <div
+            class="card-header d-flex justify-content-between align-items-center border-bottom border-secondary"
+          >
+            <h5 class="mb-0 fw-semibold">{{ voucher.supplier }}</h5>
 
             {% if voucher.is_completed %}
-              <span class="badge bg-success">Completed</span>
+            <span class="badge bg-success">Completed</span>
             {% else %}
-              <span class="badge bg-warning text-dark">Pending</span>
+            <span class="badge bg-warning text-dark">Pending</span>
             {% endif %}
           </div>
 
           <!-- Card Body -->
           <div class="card-body">
-
             <p class="text-muted mb-2">
               <i class="bi bi-geo-alt"></i> {{ voucher.address }}
             </p>
@@ -40,7 +37,7 @@
               <i class="bi bi-telephone"></i> {{ voucher.phone_number }}
             </p>
 
-            <hr class="border-secondary">
+            <hr class="border-secondary" />
 
             <div class="d-flex justify-content-between mb-2">
               <span class="text-muted">Amount</span>
@@ -57,36 +54,29 @@
             <div class="d-flex justify-content-between">
               <span class="text-muted">Payment</span>
               {% if voucher.is_purchased_in_cash %}
-                <span class="badge bg-info text-dark">Cash</span>
+              <span class="badge bg-info text-dark">Cash</span>
               {% else %}
-                <span class="badge bg-primary">Credit</span>
+              <span class="badge bg-primary">Credit</span>
               {% endif %}
             </div>
-
           </div>
 
           <!-- Card Footer -->
-          <div class="card-footer border-top border-secondary d-flex justify-content-between">
-            <a href="#" class="btn btn-sm btn-outline-light">
-              View
-            </a>
+          <div
+            class="card-footer border-top border-secondary d-flex justify-content-between"
+          >
+            <a href="{% url 'purchase_voucher_details' voucher.pk %}" class="btn btn-sm btn-outline-light"> View </a>
             {% if voucher.is_completed == False %}
-                <a href="#" class="btn btn-sm btn-outline-warning">
-                Edit
-                </a>
+            <a href="#" class="btn btn-sm btn-outline-warning"> Edit </a>
             {% endif %}
           </div>
-
         </div>
       </div>
       {% empty %}
       <div class="col-12">
-        <div class="alert alert-secondary text-center">
-          No vouchers found.
-        </div>
+        <div class="alert alert-secondary text-center">No vouchers found.</div>
       </div>
       {% endfor %}
-
     </div>
   </div>
 </section>

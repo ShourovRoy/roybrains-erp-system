@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="py-5">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold text-light">Purchase Voucher</h2>
+
+      {% if voucher.is_completed %}
+        <span class="badge bg-success fs-6 px-3 py-2">Completed</span>
+      {% else %}
+        <span class="badge bg-warning text-dark fs-6 px-3 py-2">Pending</span>
+      {% endif %}
+    </div>
+
+    <!-- Voucher Summary -->
+    <div class="card bg-dark text-light shadow-lg border border-secondary mb-4">
+      <div class="card-body">
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <h4 class="fw-semibold">{{ voucher.supplier }}</h4>
+            <p class="mb-1 text-muted">
+              <i class="bi bi-geo-alt"></i> {{ voucher.address }}
+            </p>
+            <p class="mb-1 text-muted">
+              <i class="bi bi-telephone"></i> {{ voucher.phone_number }}
+            </p>
+          </div>
+
+          <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <p class="mb-1">
+              <strong>Date:</strong> {{ voucher.date }}
+            </p>
+
+            <p class="mb-1">
+              <strong>Payment Type:</strong>
+              {% if voucher.is_purchased_in_cash %}
+                <span class="badge bg-info text-dark">Cash</span>
+              {% else %}
+                <span class="badge bg-primary">Credit</span>
+              {% endif %}
+            </p>
+
+            <h3 class="text-success fw-bold mt-2">
+              ₹ {{ voucher.total_amount }}
+            </h3>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Voucher Items -->
+    <div class="card bg-dark text-light shadow-lg border border-secondary">
+      <div class="card-header border-bottom border-secondary">
+        <h4 class="mb-0 fw-semibold">Voucher Items</h4>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead class="table-secondary text-dark">
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Weight</th>
+              <th>Unit Price</th>
+              <th class="text-end">Item Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in purchase_items %}
+            <tr>
+              <td class="fw-semibold">{{ product.product_name }}</td>
+              <td>{{ product.quantity }}</td>
+              <td>{{ product.weight }} {{ product.weight_label }}</td>
+              <td>₹ {{ product.unit_price }}</td>
+              <td class="text-end fw-bold text-success">
+                ₹ {{ product.item_price }}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">
+                No items found for this voucher.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% endblock content %}

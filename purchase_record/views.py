@@ -221,7 +221,7 @@ class PurchaseVoucherCreateView(LoginRequiredMixin, CreateView):
 # Purchase view complete view
 class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
     model = PurchaseVoucher
-    template_name = 'purchase_record/voucher-details.html'
+    template_name = 'purchase_record/voucher-complete.html'
     context_object_name = 'voucher'
     object_list = 'items'
     login_url = "/login/"

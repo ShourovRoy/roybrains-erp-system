@@ -71,7 +71,8 @@ class DeliveryOrderItem(models.Model):
                     "weight": self.weight,
                     "unit_label": self.unit_label,
                     "quantity_sold": self.quantity,
-                    "date": self.delivery_order.date
+                    "date": self.delivery_order.date,
+                    "price": self.total_price,
                 }
             )
 
@@ -79,6 +80,7 @@ class DeliveryOrderItem(models.Model):
             
             if not sale_created:
                 sale_obj.quantity_sold += self.quantity
+                sale_obj.price += self.total_price
                 
                 sale_obj.save()
 

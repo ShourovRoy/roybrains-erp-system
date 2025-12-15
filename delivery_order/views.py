@@ -196,3 +196,34 @@ class SearchInventoryProductView(LoginRequiredMixin, ListView):
             return super().get_queryset().annotate(similarity=TrigramSimilarity("product_name", query)).filter(similarity__gt=0.2, business=self.request.user).order_by("id")
          
         return []
+
+
+# list delivery orders
+class DeliveryOrdersList(LoginRequiredMixin, ListView):
+    template_name = "delivery_order/delivery-orders-list.html"
+    login_url = "/login/"
+    model = DeliveryOrder
+    context_object_name = "delivery_orders"
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        q = self.request.GET.get("delivery_order_id", None)
+
+        if q is not None:
+            context['is_searched'] = True
+
+        return context
+
+
+    def get_queryset(self):
+
+        q = self.request.GET.get("delivery_order_id", None)
+
+        if self.request.GET.get("delivery_order_id"):
+            return super().get_queryset().filter(business=self.request.user, pk=q).order_by('date', 'id')
+
+
+        return super().get_queryset().filter(business=self.request.user, total_price__gt=0.0).order_by('date', 'id')
+    

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="py-5">
+  <div class="container">
+
+    <!-- Header & Search -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold text-light">Delivery Orders</h2>
+
+      <form action="{% url 'delivery_orders_list' %}" method="get" class="d-flex gap-2 w-auto">
+        <input
+          type="search"
+          name="delivery_order_id"
+          class="form-control form-control-sm bg-dark text-light border-secondary"
+          placeholder="Enter order id"
+        >
+        <button class="btn btn-primary btn-sm">
+          Search
+        </button>
+        {% if is_searched %}
+            <a class="btn btn-outline-danger btn-md" href="{% url 'delivery_orders_list' %}">Clear search</a>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card bg-dark border border-secondary shadow-lg">
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead class="table-secondary text-dark">
+            <tr>
+              <th>Order Id</th>
+              <th>Customer</th>
+              <th>Ledger</th>
+              <th>Phone</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th class="text-end">Total</th>
+              <th class="text-end">Paid</th>
+              <th class="text-end">Due</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for delivery_order in delivery_orders %}
+            <tr>
+              <td>{{delivery_order.id}}</td>
+              <td class="fw-semibold">
+                {{ delivery_order.account_name }} 
+                <div class="small text-muted">
+                  {{ delivery_order.address }}
+                </div>
+              </td>
+
+              <td>{{ delivery_order.ledger.account_name }}</td>
+              <td>{{ delivery_order.phone_number }}</td>
+              <td>{{ delivery_order.date }}</td>
+
+              <td>
+                {% if delivery_order.due_amount == 0.0 %}
+                  <span class="badge bg-success">Paid</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Unpaid</span>
+                {% endif %}
+              </td>
+
+              <td class="text-end fw-bold">
+                ₹ {{ delivery_order.total_price }}
+              </td>
+
+              <td class="text-end text-info">
+                ₹ {{ delivery_order.payment_amount }}
+              </td>
+
+              <td class="text-end text-danger">
+                ₹ {{ delivery_order.due_amount }}
+              </td>
+
+              <td class="text-center">
+                <a
+                  href="#"
+                  class="btn btn-outline-primary btn-sm"
+                >
+                  View
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="text-center text-muted py-4">
+                No delivery orders found.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{% endblock content %}

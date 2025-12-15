@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.postgres.search import TrigramSimilarity
 from django.utils.dateparse import parse_date
 from datetime import date
+from django.db.models import Sum
 # Create your views here.
 
 # TODO: create inventory create view
@@ -84,10 +85,22 @@ class SalesLogView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Keep selected date in the form
-        context["selected_date"] = self.request.GET.get(
+        selected_date = self.request.GET.get(
             "date", 
             date.today().isoformat()
         )
+
+        # Keep selected date in the form
+        context["selected_date"] = selected_date
+
+        parsed_date = parse_date(selected_date)
+
+        total_sales_price = (
+            SalesLog.objects.filter(business=self.request.user, date__date=parsed_date).aggregate(
+                total=Sum('price')
+            )["total"] or 0.00
+        )
+
+        context["total_sales_price"] = total_sales_price
 
         return context

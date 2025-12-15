@@ -11,6 +11,8 @@
             <button type="submit" class="btn btn-primary btn-sm">Search</button>
             <a href="{% url 'sales_log' %}" class="btn btn-secondary btn-sm">Clear</a>
         </form>
+
+        <p>Total Sales Price: {{ total_sales_price }}</p>
         
         <table class="table table-striped">
           <thead>

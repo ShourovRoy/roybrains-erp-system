@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="py-5">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Expense Books</h2>
+    </div>
+
+    {% if exepnse_books %}
+      <div class="row g-4">
+        {% for expense_book in exepnse_books %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+
+              <div class="card-body">
+                <h5 class="card-title fw-semibold mb-2">
+                  {{ expense_book.name }}
+                </h5>
+
+                {% if expense_book.description %}
+                  <p class="text-muted small mb-3">
+                    {{ expense_book.description|truncatechars:90 }}
+                  </p>
+                {% endif %}
+
+                <ul class="list-unstyled small mb-3">
+                  <li class="mb-1">
+                    <strong>Owner:</strong>
+                    {{ expense_book.business.owner_name }}
+                  </li>
+                  <li>
+                    <strong>Created:</strong>
+                    {{ expense_book.created_at|date:"d M Y" }}
+                  </li>
+                </ul>
+              </div>
+
+              <div class="card-footer bg-transparent border-top-0">
+                <a href="#"
+                   class="btn btn-sm btn-outline-primary w-100">
+                  View Details
+                </a>
+              </div>
+
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center">
+        No expense books found.
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% endblock content %}

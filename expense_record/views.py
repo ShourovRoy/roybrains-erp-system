@@ -1,4 +1,4 @@
-from django.views.generic import CreateView
+from django.views.generic import CreateView, ListView
 from .forms import ExpenseBookForm
 from .models import ExpenseBook
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,3 +17,16 @@ class CreateExpenseBook(LoginRequiredMixin, CreateView):
         form.instance.business = self.request.user
         messages.success(self.request, 'Expense Book Created Successfully')
         return super().form_valid(form)
+    
+
+# expense ledger list view
+class ExpenseBookListView(LoginRequiredMixin, ListView):
+    login_url = "/login/"
+    model = ExpenseBook
+    template_name = "expense_record/expense-books.html"
+    context_object_name = "exepnse_books"
+
+
+    def get_queryset(self):
+        return super().get_queryset().filter(business=self.request.user).order_by("created_at", "id")
+    

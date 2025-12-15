@@ -7,8 +7,9 @@ from django.db.models.functions import Coalesce
 from .forms import LedgerForm
 from django.shortcuts import redirect
 from django.contrib import messages
-# Create your views here.
 
+# Create your views here.
+# Ledger List View
 class LedgerListView(LoginRequiredMixin, ListView):
     
     model = Ledger
@@ -48,7 +49,7 @@ class LedgerListView(LoginRequiredMixin, ListView):
         return context
 
 
-
+# Transaction List View
 class TransactionListView(LoginRequiredMixin, ListView):
     model = TransactionLedger
     template_name = 'ledger/transactions-list.html'
@@ -78,6 +79,7 @@ class TransactionListView(LoginRequiredMixin, ListView):
         return l_list
     
 
+# Create New Ledger View
 class CreateNewLedgerView(LoginRequiredMixin, CreateView):
     login_url = "/login/"
     model = Ledger

@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'internal_banking',
     'cashbook',
     'capital_management',
-    # 'expense_record',
+    'expense_record',
 ]
 
 MIDDLEWARE = [

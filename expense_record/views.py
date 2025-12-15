@@ -11,6 +11,7 @@ class CreateExpenseBook(LoginRequiredMixin, CreateView):
     form_class = ExpenseBookForm
     template_name = "expense_record/expense_book_form.html"
     success_url = "create-expense-book"
+    login_url = '/login/'
 
 
     def form_valid(self, form):

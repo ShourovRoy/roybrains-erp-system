@@ -5,9 +5,9 @@
     <div class="container">
         <h1>Sales Log</h1>
         
-        <form action="{% url 'sales_log' %}" method="get" class="mb-3">
+        <form id="date_input_form_action" action="{% url 'sales_log' %}" method="get" class="mb-3">
             <label for="date">Filter by Date:</label>
-            <input type="date" name="date" id="date" value="{{ selected_date }}">
+            <input type="date" name="date" id="date" value="{{selected_date}}" >
             <button type="submit" class="btn btn-primary btn-sm">Search</button>
             <a href="{% url 'sales_log' %}" class="btn btn-secondary btn-sm">Clear</a>
         </form>
@@ -19,6 +19,8 @@
             <tr>
               <th scope="col">Product Name</th>
               <th scope="col">Quantity</th>
+              <th scope="col">Wight</th>
+              <th scope="col">Net Weight</th>
               <th scope="col">Price</th>
               <th scope="col">Date</th>
             </tr>
@@ -28,6 +30,8 @@
             <tr>
               <td>{{ sales_log.product.product_name }}</td>
               <td>{{ sales_log.quantity_sold }}</td>
+              <td>{{sales_log.weight}} {{sales_log.unit_label}}</td>
+              <td>{{sales_log.net_weight }} {{sales_log.unit_label}}</td>
               <td>{{ sales_log.price }}</td>
               <td>{{ sales_log.date|date:"Y-m-d" }}</td>
             </tr>
@@ -40,4 +44,7 @@
         </table>
     </div>
 </section>
+
+
+
 {% endblock content %}

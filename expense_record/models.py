@@ -13,11 +13,18 @@ class ExpenseLedger(models.Model):
     business = models.ForeignKey('business.BusinessUser', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, unique=False)
     description = models.TextField(max_length=255, blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.name} - {self.business.owner_name}"
+    
+    def save(self, **kwargs):
+
+        self.name = self.name.capitalize()
+
+        return super().save(**kwargs)
     
 
     class Meta:

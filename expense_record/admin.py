@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import ExpenseBook, ExpenseTransaction
+from .models import ExpenseType
 # Register your models here.
 
-admin.site.register(ExpenseBook)
-admin.site.register(ExpenseTransaction)
+admin.site.register(ExpenseType)

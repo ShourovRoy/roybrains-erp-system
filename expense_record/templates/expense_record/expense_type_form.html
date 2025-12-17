@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<form action="{% url 'expense_record:create-expense-book' %}" method="post">
+<form action="{% url 'expense_record:create-expense-type' %}" method="post">
     {% csrf_token %}
 {{form.as_p}}
 

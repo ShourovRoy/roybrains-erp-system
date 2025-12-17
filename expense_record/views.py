@@ -1,6 +1,6 @@
 from django.views.generic import CreateView, ListView, TemplateView
-from .forms import ExpenseTypeForm
-from .models import ExpenseType
+from .forms import ExpenseLedgerForm
+from .models import ExpenseLedger
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import IntegrityError
@@ -8,11 +8,11 @@ from django.urls import reverse_lazy
 
 # Create your views here.
 # create a expense book
-class CreateExpenseType(LoginRequiredMixin, CreateView):
-    model = ExpenseType
-    form_class = ExpenseTypeForm
-    template_name = "expense_record/expense_type_form.html"
-    success_url = reverse_lazy("expense_record:create-expense-type")
+class CreateExpenseLedger(LoginRequiredMixin, CreateView):
+    model = ExpenseLedger
+    form_class = ExpenseLedgerForm
+    template_name = "expense_record/expense_ledger_form.html"
+    success_url = reverse_lazy("expense_record:create-expense-ledger")
     login_url = '/login/'
 
 
@@ -33,7 +33,7 @@ class CreateExpenseType(LoginRequiredMixin, CreateView):
 # expense ledger list view
 class ExpenseBookListView(LoginRequiredMixin, ListView):
     login_url = "/login/"
-    model = ExpenseType
+    model = ExpenseLedger
     template_name = "expense_record/expense-books.html"
     context_object_name = "exepnse_books"
 

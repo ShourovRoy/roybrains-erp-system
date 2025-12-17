@@ -9,7 +9,7 @@ EXPENSE_TRANSACTION_STATUS_CHOICES = [
 
 # Create your models here.
 # Expense type model
-class ExpenseType(models.Model):
+class ExpenseLedger(models.Model):
     business = models.ForeignKey('business.BusinessUser', on_delete=models.CASCADE)
     name = models.CharField(max_length=100, unique=False)
     description = models.TextField(max_length=255, blank=True, null=True)
@@ -24,9 +24,6 @@ class ExpenseType(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['business', 'name'],
-                name='unique_expense_type_per_business'
+                name='unique_expense_ledger_per_business'
             )
         ]
-
-
-

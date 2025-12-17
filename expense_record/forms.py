@@ -1,8 +1,8 @@
 from django.forms import ModelForm
-from .models import ExpenseType
+from .models import ExpenseLedger
 
 
-class ExpenseTypeForm(ModelForm):
+class ExpenseLedgerForm(ModelForm):
     class Meta:
-        model = ExpenseType
+        model = ExpenseLedger
         exclude = ['business', 'amount']

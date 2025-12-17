@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ExpenseType
+from .models import ExpenseLedger
 # Register your models here.
 
-admin.site.register(ExpenseType)
+admin.site.register(ExpenseLedger)

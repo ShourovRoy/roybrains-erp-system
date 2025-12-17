@@ -18,7 +18,7 @@ class ExpenseLedger(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.name} - {self.business.owner_name}"
+        return f"{self.name}"
     
     def save(self, **kwargs):
 
@@ -43,8 +43,8 @@ class ExpenseLedgerTransaction(models.Model):
     description = models.CharField(max_length=255, blank=False, null=False)
     debit = models.FloatField(default=0.00, blank=True, null=True)
     credit = models.FloatField(default=0.00, blank=True, null=True)
-    balance = models.FloatField(default=0.00, blank=True, null=True)
     status = models.CharField(max_length=255, choices=EXPENSE_LEDGER_TRANSACTION_STATUS_CHOICES, default="Balanced", blank=True, null=True)
+    date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.expense_ledger.name} - {self.business.owner_name}"

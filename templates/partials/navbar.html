@@ -87,6 +87,16 @@
               >
             </li>
             <li>
+              <a class="dropdown-item" href="{% url 'expense_record:create-expense-ledger' %}">
+                Create Expense Book
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'expense_record:expense-book-transaction' %}">
+                Expense Transaction
+              </a>
+            </li>
+            <li>
               <a class="dropdown-item" href="{% url 'expense_record:expense-books-list' %}">
                 Expenses
               </a>

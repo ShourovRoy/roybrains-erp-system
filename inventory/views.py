@@ -99,7 +99,7 @@ class SalesLogView(LoginRequiredMixin, ListView):
             SalesLog.objects.filter(business=self.request.user, date__date=parsed_date).aggregate(
                 total=Sum('price'),
             ) or 0.00
-        )
+        )['total']
 
 
         context["total_sales_price"] = total_sales_price

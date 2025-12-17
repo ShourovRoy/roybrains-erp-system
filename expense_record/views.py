@@ -1,12 +1,14 @@
-from django.views.generic import CreateView, ListView, FormView
+from django.views.generic import CreateView, ListView, FormView, DetailView
 from .forms import ExpenseLedgerForm, ExpenseLedgerTransactionForm
 from .models import ExpenseLedger, ExpenseLedgerTransaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import IntegrityError
 from django.urls import reverse_lazy
-from django.shortcuts import redirect, get_object_or_404
-
+from django.shortcuts import redirect, get_object_or_404, render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, F
+from datetime import date
 # Create your views here.
 # create a expense book
 class CreateExpenseLedger(LoginRequiredMixin, CreateView):
@@ -88,3 +90,54 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
             print(str(e))
             messages.error(self.request, f"Error: {str(e)}")
             return self.form_invalid(form)
+        
+
+# Expense detail view
+class ExpenseDetailsView(LoginRequiredMixin, DetailView):
+    login_url = "/login/"
+    template_name = "expense_record/expense_details_transaction_list.html"
+    model = ExpenseLedger
+    context_object_name = "expense_details"
+
+    
+
+    def get_object(self, queryset = None):
+        expense_book_id = self.kwargs["pk"];
+
+        obj =  get_object_or_404(ExpenseLedger, business=self.request.user, pk=expense_book_id)
+
+        return obj
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        expense_ledger = self.object;
+
+        expense_transactions = ExpenseLedgerTransaction.objects.filter(business=self.request.user, expense_ledger=expense_ledger).order_by('date', 'id')
+
+        # life time expense 
+        life_time_expense = (expense_transactions.aggregate(
+            total=Sum(F("debit") - F("credit"))
+        )["total"] or 0.00)
+
+        # per day expense
+        today_expense = (expense_transactions.filter(date__date=date.today()).aggregate(
+            total=Sum(F("debit") - F("credit"))
+        )["total"] or 0.00)
+
+        yearly_expense = (expense_transactions.filter(date__year=date.today().year).aggregate(
+            total=Sum(F("debit") - F("credit"))
+        )["total"] or 0.00)
+
+
+        context.update({
+            "expense_transactions": expense_transactions,
+            "life_time_expense": life_time_expense,
+            "today_expense": today_expense,
+            "yearly_expense": yearly_expense,
+            "today": str(date.today())
+        })
+
+        return context

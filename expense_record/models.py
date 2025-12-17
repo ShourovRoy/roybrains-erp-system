@@ -48,3 +48,11 @@ class ExpenseLedgerTransaction(models.Model):
 
     def __str__(self):
         return f"{self.expense_ledger.name} - {self.business.owner_name}"
+
+    def save(self, **kwargs):
+        if self.debit > 0.00:
+            self.status = "Dr"
+        elif self.credit > 0.00:
+            self.status = "Cr"
+
+        return super().save(**kwargs)

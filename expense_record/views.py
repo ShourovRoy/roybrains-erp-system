@@ -127,6 +127,7 @@ class ExpenseDetailsView(LoginRequiredMixin, DetailView):
             total=Sum(F("debit") - F("credit"))
         )["total"] or 0.00)
 
+        # per year expense
         yearly_expense = (expense_transactions.filter(date__year=date.today().year).aggregate(
             total=Sum(F("debit") - F("credit"))
         )["total"] or 0.00)

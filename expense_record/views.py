@@ -98,6 +98,7 @@ class ExpenseDetailsView(LoginRequiredMixin, ListView):
     template_name = "expense_record/expense_details_transaction_list.html"
     model = ExpenseLedgerTransaction
     context_object_name = "expense_transactions"
+    paginate_by = 10
 
     def dispatch(self, request, *args, **kwargs):
         expense_book_id = self.kwargs["pk"];

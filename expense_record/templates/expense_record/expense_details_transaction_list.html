@@ -1,6 +1,4 @@
-{% extends 'base.html' %} 
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <section class="py-5">
   <div class="container">
     <!-- Expense Book Header -->
@@ -9,9 +7,7 @@
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <h3 class="fw-semibold mb-1">{{ expense_details.name }}</h3>
-            <p class="text-secondary mb-2">
-              {{ expense_details.description }}
-            </p>
+            <p class="text-secondary mb-2">{{ expense_details.description }}</p>
             <small class="text-muted">
               Created on {{ expense_details.created_at|date:"d M Y, h:i A" }}
             </small>
@@ -37,9 +33,12 @@
         <div class="card bg-dark border-secondary text-light h-100 shadow-sm">
           <div class="card-body">
             {% if filtered %}
-              <small class="text-muted">{{request.GET.start_date}} to {{request.GET.end_date}} Expense</small>
+            <small class="text-muted"
+              >{{request.GET.start_date}} to {{request.GET.end_date}}
+              Expense</small
+            >
             {% else %}
-              <small class="text-muted">Today’s Expense</small>
+            <small class="text-muted">Today’s Expense</small>
             {% endif %}
             <h4 class="mt-1 text-warning fw-bold">
               ₹ {{ today_expense|floatformat:2 }}
@@ -61,7 +60,11 @@
     </div>
 
     {% comment %} Date range filter {% endcomment %}
-    <form action="{% url 'expense_record:expense-book-details' expense_details.pk  %}" method="get" class="card bg-dark border-secondary mb-4">
+    <form
+      action="{% url 'expense_record:expense-book-details' expense_details.pk  %}"
+      method="get"
+      class="card bg-dark border-secondary mb-4"
+    >
       <div class="card-body">
         <div class="row g-3 align-items-end">
           <!-- From Date -->
@@ -99,12 +102,12 @@
             </button>
 
             {% if filtered %}
-              <a
-                href="{% url 'expense_record:expense-book-details' expense_details.pk  %}"
-                class="btn btn-secondary w-100"
-              >
-                ✖ Clear
-              </a>
+            <a
+              href="{% url 'expense_record:expense-book-details' expense_details.pk  %}"
+              class="btn btn-secondary w-100"
+            >
+              ✖ Clear
+            </a>
             {% endif %}
           </div>
         </div>
@@ -157,6 +160,52 @@
           </table>
         </div>
       </div>
+    </div>
+
+    <div class="py-4">
+      <nav aria-label="Pagination">
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page=1"
+              >&laquo; First</a
+            >
+          </li>
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}"
+              >Previous</a
+            >
+          </li>
+          {% endif %}
+
+          <li class="page-item active">
+            <span class="page-link">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+          </li>
+
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}"
+              >Next</a
+            >
+          </li>
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}"
+              >Last &raquo;</a
+            >
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
     </div>
   </div>
 </section>

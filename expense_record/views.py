@@ -93,29 +93,30 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
         
 
 # Expense detail view
-class ExpenseDetailsView(LoginRequiredMixin, DetailView):
+class ExpenseDetailsView(LoginRequiredMixin, ListView):
     login_url = "/login/"
     template_name = "expense_record/expense_details_transaction_list.html"
-    model = ExpenseLedger
-    context_object_name = "expense_details"
+    model = ExpenseLedgerTransaction
+    context_object_name = "expense_transactions"
 
-    
-
-    def get_object(self, queryset = None):
+    def dispatch(self, request, *args, **kwargs):
         expense_book_id = self.kwargs["pk"];
 
-        obj =  get_object_or_404(ExpenseLedger, business=self.request.user, pk=expense_book_id)
+        self.expense_ledger = get_object_or_404(ExpenseLedger, business=self.request.user, pk=expense_book_id)
+          
+        return super().dispatch(request, *args, **kwargs)
 
-        return obj
+
+    def get_queryset(self):
+
+        return super().get_queryset().filter(business=self.request.user, expense_ledger=self.expense_ledger).order_by('date', 'id')
 
 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        expense_ledger = self.object;
-
-        expense_transactions = ExpenseLedgerTransaction.objects.filter(business=self.request.user, expense_ledger=expense_ledger).order_by('date', 'id')
+        expense_transactions = self.object_list
 
         # life time expense 
         life_time_expense = (expense_transactions.aggregate(
@@ -134,7 +135,7 @@ class ExpenseDetailsView(LoginRequiredMixin, DetailView):
 
 
         context.update({
-            "expense_transactions": expense_transactions,
+            "expense_details": self.expense_ledger,
             "life_time_expense": life_time_expense,
             "today_expense": today_expense,
             "yearly_expense": yearly_expense,

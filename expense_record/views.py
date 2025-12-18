@@ -1,14 +1,14 @@
-from django.views.generic import CreateView, ListView, FormView, DetailView
+from django.views.generic import CreateView, ListView, FormView
 from .forms import ExpenseLedgerForm, ExpenseLedgerTransactionForm
 from .models import ExpenseLedger, ExpenseLedgerTransaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import IntegrityError
 from django.urls import reverse_lazy
-from django.shortcuts import redirect, get_object_or_404, render
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, get_object_or_404
 from django.db.models import Sum, F
 from datetime import date
+
 # Create your views here.
 # create a expense book
 class CreateExpenseLedger(LoginRequiredMixin, CreateView):
@@ -109,27 +109,64 @@ class ExpenseDetailsView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
 
-        return super().get_queryset().filter(business=self.request.user, expense_ledger=self.expense_ledger).order_by('date', 'id')
+        if self.request.GET.get("start_date") and self.request.GET.get("end_date"):
+
+
+            return super().get_queryset().filter(
+                business=self.request.user, 
+                expense_ledger=self.expense_ledger,
+                date__date__range=[self.request.GET.get('start_date'), self.request.GET.get('end_date')]
+                ).order_by('date', 'id')
+        else:
+            return super().get_queryset().filter(
+                business=self.request.user, 
+                expense_ledger=self.expense_ledger,
+                ).order_by('date', 'id')
 
 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        
+
         expense_transactions = self.object_list
 
         # life time expense 
-        life_time_expense = (expense_transactions.aggregate(
+        life_time_expense = (ExpenseLedgerTransaction.objects.filter(
+            business=self.request.user,
+            expense_ledger=self.expense_ledger,
+        ).order_by('date', 'id').aggregate(
             total=Sum(F("debit") - F("credit"))
         )["total"] or 0.00)
 
-        # per day expense
-        today_expense = (expense_transactions.filter(date__date=date.today()).aggregate(
-            total=Sum(F("debit") - F("credit"))
-        )["total"] or 0.00)
+
+
+        # if filtered
+        if self.request.GET.get("start_date") and self.request.GET.get("end_date"):
+            context.update({
+                "filtered": True
+            })
+            today_expense = (expense_transactions.aggregate(
+                total=Sum(F("debit") - F("credit"))
+            )["total"] or 0.00)
+        else:
+
+            # per day expense
+            today_expense = (ExpenseLedgerTransaction.objects.filter(
+                business=self.request.user,
+                expense_ledger=self.expense_ledger,
+                date__date=date.today()
+            ).aggregate(
+                total=Sum(F("debit") - F("credit"))
+            )["total"] or 0.00)
 
         # per year expense
-        yearly_expense = (expense_transactions.filter(date__year=date.today().year).aggregate(
+        yearly_expense = (ExpenseLedgerTransaction.objects.filter(
+                business=self.request.user,
+                expense_ledger=self.expense_ledger,
+                date__year=date.today().year
+            ).aggregate(
             total=Sum(F("debit") - F("credit"))
         )["total"] or 0.00)
 

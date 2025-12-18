@@ -36,7 +36,11 @@
       <div class="col-md-4">
         <div class="card bg-dark border-secondary text-light h-100 shadow-sm">
           <div class="card-body">
-            <small class="text-muted">Today’s Expense</small>
+            {% if filtered %}
+              <small class="text-muted">{{request.GET.start_date}} to {{request.GET.end_date}} Expense</small>
+            {% else %}
+              <small class="text-muted">Today’s Expense</small>
+            {% endif %}
             <h4 class="mt-1 text-warning fw-bold">
               ₹ {{ today_expense|floatformat:2 }}
             </h4>
@@ -57,7 +61,7 @@
     </div>
 
     {% comment %} Date range filter {% endcomment %}
-    <form method="get" class="card bg-dark border-secondary mb-4">
+    <form action="{% url 'expense_record:expense-book-details' expense_details.pk  %}" method="get" class="card bg-dark border-secondary mb-4">
       <div class="card-body">
         <div class="row g-3 align-items-end">
           <!-- From Date -->
@@ -93,12 +97,15 @@
             <button type="submit" class="btn btn-primary w-100">
               🔍 Filter
             </button>
-            <a
-              href="#"
-              class="btn btn-secondary w-100"
-            >
-              ✖ Clear
-            </a>
+
+            {% if filtered %}
+              <a
+                href="{% url 'expense_record:expense-book-details' expense_details.pk  %}"
+                class="btn btn-secondary w-100"
+              >
+                ✖ Clear
+              </a>
+            {% endif %}
           </div>
         </div>
       </div>

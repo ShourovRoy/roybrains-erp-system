@@ -50,9 +50,6 @@
       const expenseSource = expenseSourceField.value;
       const isBank = isBankCheckbox.checked;
 
-      // Auto-fill description
-      descriptionField.value = expenseSource;
-
       if (expenseSource === "bank") {
         bankDiv.classList.replace("hidden", "show");
         bankIdField.classList.replace("hidden","show");

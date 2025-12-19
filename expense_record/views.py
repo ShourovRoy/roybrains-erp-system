@@ -94,7 +94,7 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
             return self.form_invalid(form)
         
 
-# Expense detail view with transaction action
+# Expense detail view 
 class ExpenseDetailsView(LoginRequiredMixin, ListView):
     login_url = "/login/"
     template_name = "expense_record/expense_details_transaction_list.html"

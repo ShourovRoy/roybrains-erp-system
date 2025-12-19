@@ -8,6 +8,8 @@ from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 from django.db.models import Sum, F
 from datetime import date
+from ledger.models import Ledger
+from django.contrib.postgres.search import TrigramSimilarity
 
 # Create your views here.
 # create a expense book
@@ -43,7 +45,7 @@ class ExpenseBookListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return super().get_queryset().filter(business=self.request.user).order_by("created_at", "id")
 
-
+# TODO: handle cash expense, bank withdraw and cash expense and expense directly from bank
 # Expense ledger transactions
 class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
     login_url = "/login/"
@@ -181,3 +183,24 @@ class ExpenseDetailsView(LoginRequiredMixin, ListView):
         })
 
         return context
+
+
+# search expense 
+class ExpenseBankSearch(LoginRequiredMixin, ListView):
+    login_url = "/login/"
+    model = Ledger
+    context_object_name = "banks"
+    template_name = "expense_record/expense_bank_search_result.html"
+
+
+    def get_queryset(self):
+
+        query = self.request.GET.get("bank_search", None)
+
+
+        if not query:
+            return super().get_queryset().filter(business=self.request.user, similarity__gt=0.3, branch__isnull=False).exclude(branch="").order_by("updated_at")
+
+        return super().get_queryset().annotate(
+                similarity=TrigramSimilarity("account_name", query),
+            ).filter(business=self.request.user, similarity__gt=0.3, branch__isnull=False, ).exclude(branch="").order_by("-similarity")

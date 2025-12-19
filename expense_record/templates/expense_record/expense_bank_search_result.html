@@ -1,0 +1,11 @@
+<section>
+    {% for bank in banks %}
+
+        {{bank.account_name}}
+        <button
+        data-bank-name={{bank.account_name}}
+        data-bank-id={{bank.id}}
+        class="select-bank"
+        >From This Account</button>
+    {% endfor %}
+</section>

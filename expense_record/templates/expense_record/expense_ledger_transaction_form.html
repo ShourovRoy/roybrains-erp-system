@@ -1,10 +1,100 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block style %}
 
-{% block content %}
-<form action="{% url 'expense_record:expense-book-transaction' %}" method="post">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button type="submit">Submit</button>
+<style>
+  .hidden {
+    display: none;
+  }
+
+  .show {
+    display: block;
+  }
+</style>
+
+{% endblock style %} {% block content %}
+<form
+  action="{% url 'expense_record:expense-book-transaction' %}"
+  method="post"
+>
+  {% csrf_token %} {{form.as_p}}
+  <button type="submit">Submit</button>
 </form>
+
+<div id="bank_search_div" class="hidden">
+  <h1>Bank Search</h1>
+  <input
+    hx-get="{% url 'expense_record:expense-bank-search' %}"
+    type="search"
+    name="bank_search"
+    id="#bank_search"
+    hx-trigger="keyup changed delay:500ms"
+    hx-target="#search-results"
+    placeholder="Search..."
+  />
+  <div id="search-results"></div>
+</div>
+
+<script>
+  function loader() {
+    const expenseSourceField = document.getElementById("id_expense_source");
+    const isBankCheckbox = document.getElementById("id_is_bank_transfered");
+    const bankDiv = document.getElementById("bank_search_div");
+    const descriptionField = document.getElementById("id_description");
+    const bankIdField = document.getElementById("id_bank_id");
+    const bankNameField = document.getElementById("id_bank_name");
+    const bankTransferField = document.getElementById("id_is_bank_transfered");
+    bankTransferField.setAttribute("class", "hidden")
+
+    function handleChange() {
+      const selectBankButtons = document.querySelectorAll(".select-bank");
+
+      const expenseSource = expenseSourceField.value;
+      const isBank = isBankCheckbox.checked;
+
+      // Auto-fill description
+      descriptionField.value = expenseSource;
+
+      if (expenseSource === "bank") {
+        bankDiv.classList.replace("hidden", "show");
+        bankIdField.classList.replace("hidden","show");
+        bankNameField.classList.replace("hidden","show");
+        bankTransferField.classList.replace("hidden","show");
+
+        const selectBankButtons = document.querySelectorAll(".select-bank");
+        selectBankButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            console.log(this.getAttribute("data-bank-id"));
+            bankNameField.value = this.getAttribute("data-bank-name");
+            bankIdField.value = this.getAttribute("data-bank-id");
+          });
+        });
+      } else {
+        bankDiv.classList.replace("show", "hidden");
+        bankIdField.classList.replace("show", "hidden");
+        bankNameField.classList.replace("show", "hidden");
+        bankTransferField.classList.replace("show", "hidden");
+
+        isBankCheckbox.checked = false;
+        bankNameField.value = null;
+        bankIdField.value = null;
+
+      }
+
+
+    }
+
+    // initial run
+    handleChange();
+
+    expenseSourceField.addEventListener("change", handleChange);
+    isBankCheckbox.addEventListener("change", handleChange);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    loader();
+  });
+  document.addEventListener("htmx:afterSwap", function () {
+    loader();
+  });
+</script>
 
 {% endblock content %}

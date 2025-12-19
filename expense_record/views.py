@@ -10,7 +10,7 @@ from django.db.models import Sum, F
 from datetime import date
 from ledger.models import Ledger, Transaction as LedgerTransaction
 from django.contrib.postgres.search import TrigramSimilarity
-from utils.helper import get_cashbook_on_date_or_previous, encode_date_time
+from utils.helper import get_cashbook_on_date_or_previous
 from cashbook.models import CashTransaction
 
 # Create your views here.

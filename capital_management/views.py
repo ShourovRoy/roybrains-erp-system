@@ -48,6 +48,8 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
                     }
                 )
 
+                print(form.cleaned_data['date'])
+
                 # get latest cash book
                 cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
 

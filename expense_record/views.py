@@ -3,13 +3,15 @@ from .forms import ExpenseLedgerForm, ExpenseLedgerTransactionForm
 from .models import ExpenseLedger, ExpenseLedgerTransaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 from django.db.models import Sum, F
 from datetime import date
-from ledger.models import Ledger
+from ledger.models import Ledger, Transaction as LedgerTransaction
 from django.contrib.postgres.search import TrigramSimilarity
+from utils.helper import get_cashbook_on_date_or_previous, encode_date_time
+from cashbook.models import CashTransaction
 
 # Create your views here.
 # create a expense book
@@ -45,7 +47,7 @@ class ExpenseBookListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return super().get_queryset().filter(business=self.request.user).order_by("created_at", "id")
 
-# TODO: handle cash expense, bank withdraw and cash expense and expense directly from bank
+
 # Expense ledger transactions
 class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
     login_url = "/login/"
@@ -56,7 +58,6 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
 
     def get_form_kwargs(self):
         kwargs =  super().get_form_kwargs()
-        print(kwargs)
         kwargs['business'] = self.request.user
         return kwargs
     
@@ -64,11 +65,13 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
 
 
         expense_ledger = None
+        bank_ledger = None
+        is_bank_transfered = False
 
-        # get expense ledger
-        if form.cleaned_data["select_expense_ledger"]:
-            expense_ledger = get_object_or_404(ExpenseLedger, business=self.request.user, name=form.cleaned_data["select_expense_ledger"])
-        
+
+        # get lastest cashbook
+        cash_book = get_cashbook_on_date_or_previous(self.request.user, form.cleaned_data["date"].date())
+
 
         # check for empty transactions
         if not form.cleaned_data["amount"] or float(form.cleaned_data["amount"]) < 0.00:
@@ -76,18 +79,158 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
             return self.form_invalid(form)
         
 
+        # get expense ledger
+        if form.cleaned_data["select_expense_ledger"]:
+            expense_ledger = get_object_or_404(ExpenseLedger, business=self.request.user, name=form.cleaned_data["select_expense_ledger"])
+        
+
+        # check if the expense source is bank
+        if form.cleaned_data["expense_source"] == "bank" :
+            bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=form.cleaned_data["bank_id"])
+            is_bank_transfered = form.cleaned_data["is_bank_transfered"] or False
+
+            # check the bank balance
+            if bank_ledger.balance < float(form.cleaned_data["amount"]) or bank_ledger.balance == 0.00:
+                messages.error(self.request, f"{bank_ledger.account_name} has not enough balance!")
+                return self.form_invalid(form)
+            
+        else:
+
+            # for cash check if cash available or not in cashbook
+            if cash_book.cash_amount < float(form.cleaned_data["amount"]):
+                messages.error(self.request, f"You don't have enough cash!")
+                return self.form_invalid(form)
+        
+
         try:
 
-            # create the transaction
-            ExpenseLedgerTransaction.objects.create(
-                business=self.request.user,
-                expense_ledger=expense_ledger,
-                description=form.cleaned_data["description"] or "Cash",
-                date=form.cleaned_data["date"],
-                debit=float(form.cleaned_data["amount"]),
-            )
+            with transaction.atomic():
+                expense_desc = None
 
-            return redirect("expense_record:expense-book-transaction")
+                # if expense done using direct bank transfer
+                if bank_ledger and is_bank_transfered:
+
+                    # bank ledger credit 
+                    LedgerTransaction.objects.create(
+                        business=self.request.user,
+                        ledger=bank_ledger,
+                        description=f"Transfered to {expense_ledger.name} account of business.",
+                        debit=0.00,
+                        credit=float(form.cleaned_data["amount"]),
+                        date=form.cleaned_data["date"],
+                    )
+
+                    # credit the cashbook bank transaction for making expense
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Given to {expense_ledger.name}",
+                        is_bank=True,
+                        credit=float(form.cleaned_data["amount"]),
+                        debit=0.00,
+                        date=form.cleaned_data["date"],
+                    )
+
+                    expense_desc = f"{bank_ledger.account_name} - {bank_ledger.branch}"
+
+                    # update bank and cash balance in cashbook
+                    cash_book.bank_amount -= float(form.cleaned_data["amount"])
+
+                # if expense done by withdrawing from bank
+                if bank_ledger and is_bank_transfered == False:
+
+                    # bank ledger credit
+                    LedgerTransaction.objects.create(
+                        business=self.request.user,
+                        ledger=bank_ledger,
+                        description=f"Cash withdrawn",
+                        debit=0.00,
+                        credit=float(form.cleaned_data["amount"]),
+                        date=form.cleaned_data["date"],
+                    )
+
+
+                    # bank credit transaction in cashbook 
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"Cash withdrawn",
+                        is_bank=True,
+                        credit=float(form.cleaned_data["amount"]),
+                        debit=0.00,
+                        date=form.cleaned_data["date"],
+                    )
+
+                    # cash debit transaction in cashbook
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"{bank_ledger.account_name} - {bank_ledger.branch}",
+                        is_bank=False,
+                        debit=float(form.cleaned_data["amount"]),
+                        credit=0.00,
+                        date=form.cleaned_data["date"],
+                    )
+
+                    # cash credit for expense in cashbook
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"{expense_ledger.name} account",
+                        is_bank=False,
+                        credit=float(form.cleaned_data["amount"]),
+                        debit=0.00,
+                        date=form.cleaned_data["date"],
+                    )
+
+                    # udpate the expense description
+                    expense_desc = f"Cash"
+
+                    # update bank and cash balance in cashbook
+                    cash_book.bank_amount -= float(form.cleaned_data["amount"])
+
+
+                # for cash only expense without bank involvement
+                if not bank_ledger:
+                    # cash credit for expense in cashbook
+                    CashTransaction.objects.create(
+                        business=self.request.user,
+                        cashbook=cash_book,
+                        description=f"{expense_ledger.name} account",
+                        is_bank=False,
+                        credit=float(form.cleaned_data["amount"]),
+                        debit=0.00,
+                        date=form.cleaned_data["date"],
+                    )
+
+                    # udpate the expense description
+                    expense_desc = f"Cash"
+
+                    # deduct cash balance from cashbook 
+                    cash_book.cash_amount -= float(form.cleaned_data["amount"])
+
+
+
+                # create the transaction
+                ExpenseLedgerTransaction.objects.create(
+                    business=self.request.user,
+                    expense_ledger=expense_ledger,
+                    description=expense_desc,
+                    date=form.cleaned_data["date"],
+                    debit=float(form.cleaned_data["amount"]),
+                )
+
+
+                # save cashbook
+                cash_book.save()
+
+
+                messages.success(self.request, "Expense made.")
+
+                return redirect("expense_record:expense-book-transaction")
+            
+
+
         except Exception as e:
             print(str(e))
             messages.error(self.request, f"Error: {str(e)}")

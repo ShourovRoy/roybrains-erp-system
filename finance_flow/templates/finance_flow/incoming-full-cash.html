@@ -1,18 +1,114 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<section class="py-5 bg-dark text-light min-vh-100">
+    <div class="container">
+        <div class="mb-4 text-center">
+            <a href="javascript:history.back()" class="text-secondary text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i> Cancel & Go Back
+            </a>
+        </div>
 
-<section>
-    <form action="" method="post">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card bg-body-tertiary border-0 shadow-lg">
+                    <div class="card-header bg-primary bg-opacity-10 border-bottom border-secondary border-opacity-10 py-3 text-center">
+                        <div class="icon-circle bg-primary bg-opacity-20 text-primary mx-auto mb-2">
+                            <i class="bi bi-cash-stack fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold text-white mb-0">Cash Deposit Form</h5>
+                        <p class="x-small-label text-secondary text-uppercase mt-1 mb-0">Transaction Ref: #{{ request.GET.pk|default:"NEW" }}</p>
+                    </div>
 
-        {% csrf_token %}
+                    <div class="card-body p-4">
+                        <form action="" method="post">
+                            {% csrf_token %}
 
-        <label for="">{{request.GET.pk}}</label>
-        <input type="number" name="amount" id="" step="0.01" placeholder="Enter the amount" required>
-        <input type="datetime-local" name="datetime">
-        <button type="submit">Take money full in cash</button>
+                            <div class="mb-4">
+                                <label class="x-small-label text-secondary text-uppercase fw-bold mb-2 d-block">Deposit Amount</label>
+                                <div class="input-group input-group-lg border border-secondary border-opacity-25 rounded-3 overflow-hidden">
+                                    <span class="input-group-text bg-dark border-0 text-success fw-bold">৳</span>
+                                    <input 
+                                        type="number" 
+                                        name="amount" 
+                                        step="0.01" 
+                                        class="form-control bg-dark text-white border-0 fw-bold fs-4" 
+                                        placeholder="0.00" 
+                                        required
+                                    >
+                                </div>
+                            </div>
 
-    </form>
+                            <div class="mb-4">
+                                <label class="x-small-label text-secondary text-uppercase fw-bold mb-2 d-block">Transaction Date & Time</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </span>
+                                    <input 
+                                        type="datetime-local" 
+                                        name="datetime" 
+                                        class="form-control bg-dark text-white border-secondary border-opacity-25"
+                                        required
+                                    >
+                                </div>
+                                <small class="text-muted x-small mt-1 d-block italic">Don't leave it blank!</small>
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">
+                                    <i class="bi bi-check2-circle me-2"></i> Confirm & Process Deposit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer bg-black bg-opacity-20 border-top border-secondary border-opacity-10 py-3">
+                        <div class="d-flex align-items-center justify-content-center text-secondary small">
+                            <i class="bi bi-shield-check me-2 text-success"></i>
+                            <span>Secure Cash Transaction</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
+<style>
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .x-small-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; }
+    .x-small { font-size: 0.75rem; }
+    .italic { font-style: italic; }
+    
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    /* Style the date picker icon color for dark mode */
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.5;
+    }
+
+    .form-control:focus {
+        background-color: #1a1d20 !important;
+        border-color: #0d6efd !important;
+        box-shadow: none;
+        color: white;
+    }
+
+    .input-group-text {
+        border-radius: 0;
+    }
+
+    .card {
+        border-radius: 16px;
+    }
+</style>
 {% endblock content %}

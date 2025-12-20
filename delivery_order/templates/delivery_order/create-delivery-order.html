@@ -1,414 +1,496 @@
-{% extends 'delivery_order/delivery-order-base.html' %}
-
-{% block style %}
+{% extends 'delivery_order/delivery-order-base.html' %} {% block style %}
 <style>
-    .hidden {
-        display: none;
-    }
+  .hidden {
+    display: none;
+  }
+  .bg-body-tertiary {
+    background-color: #2b3035 !important;
+  }
+  .card {
+    border-radius: 12px;
+  }
+  /* Match Django generated inputs to Bootstrap Dark */
+  input,
+  select,
+  textarea {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    color: #fff;
+    background-color: #1a1d20 !important;
+    border: 1px solid #495057 !important;
+    border-radius: 6px;
+  }
+  input:focus {
+    border-color: #0d6efd !important;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  }
+  input[readonly] {
+    background-color: #121416 !important;
+    border-color: #2d3238 !important;
+    color: #6c757d;
+  }
+  .table-dark {
+    --bs-table-bg: #1a1d20;
+  }
+  .x-small-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
 </style>
-{% endblock style %}
+{% endblock style %} {% block delivery_content %}
+<section class="py-4 bg-dark text-light min-vh-100">
+  <div class="container-fluid px-4">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div
+          class="card bg-body-tertiary border-0 shadow-sm sticky-top"
+          style="top: 20px"
+        >
+          <div
+            class="card-header bg-transparent border-bottom border-secondary border-opacity-10 py-3"
+          >
+            <h5 class="mb-0 fw-bold text-white">
+              <i class="bi bi-search me-2 text-primary"></i>Search Products
+            </h5>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+              <div class="input-group">
+                <span
+                  class="input-group-text bg-dark border-secondary border-opacity-50 text-secondary"
+                >
+                  <i class="bi bi-box-seam"></i>
+                </span>
+                <input
+                  class="form-control"
+                  placeholder="Type product name..."
+                  type="search"
+                  name="product_search"
+                  id="product_search"
+                  required
+                  hx-get="{% url 'search_inventory_products' %}"
+                  hx-trigger="input changed delay:500ms, keyup[key=='Enter'], load"
+                  hx-target="#search_result"
+                />
+              </div>
+            </form>
 
-
-{% block delivery_content %}
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <form action="{% url 'create_delivery_order' %}" method="POST">
-                    {% csrf_token %}
-                    <h1>Create Delivery Order</h1>
-                    {{form.management_form}}
-
-                    <input type="hidden" name="ledger_id" value="{{request.GET.ledger_id}}">
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="py-2">
-                                <label for="" class="form-label">
-                                    {{form.account_name.label}}
-                                </label>
-                                {{form.account_name}}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="py-2">
-                                <label for="" class="form-label">
-                                    {{form.address.label}}
-                                </label>
-                                {{form.address}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="py-2">
-                                <label for="" class="form-label">
-                                    {{form.phone_number.label}}
-                                </label>
-                                {{form.phone_number}}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="py-2">
-                                <label for="" class="form-label">
-                                    {{form.date.label}}
-                                </label>
-                                {{form.date}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="py-2">
-                                <label for="" class="form-label">
-                                    {{form.previous_due.label}}
-                                </label>
-                                {{form.previous_due}}
-                            </div>
-
-                        </div>
-                        <div class="col-md-4">
-                            <div class="py-2">
-                                <label for="" class="form-label">
-                                    {{form.total_price.label}}
-                                </label>
-                                {{form.total_price}}
-                            </div>
-
-                        </div>
-                        <div class="col-md-4">
-
-                            <div class="py-2">
-                                <label for="" class="form-label">
-                                    {{form.grand_total.label}}
-                                </label>
-                                {{form.grand_total}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="py-2 col-md-6">
-                            <label for="" class="form-label">
-                                {{form.payment_amount.label}}
-                            </label>
-                            {{form.payment_amount}}
-                        </div>
-
-                        <div class="py-2 col-md-6">
-                            <label for="" class="form-label">
-                                {{form.due_amount.label}}
-                            </label>
-                            {{form.due_amount}}
-                        </div>
-                        
-                    </div>
-
-                    <div class="py-2">
-                        <label for="" class="form-label">
-                            {{form.is_paid.label}}
-                        </label>
-                        {{form.is_paid}}
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Create Delivery Order</button>
-
-                    <div id="added-products-section" class="py-3 hidden">
-
-                        <h2>Products</h2>
-            
-                        <table border="1px">
-                            {{formset.management_form}}
-                            <thead>
-                                <tr>
-                                    <th>Product Name</th>
-                                    <th>Weight</th>
-                                    <th>Label</th>
-                                    <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Total</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="product-form-list">
-                                {% for productForm in formset %}
-                                    <tr class="product-form">
-                                     
-                                        <td>
-                                            {{productForm.product_name}}
-                                        </td>
-                                        <td>
-                                            {{productForm.weight}}
-                                        </td>
-                                        <td>
-                                            {{productForm.unit_label}}
-                                        </td>
-                                        <td>
-                                            {{productForm.quantity}}
-                                        </td>
-                                        <td>
-                                            {{productForm.price}}
-                                        </td>
-                                       
-                                        <td><input type="number" class="form-control total-field" readonly></td> <!-- ✅ New field -->
-                                        
-                                        <td>
-                                           
-                                            <li class="hidden">{{ productForm.DELETE }}</li>
-                                            <button type="button" class="btn btn-sm btn-danger delete-product-btn">Delete</button>
-                                           
-                                        </td>
-                                       
-                                    </tr>
-                                    {% endfor %}
-                                    <tr id="empty-product-form" class="hidden"> 
-                                        <td>
-                                            {{formset.empty_form.product_name}}
-                                        </td>
-                                        <td>
-                                            {{formset.empty_form.weight}}
-                                        </td>
-                                        <td>
-                                            {{formset.empty_form.unit_label}}
-                                        </td>
-                                        <td>
-                                            {{formset.empty_form.quantity}}
-                                        </td>
-                                        <td>
-                                            {{formset.empty_form.price}}
-                                        </td>
-                                        <td><input type="number" class="form-control total-field" readonly></td>
-                                        <td>
-                                            <li class="hidden">{{ formset.empty_form.DELETE }}</li>
-                                            <button type="button" class="btn btn-sm btn-danger delete-product-btn">Delete</button>
-                                        </td>
-                                    </tr> 
-                            </tbody>
-                        </table>
-                    </div>
-                </form>
-
-            </div>
-
-            <div class="col-md-6">
-                <h4>Search Products</h4>
-                <form method="post">
-
-                    {% csrf_token %}              
-                    <input 
-                        class="form-control" 
-                        placeholder="Start typing product name.." 
-                        type="search" 
-                        name="product_search" 
-                        id="product_search" 
-                        required 
-                        hx-get="{% url 'search_inventory_products' %}"
-                        hx-trigger="input changed delay:500ms, keyup[key=='Enter'], load"
-                        hx-target="#search_result"
-                    />
-                </form>
-
-                <div id="search_result" class="py-3">
-
-                </div>
-            
-            </div>
+            <div
+              id="search_result"
+              class="mt-3 overflow-auto"
+              style="max-height: 70vh"
+            ></div>
+          </div>
         </div>
+      </div>
+
+      <div class="col-lg-8">
+        <form action="{% url 'create_delivery_order' %}" method="POST">
+          {% csrf_token %} {{form.management_form}}
+          <input
+            type="hidden"
+            name="ledger_id"
+            value="{{request.GET.ledger_id}}"
+          />
+
+          <div class="card bg-body-tertiary border-0 shadow-sm mb-4">
+            <div
+              class="card-header bg-transparent border-bottom border-secondary border-opacity-10 py-3"
+            >
+              <h5 class="mb-0 fw-bold text-white">
+                <i class="bi bi-person-badge me-2 text-primary"></i>Customer
+                Details
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="x-small-label text-secondary text-uppercase"
+                    >{{form.account_name.label}}</label
+                  >
+                  {{form.account_name}}
+                </div>
+                <div class="col-md-6">
+                  <label class="x-small-label text-secondary text-uppercase"
+                    >{{form.phone_number.label}}</label
+                  >
+                  {{form.phone_number}}
+                </div>
+                <div class="col-md-8">
+                  <label class="x-small-label text-secondary text-uppercase"
+                    >{{form.address.label}}</label
+                  >
+                  {{form.address}}
+                </div>
+                <div class="col-md-4">
+                  <label class="x-small-label text-secondary text-uppercase"
+                    >{{form.date.label}}</label
+                  >
+                  {{form.date}}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="added-products-section"
+            class="card bg-body-tertiary border-0 shadow-sm mb-4 hidden"
+          >
+            <div
+              class="card-header bg-transparent border-bottom border-secondary border-opacity-10 py-3"
+            >
+              <h5 class="mb-0 fw-bold text-white">
+                <i class="bi bi-cart-check me-2 text-success"></i>Order Items
+              </h5>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-dark align-middle mb-0">
+                {{formset.management_form}}
+                <thead class="bg-black">
+                  <tr class="x-small-label text-secondary text-uppercase">
+                    <th class="ps-3">Product Name</th>
+                    <th>Weight / Unit</th>
+                    <th style="width: 100px">Qty</th>
+                    <th style="width: 120px">Price</th>
+                    <th style="width: 120px">Total</th>
+                    <th class="text-center">Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="product-form-list">
+                  {% for productForm in formset %}
+                  <tr
+                    class="product-form border-bottom border-secondary border-opacity-10"
+                  >
+                    <td class="ps-3">{{productForm.product_name}}</td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        {{productForm.weight}} {{productForm.unit_label}}
+                      </div>
+                    </td>
+                    <td>{{productForm.quantity}}</td>
+                    <td>{{productForm.price}}</td>
+                    <td>
+                      <input
+                        type="number"
+                        class="form-control total-field"
+                        readonly
+                      />
+                    </td>
+                    <td class="text-center">
+                      <span class="hidden">{{ productForm.DELETE }}</span>
+                      <button
+                        type="button"
+                        class="btn btn-outline-danger btn-sm delete-product-btn"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+
+                  <tr id="empty-product-form" class="hidden">
+                    <td class="ps-3">{{formset.empty_form.product_name}}</td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        {{formset.empty_form.weight}}
+                        {{formset.empty_form.unit_label}}
+                      </div>
+                    </td>
+                    <td>{{formset.empty_form.quantity}}</td>
+                    <td>{{formset.empty_form.price}}</td>
+                    <td>
+                      <input
+                        type="number"
+                        class="form-control total-field"
+                        readonly
+                      />
+                    </td>
+                    <td class="text-center">
+                      <span class="hidden"
+                        >{{ formset.empty_form.DELETE }}</span
+                      >
+                      <button
+                        type="button"
+                        class="btn btn-outline-danger btn-sm delete-product-btn"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card bg-body-tertiary border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+              <div class="row g-4">
+                <div class="col-md-4">
+                  <div
+                    class="p-3 bg-dark rounded border border-secondary border-opacity-10"
+                  >
+                    <label
+                      class="x-small-label text-secondary text-uppercase mb-2 d-block"
+                      >{{form.previous_due.label}}</label
+                    >
+                    {{form.previous_due}}
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div
+                    class="p-3 bg-dark rounded border border-secondary border-opacity-10"
+                  >
+                    <label
+                      class="x-small-label text-secondary text-uppercase mb-2 d-block"
+                      >{{form.total_price.label}}</label
+                    >
+                    {{form.total_price}}
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div
+                    class="p-3 bg-primary bg-opacity-10 rounded border border-primary border-opacity-20"
+                  >
+                    <label
+                      class="x-small-label text-primary text-uppercase mb-2 d-block fw-bold"
+                      >{{form.grand_total.label}}</label
+                    >
+                    {{form.grand_total}}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-4 mt-1">
+                <div class="col-md-6">
+                  <label class="x-small-label text-secondary text-uppercase"
+                    >{{form.payment_amount.label}}</label
+                  >
+                  {{form.payment_amount}}
+                </div>
+                <div class="col-md-6">
+                  <label class="x-small-label text-secondary text-uppercase"
+                    >{{form.due_amount.label}}</label
+                  >
+                  {{form.due_amount}}
+                </div>
+              </div>
+
+              <div
+                class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary border-opacity-10"
+              >
+                <div class="form-check form-switch">
+                  {{form.is_paid}}
+                  <label
+                    class="form-check-label text-secondary small"
+                    for="{{form.is_paid.id_for_label}}"
+                    >{{form.is_paid.label}}</label
+                  >
+                </div>
+                <button
+                  type="submit"
+                  class="btn btn-primary px-5 fw-bold py-2 shadow"
+                >
+                  <i class="bi bi-check2-circle me-2"></i>Create Delivery Order
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </section>
-{% endblock delivery_content %}
-
-
-{% block script %}
-
+{% endblock delivery_content %} {% block script %}
 <script>
-    function setupAddMoreButtons() {
-        const addButtons = document.querySelectorAll(".add-more-product");
-        const totalNewForms = document.getElementById("id_items-TOTAL_FORMS");
-        
-        addButtons.forEach((button) => {
-            if (!button.dataset.listenerAdded) {
-                button.addEventListener("click", function (event) {
-                    event.preventDefault();
+  function setupAddMoreButtons() {
+      const addButtons = document.querySelectorAll(".add-more-product");
+      const totalNewForms = document.getElementById("id_items-TOTAL_FORMS");
 
-                    document.getElementById("search_result").innerHTML = ""
+      addButtons.forEach((button) => {
+          if (!button.dataset.listenerAdded) {
+              button.addEventListener("click", function (event) {
+                  event.preventDefault();
 
-                    const searchInput = document.getElementById("product_search");
-                    if (searchInput) {
-                        searchInput.value = "";
-                        searchInput.focus();
-                    }
+                  document.getElementById("search_result").innerHTML = ""
 
-                    const productName = button.dataset.name;
-                    const productWeight = button.dataset.weight;
-                    const productQty = button.dataset.quantity;
-                    const productId = button.dataset.id;
+                  const searchInput = document.getElementById("product_search");
+                  if (searchInput) {
+                      searchInput.value = "";
+                      searchInput.focus();
+                  }
 
-
-                    const currentProductForms = document.getElementsByClassName("product-form");
-                    let currentFormCount = currentProductForms.length;
-
-                    const formCopyTarget = document.getElementById("product-form-list");
-                    const copyEmptyFormEl = document.getElementById("empty-product-form").cloneNode(true);
-
-                    copyEmptyFormEl.setAttribute("class", "product-form");
-                    copyEmptyFormEl.setAttribute("id", `form-${currentFormCount}`);
-
-                    const regex = new RegExp("__prefix__", "g");
-                    copyEmptyFormEl.innerHTML = copyEmptyFormEl.innerHTML.replace(regex, currentFormCount);
-
-                    totalNewForms.setAttribute("value", currentFormCount + 1);
-                    formCopyTarget.append(copyEmptyFormEl);
-
-                    // Now fill the new form with product data
-                    const newForm = formCopyTarget.lastElementChild;
-                    const nameInput = newForm.querySelector('input[name$="-product_name"]');
-                    const weightInput = newForm.querySelector('input[name$="-weight"]');
-                    const qtyInput = newForm.querySelector('input[name$="-quantity"]');
-                    const priceInput = newForm.querySelector('input[name$="-price"]');
-                    const totalInput = newForm.querySelector(".total-field");
-
-                    if (nameInput) nameInput.value = productName;
-                    if (weightInput) weightInput.value = productWeight;
-                    if (qtyInput) qtyInput.value = 0;
-                    if (priceInput) priceInput.value = "";
-
-                    // Update total when quantity or price changes
-                    [qtyInput, priceInput].forEach(input => {
-                        input.addEventListener("input", function() {
-                            let qty = parseFloat(qtyInput.value) || 0;
-                            if (qty > Number(productQty)) {
-                                alert(`${productName} has ${productQty} but you are trying to sell ${qty}`)
-                                qtyInput.value = 0
-                                qty = 0
-                            } 
-
-                            const price = parseFloat(priceInput.value) || 0;
-                            totalInput.value = (qty * price).toFixed(2);
-                            calculateTotalPrice()
-                        });
-                    });
-
-                    document.getElementById("added-products-section").classList.remove("hidden")
-
-                    calculateTotalPrice()
-
-                    console.log(`Added ${productName} to form #${currentFormCount}`);
-                });
-
-                button.dataset.listenerAdded = "true";
-            }
-        });
-    }
-
-    function setupDeleteButtonHandler() {
-        const tableBody = document.getElementById("product-form-list");
-
-        // Use event delegation — works for dynamically added elements too
-        tableBody.addEventListener("click", function (event) {
-            if (event.target.classList.contains("delete-product-btn")) {
-                event.preventDefault();
-
-                const form = event.target.closest(".product-form");
-                const deleteCheckbox = form.querySelector('input[name$="-DELETE"]');
-
-                if (deleteCheckbox) {
-                    deleteCheckbox.checked = true;
-                }
-
-                // Hide the form visually
-                form.style.display = "none";
-
-                calculateTotalPrice()
-                
-
-                // 🔹 Hide the products section if no visible items remain
-                const visibleForms = Array.from(document.querySelectorAll(".product-form"))
-                    .filter(f => f.style.display !== "none");
-
-                if (visibleForms.length === 0) {
-                    document.getElementById("added-products-section").classList.add("hidden");
-                }
-            }
-        });
-    }
+                  const productName = button.dataset.name;
+                  const productWeight = button.dataset.weight;
+                  const productQty = button.dataset.quantity;
+                  const productId = button.dataset.id;
 
 
-    function calculateTotalPrice() {
-        let totalProductsBill = 0;
+                  const currentProductForms = document.getElementsByClassName("product-form");
+                  let currentFormCount = currentProductForms.length;
 
-        document.querySelectorAll(".product-form").forEach((form) => {
-            if (form.style.display === "none") return; // skip hidden forms
+                  const formCopyTarget = document.getElementById("product-form-list");
+                  const copyEmptyFormEl = document.getElementById("empty-product-form").cloneNode(true);
 
-            const itemTotalInput = form.querySelector(".total-field");
-            if (itemTotalInput) {
-                totalProductsBill += parseFloat(itemTotalInput.value) || 0;
-            }
-        });
+                  copyEmptyFormEl.setAttribute("class", "product-form");
+                  copyEmptyFormEl.setAttribute("id", `form-${currentFormCount}`);
 
-        const orderTotalPriceInput = document.getElementById("id_total_price");
-        if (orderTotalPriceInput) {
-            orderTotalPriceInput.value = totalProductsBill.toFixed(2);
-        }
+                  const regex = new RegExp("__prefix__", "g");
+                  copyEmptyFormEl.innerHTML = copyEmptyFormEl.innerHTML.replace(regex, currentFormCount);
 
-        const orderPreviousDueInput = document.getElementById("id_previous_due");
-        const orderGrandTotalInput = document.getElementById("id_grand_total");
-        if (orderGrandTotalInput && orderPreviousDueInput) {
-            
-            orderGrandTotalInput.value = Number(orderPreviousDueInput.value) + totalProductsBill;
-            
-        }
-        
+                  totalNewForms.setAttribute("value", currentFormCount + 1);
+                  formCopyTarget.append(copyEmptyFormEl);
 
-        {% comment %} update due amount {% endcomment %}
-        calculateDueAmount()
+                  // Now fill the new form with product data
+                  const newForm = formCopyTarget.lastElementChild;
+                  const nameInput = newForm.querySelector('input[name$="-product_name"]');
+                  const weightInput = newForm.querySelector('input[name$="-weight"]');
+                  const qtyInput = newForm.querySelector('input[name$="-quantity"]');
+                  const priceInput = newForm.querySelector('input[name$="-price"]');
+                  const totalInput = newForm.querySelector(".total-field");
 
-    }
+                  if (nameInput) nameInput.value = productName;
+                  if (weightInput) weightInput.value = productWeight;
+                  if (qtyInput) qtyInput.value = 0;
+                  if (priceInput) priceInput.value = "";
 
-    {% comment %} calculate due amount {% endcomment %}
-    function calculateDueAmount() {
-        const payment_amount_input = document.getElementById("id_payment_amount")
+                  // Update total when quantity or price changes
+                  [qtyInput, priceInput].forEach(input => {
+                      input.addEventListener("input", function() {
+                          let qty = parseFloat(qtyInput.value) || 0;
+                          if (qty > Number(productQty)) {
+                              alert(`${productName} has ${productQty} but you are trying to sell ${qty}`)
+                              qtyInput.value = 0
+                              qty = 0
+                          }
 
-        if (Number(payment_amount_input.value) < 0 ) {
-            alert("Payment amount can not be negative")
-            payment_amount_input.value = 0.0
-        } else {
+                          const price = parseFloat(priceInput.value) || 0;
+                          totalInput.value = (qty * price).toFixed(2);
+                          calculateTotalPrice()
+                      });
+                  });
 
-            const currentPaymentInputValue = payment_amount_input.value
-            const orderGrandTotalInput = document.getElementById("id_grand_total");
-    
-            document.getElementById("id_due_amount").value = Number(orderGrandTotalInput.value) - currentPaymentInputValue
-        }
+                  document.getElementById("added-products-section").classList.remove("hidden")
+
+                  calculateTotalPrice()
+
+                  console.log(`Added ${productName} to form #${currentFormCount}`);
+              });
+
+              button.dataset.listenerAdded = "true";
+          }
+      });
+  }
+
+  function setupDeleteButtonHandler() {
+      const tableBody = document.getElementById("product-form-list");
+
+      // Use event delegation — works for dynamically added elements too
+      tableBody.addEventListener("click", function (event) {
+          if (event.target.classList.contains("delete-product-btn")) {
+              event.preventDefault();
+
+              const form = event.target.closest(".product-form");
+              const deleteCheckbox = form.querySelector('input[name$="-DELETE"]');
+
+              if (deleteCheckbox) {
+                  deleteCheckbox.checked = true;
+              }
+
+              // Hide the form visually
+              form.style.display = "none";
+
+              calculateTotalPrice()
 
 
-    }
+              // 🔹 Hide the products section if no visible items remain
+              const visibleForms = Array.from(document.querySelectorAll(".product-form"))
+                  .filter(f => f.style.display !== "none");
 
-    document.addEventListener("DOMContentLoaded", () => {
-        setupAddMoreButtons();
-        setupDeleteButtonHandler();
+              if (visibleForms.length === 0) {
+                  document.getElementById("added-products-section").classList.add("hidden");
+              }
+          }
+      });
+  }
 
-        {% comment %} listen the paid amount input field {% endcomment %}
-        const payment_amount_input = document.getElementById("id_payment_amount")
-        const orderPreviousDueInput = document.getElementById("id_previous_due");
-        const orderGrandTotalInput = document.getElementById("id_grand_total");
-        const currentDueInput = document.getElementById("id_due_amount");
-        
-        if (orderGrandTotalInput && orderPreviousDueInput && currentDueInput) {
-            
-            orderGrandTotalInput.value = Number(orderPreviousDueInput.value) + 0;
-            currentDueInput.value = orderGrandTotalInput.value
-            
-        }
-        
-        if(payment_amount_input){
-            payment_amount_input.addEventListener("input", calculateDueAmount)
-        }
-        
-    });
-    document.body.addEventListener("htmx:afterSwap", setupAddMoreButtons);
+
+  function calculateTotalPrice() {
+      let totalProductsBill = 0;
+
+      document.querySelectorAll(".product-form").forEach((form) => {
+          if (form.style.display === "none") return; // skip hidden forms
+
+          const itemTotalInput = form.querySelector(".total-field");
+          if (itemTotalInput) {
+              totalProductsBill += parseFloat(itemTotalInput.value) || 0;
+          }
+      });
+
+      const orderTotalPriceInput = document.getElementById("id_total_price");
+      if (orderTotalPriceInput) {
+          orderTotalPriceInput.value = totalProductsBill.toFixed(2);
+      }
+
+      const orderPreviousDueInput = document.getElementById("id_previous_due");
+      const orderGrandTotalInput = document.getElementById("id_grand_total");
+      if (orderGrandTotalInput && orderPreviousDueInput) {
+
+          orderGrandTotalInput.value = Number(orderPreviousDueInput.value) + totalProductsBill;
+
+      }
+
+
+      {% comment %} update due amount {% endcomment %}
+      calculateDueAmount()
+
+  }
+
+  {% comment %} calculate due amount {% endcomment %}
+  function calculateDueAmount() {
+      const payment_amount_input = document.getElementById("id_payment_amount")
+
+      if (Number(payment_amount_input.value) < 0 ) {
+          alert("Payment amount can not be negative")
+          payment_amount_input.value = 0.0
+      } else {
+
+          const currentPaymentInputValue = payment_amount_input.value
+          const orderGrandTotalInput = document.getElementById("id_grand_total");
+
+          document.getElementById("id_due_amount").value = Number(orderGrandTotalInput.value) - currentPaymentInputValue
+      }
+
+
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+      setupAddMoreButtons();
+      setupDeleteButtonHandler();
+
+      {% comment %} listen the paid amount input field {% endcomment %}
+      const payment_amount_input = document.getElementById("id_payment_amount")
+      const orderPreviousDueInput = document.getElementById("id_previous_due");
+      const orderGrandTotalInput = document.getElementById("id_grand_total");
+      const currentDueInput = document.getElementById("id_due_amount");
+
+      if (orderGrandTotalInput && orderPreviousDueInput && currentDueInput) {
+
+          orderGrandTotalInput.value = Number(orderPreviousDueInput.value) + 0;
+          currentDueInput.value = orderGrandTotalInput.value
+
+      }
+
+      if(payment_amount_input){
+          payment_amount_input.addEventListener("input", calculateDueAmount)
+      }
+
+  });
+  document.body.addEventListener("htmx:afterSwap", setupAddMoreButtons);
 </script>
-
-{% endblock script %} 
+{% endblock script %}

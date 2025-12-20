@@ -1,102 +1,150 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-
-
-<section class="py-5">
+<section class="py-5 bg-dark text-light min-vh-100">
     <div class="container">
-
-        <div class="row g-4">
-
-            <!-- Main Account Card -->
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Main Account</h5>
-                    </div>
-                    <div class="card-body">
-
-                        <h5 class="fw-bold">{{ account.account_name }}</h5>
-
-                        <p class="text-muted mb-1">Address:</p>
-                        <p>{{ account.address }}</p>
-
-                        <p class="text-muted mb-1">Balance:</p>
-                        <span class="badge bg-success fs-6 px-3 py-2">
-                            {{ account.balance }}
-                        </span>
-
-                        {% if account.note %}
-                        <hr>
-                        <p class="text-muted mb-1">Notes:</p>
-                        <p>{{ account.note }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bank Details Card -->
-            <div class="col-md-6">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0">Selected Bank</h5>
-                    </div>
-                    <div class="card-body">
-
-                        <h5 class="fw-bold">{{ bank_details.account_name }}</h5>
-
-                        <p class="text-muted mb-1">Branch:</p>
-                        <p>{{ bank_details.branch }}</p>
-
-                        <p class="text-muted mb-1">Address:</p>
-                        <p>{{ bank_details.address }}</p>
-
-                        <p class="text-muted mb-1">Balance:</p>
-                        <span class="badge bg-info fs-6 px-3 py-2">
-                            {{ bank_details.balance }}
-                        </span>
-
-                        {% if bank_details.note %}
-                        <hr>
-                        <p class="text-muted mb-1">Notes:</p>
-                        <p>{{ bank_details.note }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-        </div> <!-- row -->
-
-
-    {% comment %} form {% endcomment %}
-    <form class="py-5" action="{% url 'fnancial-inflow-partial-action' account.pk bank_details.pk %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="bank_id" value="{{bank_details.pk}}">
-        <input type="hidden" name="account_id" value="{{account.pk}}">
-
-        <div class="py-2">
-            <label for="">Enter Cash Amount</label>
-            <input class="form-control" type="number" name="cash_amount" step="0.01" id="" placeholder="Cash amount">
-        </div>
         
-        <div class="py-2">
-            <label for="">Enter Bank Amount</label>
-            <input class="form-control" type="number" name="bank_amount" step="0.01" id="" placeholder="Bank amount">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="javascript:history.back()" class="text-secondary text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i> Back to Bank Selection
+            </a>
+            <span class="x-small-label text-primary tracking-widest text-uppercase">Partial Deposit Processing</span>
         </div>
 
-        <div class="py-2">
-            <label class="form-label" for="">Select Date</label>
-            <input class="form-control" type="datetime-local" name="datetime" id="" required>
+        <div class="row g-3 mb-5">
+            <div class="col-md-6">
+                <div class="card bg-body-tertiary border-0 shadow-sm h-100 border-start border-success border-4">
+                    <div class="card-body p-3">
+                        <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Source Account (Client)</label>
+                        <h5 class="fw-bold text-white mb-1">{{ account.account_name }}</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-success fw-bold small">৳ {{ account.balance }}</span>
+                            <span class="text-secondary opacity-50 small">| {{ account.address|truncatechars:30 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-body-tertiary border-0 shadow-sm h-100 border-start border-info border-4">
+                    <div class="card-body p-3">
+                        <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Target Bank Account</label>
+                        <h5 class="fw-bold text-white mb-1">{{ bank_details.account_name }}</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-info fw-bold small">৳ {{ bank_details.balance }}</span>
+                            <span class="text-secondary opacity-50 small">| {{ bank_details.branch }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <button class="btn btn-md btn-primary" type="submit">Place</button>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card bg-body-tertiary border-0 shadow-lg">
+                    <div class="card-header bg-black bg-opacity-20 border-0 p-4 text-center">
+                        <h4 class="fw-bold text-white mb-0">Record Split Transaction</h4>
+                        <p class="text-secondary small mb-0">Distribute the incoming amount between Cash and Bank</p>
+                    </div>
 
-    </form>
+                    <div class="card-body p-4 p-md-5">
+                        <form action="{% url 'fnancial-inflow-partial-action' account.pk bank_details.pk %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="bank_id" value="{{bank_details.pk}}">
+                            <input type="hidden" name="account_id" value="{{account.pk}}">
 
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Cash Portion</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-success">
+                                            <i class="bi bi-cash-stack"></i>
+                                        </span>
+                                        <input 
+                                            type="number" 
+                                            name="cash_amount" 
+                                            step="0.01" 
+                                            class="form-control bg-dark text-white border-secondary border-opacity-25 py-3 fw-bold" 
+                                            placeholder="0.00"
+                                            autofocus
+                                        >
+                                    </div>
+                                    <small class="text-muted x-small mt-2 d-block italic">Amount received in hand.</small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Bank Portion</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-info">
+                                            <i class="bi bi-bank"></i>
+                                        </span>
+                                        <input 
+                                            type="number" 
+                                            name="bank_amount" 
+                                            step="0.01" 
+                                            class="form-control bg-dark text-white border-secondary border-opacity-25 py-3 fw-bold" 
+                                            placeholder="0.00"
+                                        >
+                                    </div>
+                                    <small class="text-muted x-small mt-2 d-block italic">Amount deposited to {{ bank_details.account_name }}.</small>
+                                </div>
+
+                                <div class="col-12">
+                                    <hr class="my-3 border-secondary border-opacity-10">
+                                    <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Transaction Date & Time</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary px-3">
+                                            <i class="bi bi-calendar-check"></i>
+                                        </span>
+                                        <input 
+                                            class="form-control bg-dark text-white border-secondary border-opacity-25 py-3" 
+                                            type="datetime-local" 
+                                            name="datetime" 
+                                            required
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mt-4">
+                                    <button class="btn btn-primary w-100 py-3 fw-bold shadow-sm" type="submit">
+                                        <i class="bi bi-check2-all me-2"></i> Process Split Deposit
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
+<style>
+    /* Theme Core */
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .x-small-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; }
+    .x-small { font-size: 0.75rem; }
+    .italic { font-style: italic; }
 
+    /* Input Theme Match */
+    .form-control { border-left: none !important; }
+    .input-group-text {
+        border-right: none !important;
+        background-color: #1a1d20 !important;
+    }
+    .form-control:focus {
+        background-color: #1a1d20 !important;
+        border-color: #0d6efd !important;
+        box-shadow: none;
+        color: white;
+    }
 
+    /* Date Picker Theme */
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.5;
+    }
+
+    .card { border-radius: 12px; }
+    .border-start { border-left-width: 5px !important; }
+</style>
 {% endblock content %}

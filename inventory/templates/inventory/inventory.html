@@ -4,61 +4,106 @@
 
 {% block content %}
 
-<section class="py-5">
+<section class="py-5 bg-dark text-light min-vh-100">
     <div class="container">
-        <h1>Search Inventory</h1>
+        <div class="mb-4">
+            <h1 class="fw-bold text-white mb-1">Inventory Management</h1>
+            <p class="text-secondary">Monitor stock levels and track product distribution</p>
+        </div>
 
-        <form action="{% url 'inventory' %}" method="GET" class="row">
-          {% comment %} {% csrf_token %} {% endcomment %}
-          <div class="col-auto">
-            <input type="search" placeholder="Search by product name" name="product_name" class="form-control" />
-          </div>
-          <div class="col-auto">
-            <button type="submit" class="btn btn-primary mb-3">Search</button>
-            {% if searched %}
-              <a href="{% url 'inventory' %}" class="btn btn-secondary mb-3">Show All Products</a>
-            {% endif %}
-          </div>
-        </form>
+        <div class="card bg-body-tertiary border-0 shadow-sm mb-4">
+            <div class="card-body py-3 px-4">
+                <form action="{% url 'inventory' %}" method="GET" class="row g-2 align-items-center">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary border-opacity-50 text-secondary">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="search" placeholder="Search by product name..." name="product_name" 
+                                   class="form-control bg-dark text-white border-secondary border-opacity-50" 
+                                   value="{{ request.GET.product_name|default:'' }}" />
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">Search</button>
+                    </div>
+                    {% if searched %}
+                    <div class="col-auto">
+                        <a href="{% url 'inventory' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Show All
+                        </a>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
 
+        <div class="card bg-body-tertiary border-0 shadow-sm overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead class="bg-black">
+                        <tr class="text-secondary small text-uppercase">
+                            <th class="ps-4 py-3 border-0 text-start">Product Name</th>
+                            <th class="py-3 border-0 text-center">Weight</th>
+                            <th class="py-3 border-0 text-center">Unit</th>
+                            <th class="py-3 border-0 text-center">Quantity</th>
+                            <th class="py-3 border-0 text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        {% for item in inventories %}
+                        <tr class="border-bottom border-secondary border-opacity-10">
+                            <td class="ps-4">
+                                <span class="fw-bold text-white">{{ item.product_name }}</span>
+                            </td>
+                            <td class="text-center">{{ item.weight }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2">
+                                    {{ item.unit_label }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-bold {% if item.quantity <= 0 %}text-danger{% else %}text-info{% endif %}">
+                                    {{ item.quantity }}
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'inventory_detail' item.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    Take Action <i class="bi bi-chevron-right ms-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-5 text-center">
+                                <i class="bi bi-box-seam fs-1 text-secondary opacity-25"></i>
+                                <p class="text-secondary mt-2 mb-0">No inventory items found.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </section>
 
-<section class="py-5">
-  <div class="container">
-    <table class="table table-bordered table-hover text-center align-middle">
-        <thead class="table-light">
-            <tr>
-                <th scope="col">Product Name</th>
-                <th scope="col">Weight</th>
-                <th scope="col">Unit</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">Detail</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in inventories %}
-              <tr>
-                  <td>{{ item.product_name }}</td>
-                  <td>{{ item.weight }}</td>
-                  <td>{{ item.unit_label }}</td>
-                  <td>{{ item.quantity }}</td>
-                  <td>
-                      <a href="{% url 'inventory_detail' item.id %}" class="btn btn-primary btn-sm">
-                          Take Action
-                      </a>
-                  </td>
-              </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" class="text-muted">No inventory items found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-  </div>
-</section>
-
+<style>
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .card { border-radius: 12px; }
+    .table-hover tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+    .input-group-text, .form-control:focus { box-shadow: none; }
+    
+    /* Input customization */
+    .form-control {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Small label formatting */
+    .small.text-uppercase {
+        letter-spacing: 0.05em;
+        font-weight: 600;
+    }
+</style>
 
 {% endblock %}

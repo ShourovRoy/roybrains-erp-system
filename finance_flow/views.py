@@ -347,20 +347,10 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                     date=date_time.date()
                 )
 
-                # check if cash is available in cashbook balance 
-                if cash_book.cash_amount < cash_amount:
-                    messages.error(request=self.request, message=f"{cash_amount} is not available in cashbook cash balance!")
-                    return redirect("fnancial-inflow-partial-action", pk=account_id, bank_id=bank_id)
-
 
                 account_ledger = get_object_or_404(self.model, business=self.request.user, pk=account_id)
                 bank_ledger = get_object_or_404(self.model, business=self.request.user, pk=bank_id)
 
-
-                # check if balance is available in bank account 
-                if bank_ledger.balance < bank_amount or bank_ledger.balance == 0.0:
-                    messages.error(request=self.request, message=f"{bank_amount} is not available in {bank_ledger.account_name} - {bank_ledger.branch}")
-                    return redirect("fnancial-inflow-partial-action", pk=account_id, bank_id=bank_id)
                 
                 # accounts credit for cash
                 LedgerTransaction.objects.create(

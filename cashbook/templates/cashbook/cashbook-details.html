@@ -1,114 +1,141 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="py-5">
-  <div class="container">
+<section class="py-5 bg-dark text-light min-vh-100">
+  <div class="container-fluid px-4">
 
-    <!-- Cashbook Summary Card -->
-    <div class="card bg-dark text-light shadow-sm mb-4 border-secondary">
-      <div class="card-header bg-secondary text-light border-secondary">
-        <h5 class="mb-0">Cashbook Summary – {{ cashbook_details.date|date:"F d, Y" }}</h5>
+    <div class="row align-items-center mb-4 g-3">
+      <div class="col-md-6">
+        <h2 class="fw-bold text-white mb-0">Cashbook Detail</h2>
+        <p class="text-secondary small mb-0">{{ cashbook_details.date|date:"F d, Y" }}</p>
       </div>
-
-      <div class="card-body">
-
-        <div class="row mb-3">
-          <!-- Cash Amount -->
-          <div class="col-md-4">
-            <div class="p-3 border rounded bg-secondary bg-opacity-25 border-secondary">
-              <h6 class="text-muted">Cash Amount</h6>
-              <h4 class="text-success fw-bold">{{ cashbook_details.cash_amount }}</h4>
-            </div>
+      <div class="col-md-6">
+          <div class="d-flex justify-content-md-end gap-3">
+              <div class="text-end border-end border-secondary border-opacity-25 pe-3">
+                  <small class="text-secondary text-uppercase d-block x-small-label">Cash</small>
+                  <span class="text-success fw-bold">৳ {{ cashbook_details.cash_amount }}</span>
+              </div>
+              <div class="text-end border-end border-secondary border-opacity-25 pe-3">
+                  <small class="text-secondary text-uppercase d-block x-small-label">Bank</small>
+                  <span class="text-info fw-bold">৳ {{ cashbook_details.bank_amount }}</span>
+              </div>
+              <div class="text-end">
+                <span class="badge rounded-pill {% if cashbook_details.status == 'Opening' %}bg-success{% else %}bg-warning text-dark{% endif %} px-3 py-2">
+                    {{ cashbook_details.status|upper }}
+                </span>
+              </div>
           </div>
-
-          <!-- Bank Amount -->
-          <div class="col-md-4">
-            <div class="p-3 border rounded bg-secondary bg-opacity-25 border-secondary">
-              <h6 class="text-muted">Bank Amount</h6>
-              <h4 class="text-info fw-bold">{{ cashbook_details.bank_amount }}</h4>
-            </div>
-          </div>
-
-          <!-- Status -->
-          <div class="col-md-4">
-            <div class="p-3 border rounded bg-secondary bg-opacity-25 border-secondary">
-              <h6 class="text-muted">Status</h6>
-              <h4 class="fw-bold">
-                {% if cashbook_details.status == "Opening" %}
-                <span class="badge bg-success">{{ cashbook_details.status }}</span>
-                {% else %}
-                <span class="badge bg-warning text-dark">{{ cashbook_details.status }}</span>
-                {% endif %}
-              </h4>
-            </div>
-          </div>
-        </div>
-
-        {% if cashbook_details.note %}
-        <div class="alert alert-info mt-3">{{ cashbook_details.note }}</div>
-        {% endif %}
       </div>
     </div>
 
-    <!-- Transactions List -->
-    <div class="card bg-dark text-light shadow-sm border-secondary">
-      <div class="card-header bg-secondary text-light border-secondary">
-        <h5 class="mb-0">Cash Transactions</h5>
-      </div>
-
-      <div class="card-body p-0">
-
-        {% if entries %}
-        <table class="table table-dark table-striped table-hover mb-0 align-middle">
-          <thead class="table-secondary text-dark">
-            <tr>
-              <th>Description</th>
-              <th>Debit</th>
-              <th>Credit</th>
-              <th>Type</th>
-              <th>Date</th>
+    <div class="card bg-body-tertiary border-0 shadow-lg overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-dark align-middle mb-0 ledger-table">
+          <thead>
+            <tr class="bg-black text-center">
+              <th colspan="3" class="py-3 border-end-divider text-success small fw-bold tracking-wider">
+                <i class="bi bi-arrow-down-left me-1"></i> DEBIT (INFLOW)
+              </th>
+              <th colspan="3" class="py-3 text-danger small fw-bold tracking-wider">
+                <i class="bi bi-arrow-up-right me-1"></i> CREDIT (OUTFLOW)
+              </th>
+            </tr>
+            <tr class="x-small-label text-secondary text-center bg-dark bg-opacity-50">
+              <th class="ps-3 text-start">PARTICULARS</th>
+              <th style="width: 100px;">CASH</th>
+              <th style="width: 100px;" class="border-end-divider">BANK</th>
+              
+              <th class="ps-3 text-start">PARTICULARS</th>
+              <th style="width: 100px;">CASH</th>
+              <th style="width: 100px;">BANK</th>
             </tr>
           </thead>
-
           <tbody>
-            {% for entry in entries %}
-            <tr>
-              <td>{{ entry.description }}</td>
+            {% if entries %}
+              {% for entry in entries %}
+              <tr class="border-bottom border-secondary border-opacity-10">
+                
+                {% if entry.debit > 0 %}
+                    <td class="ps-3">
+                        <div class="text-white small fw-bold">{{ entry.description }}</div>
+                        <div class="x-small text-muted">{{ entry.date|date:"H:i" }}</div>
+                    </td>
+                    <td class="text-center text-success fw-bold">
+                        {% if not entry.is_bank %}৳{{ entry.debit }}{% else %}-{% endif %}
+                    </td>
+                    <td class="text-center text-info fw-bold border-end-divider">
+                        {% if entry.is_bank %}৳{{ entry.debit }}{% else %}-{% endif %}
+                    </td>
+                    
+                    <td class="bg-black bg-opacity-25"></td>
+                    <td class="bg-black bg-opacity-25"></td>
+                    <td class="bg-black bg-opacity-25"></td>
 
-              <!-- Debit -->
-              <td class="text-success fw-bold">
-                {% if entry.debit > 0 %} {{ entry.debit }} {% else %}-{% endif %}
-              </td>
-
-              <!-- Credit -->
-              <td class="text-danger fw-bold">
-                {% if entry.credit > 0 %} {{ entry.credit }} {% else %}-{% endif %}
-              </td>
-
-              <!-- Type -->
-              <td>
-                {% if entry.is_bank %}
-                <span class="badge bg-info">Bank</span>
                 {% else %}
-                <span class="badge bg-warning text-dark">Cash</span>
-                {% endif %}
-              </td>
+                    <td class="bg-black bg-opacity-25"></td>
+                    <td class="bg-black bg-opacity-25"></td>
+                    <td class="bg-black bg-opacity-25 border-end-divider"></td>
 
-              <td>{{ entry.date|date:"Y-m-d H:i" }}</td>
-            </tr>
-            {% endfor %}
+                    <td class="ps-3">
+                        <div class="text-white small fw-bold">{{ entry.description }}</div>
+                        <div class="x-small text-muted">{{ entry.date|date:"H:i" }}</div>
+                    </td>
+                    <td class="text-center text-warning fw-bold">
+                        {% if not entry.is_bank %}৳{{ entry.credit }}{% else %}-{% endif %}
+                    </td>
+                    <td class="text-center text-danger fw-bold">
+                        {% if entry.is_bank %}৳{{ entry.credit }}{% else %}-{% endif %}
+                    </td>
+                {% endif %}
+
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center py-5 text-muted">No transactions recorded.</td>
+              </tr>
+            {% endif %}
           </tbody>
         </table>
-
-        {% else %}
-        <div class="p-4 text-center text-muted">
-          No transactions found for this date.
-        </div>
-        {% endif %}
-
       </div>
     </div>
+
+    {% if cashbook_details.note %}
+    <div class="mt-4 p-3 bg-body-tertiary rounded-3 border-start border-primary border-4">
+        <small class="text-secondary text-uppercase x-small-label d-block mb-1">Notes</small>
+        <p class="mb-0 small">{{ cashbook_details.note }}</p>
+    </div>
+    {% endif %}
 
   </div>
 </section>
+
+<style>
+  .bg-body-tertiary { background-color: #2b3035 !important; }
+  .x-small-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; }
+  .x-small { font-size: 0.7rem; }
+  
+  /* The Vertical Central Line */
+  .border-end-divider {
+      border-right: 2px solid rgba(255, 255, 255, 0.15) !important;
+  }
+
+  /* Fixed Column Widths for Symmetry */
+  .ledger-table { table-layout: fixed; }
+  .ledger-table td, .ledger-table th {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+  }
+
+  /* Row Hover Effect */
+  .ledger-table tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  /* Shading the 'Dead' side of a transaction */
+  .bg-black.bg-opacity-25 {
+      background-color: rgba(0, 0, 0, 0.1) !important;
+  }
+</style>
 {% endblock content %}

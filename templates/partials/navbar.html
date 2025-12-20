@@ -1,128 +1,123 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'home' %}">Navbar</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
+<nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-dark border-bottom border-secondary border-opacity-25 shadow-sm" style="backdrop-filter: blur(10px); background-color: rgba(33, 37, 41, 0.9) !important;">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
+      <span class="bg-primary bg-gradient text-white px-2 py-1 rounded me-2">S</span>
+      <span class="text-white tracking-wider">SAMVĀDA<small class="text-secondary" style="font-size: 0.6rem; letter-spacing: 1px;"> ERP</small></span>
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center">
         {% if user.is_authenticated %}
+        
         <li class="nav-item">
-          <a
-            class="nav-link active"
-            aria-current="page"
-            href="{% url 'inventory' %}"
-            >Inventory</a
-          >
-        </li>
-        <li class="nav-item dropdown">
-          <a
-            class="nav-link dropdown-toggle"
-            href=""
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            Purchase Management
+          <a class="nav-link px-3 small text-uppercase fw-semibold" href="{% url 'inventory' %}">
+            <i class="bi bi-box-seam me-1"></i> Inventory
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'voucher_search_ledger_account' %}">Create Voucher</a></li>
-            <li><a class="dropdown-item" href="{% url 'purchase_voucher_list' %}">Vouchers</a></li>
-          </ul>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'ledger-list' %}">Ledger Accounts</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'internal_banking_control_panel' %}"
-            >Internal Banking</a
-          >
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'finance-flow' %}">Finance Flow</a>
-        </li>
+
         <li class="nav-item dropdown">
-          <button
-            class="nav-link dropdown-toggle"
-            role="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            Sale Force
-          </button>
-          <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item" href="{% url 'sale_management' %}"
-                >Sale Management</a
-              >
-            </li>
-            <li>
-              <a class="dropdown-item" href="{% url 'delivery_orders_list' %}">
-                Delivery Orders
-              </a>
-            </li>
-            
-           
-            <li><hr class="dropdown-divider" /></li>
-            <li>
-              <a
-                class="dropdown-item"
-                href="{% url 'cashbook:cashbook-control-panel' %}"
-                >Cashbook</a
-              >
-            </li>
-            <li>
-              <a
-                class="dropdown-item"
-                href="{% url 'capital_management:capital_deposite_withdraw' %}"
-                >Capital Management</a
-              >
-            </li>
-            <li>
-              <a class="dropdown-item" href="{% url 'expense_record:create-expense-ledger' %}">
-                Create Expense Book
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="{% url 'expense_record:expense-book-transaction' %}">
-                Expense Transaction
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="{% url 'expense_record:expense-books-list' %}">
-                Expenses
-              </a>
-            </li>
+          <a class="nav-link dropdown-toggle px-3 small text-uppercase fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+            Procurement
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark shadow-lg border-secondary border-opacity-25">
+            <li><a class="dropdown-item py-2" href="{% url 'voucher_search_ledger_account' %}"><i class="bi bi-plus-circle me-2"></i>Create Voucher</a></li>
+            <li><a class="dropdown-item py-2" href="{% url 'purchase_voucher_list' %}"><i class="bi bi-list-check me-2"></i>Vouchers List</a></li>
           </ul>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'sales_log' %}">Sales Log</a>
-        </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'business_logout' %}">Logout</a>
+          <a class="nav-link px-3 small text-uppercase fw-semibold" href="{% url 'ledger-list' %}">
+            <i class="bi bi-journal-text me-1"></i> Ledgers
+          </a>
         </li>
 
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'business_login' %}">Login</a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle px-3 small text-uppercase fw-semibold text-primary" href="#" role="button" data-bs-toggle="dropdown">
+            Operations
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark shadow-lg border-secondary border-opacity-25" style="min-width: 220px;">
+            <li class="dropdown-header text-secondary text-uppercase small">Sale Force</li>
+            <li><a class="dropdown-item" href="{% url 'sale_management' %}">Sale Management</a></li>
+            <li><a class="dropdown-item" href="{% url 'delivery_orders_list' %}">Delivery Orders</a></li>
+            <li><hr class="dropdown-divider border-secondary opacity-25" /></li>
+            
+            <li class="dropdown-header text-secondary text-uppercase small">Capital & Expense</li>
+            <li><a class="dropdown-item" href="{% url 'expense_record:expense-books-list' %}">Expense Books</a></li>
+            <li><a class="dropdown-item" href="{% url 'expense_record:expense-book-transaction' %}">Expense Entry</a></li>
+            <li><a class="dropdown-item" href="{% url 'capital_management:capital_deposite_withdraw' %}">Capital Mgmt</a></li>
+          </ul>
         </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'business_signup' %}">Signup</a>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle px-3 small text-uppercase fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+            Finance
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark shadow-lg border-secondary border-opacity-25">
+            <li><a class="dropdown-item" href="{% url 'internal_banking_control_panel' %}"><i class="bi bi-bank me-2"></i>Banking</a></li>
+            <li><a class="dropdown-item" href="{% url 'finance-flow' %}"><i class="bi bi-arrow-left-right me-2"></i>Finance Flow</a></li>
+            <li><a class="dropdown-item" href="{% url 'cashbook:cashbook-control-panel' %}"><i class="bi bi-book me-2"></i>Cashbook</a></li>
+            <li><hr class="dropdown-divider border-secondary opacity-25" /></li>
+            <li><a class="dropdown-item" href="{% url 'sales_log' %}"><i class="bi bi-clock-history me-2"></i>Sales Log</a></li>
+          </ul>
         </li>
 
         {% endif %}
       </ul>
-      
+
+      <ul class="navbar-nav ms-auto align-items-center">
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center bg-secondary bg-opacity-10 rounded-pill px-3 py-1 border border-secondary border-opacity-25" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle fs-5 me-2 text-primary"></i>
+            <span class="small fw-bold text-white">{{ user.username }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg border-secondary border-opacity-25">
+            <li><a class="dropdown-item py-2" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+            <li><hr class="dropdown-divider border-secondary opacity-25" /></li>
+            <li><a class="dropdown-item py-2 text-danger" href="{% url 'business_logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+          </ul>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="btn btn-sm btn-outline-light px-3 me-2 rounded-pill" href="{% url 'business_login' %}">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-sm btn-primary px-3 rounded-pill shadow-sm" href="{% url 'business_signup' %}">Register</a>
+        </li>
+        {% endif %}
+      </ul>
     </div>
   </div>
 </nav>
+
+<style>
+  /* Premium Dark Navbar Tweaks */
+  .navbar-dark .nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+  }
+  .navbar-dark .nav-link:hover, .navbar-dark .nav-link.active {
+    color: #fff;
+  }
+  .dropdown-item {
+    font-size: 0.9rem;
+    padding: 0.5rem 1.25rem;
+  }
+  .dropdown-item:hover {
+    background-color: rgba(13, 110, 253, 0.2);
+    color: #0d6efd;
+  }
+  .dropdown-header {
+    letter-spacing: 1px;
+    font-size: 0.7rem !important;
+    padding-top: 1rem;
+  }
+  .navbar-brand {
+    letter-spacing: 1px;
+  }
+</style>

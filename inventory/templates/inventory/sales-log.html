@@ -1,50 +1,197 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
+<section class="py-5 bg-dark text-light min-vh-100">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <h1 class="fw-bold text-white mb-1">Sales Log</h1>
+        <p class="text-secondary mb-0">Managed in Bangladeshi Taka (BDT)</p>
+      </div>
+      <div class="d-none d-md-block">
+        <span
+          class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2"
+        >
+          <i class="bi bi-currency-exchange me-1"></i> Currency: BDT (৳)
+        </span>
+      </div>
+    </div>
 
-{% block content %}
-<section class="py-5">
-    <div class="container">
-        <h1>Sales Log</h1>
-        
-        <form id="date_input_form_action" action="{% url 'sales_log' %}" method="get" class="mb-3">
-            <label for="date">Filter by Date:</label>
-            <input type="date" name="date" id="date" value="{{selected_date}}" >
-            <button type="submit" class="btn btn-primary btn-sm">Search</button>
-            <a href="{% url 'sales_log' %}" class="btn btn-secondary btn-sm">Clear</a>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card bg-body-tertiary border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="text-secondary text-uppercase fw-semibold small">
+              Filtered Total
+            </h6>
+            <h3 class="fw-bold mb-0 text-info">
+              ৳{{ total_sales_price|default:"0" }}
+            </h3>
+            <div class="mt-2 small text-secondary">Selected period</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-body-tertiary border-0 shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="text-secondary text-uppercase fw-semibold small">
+              Annual Revenue
+            </h6>
+            <h3 class="fw-bold mb-0 text-success">
+              ৳{{ current_year_sales_price|default:"0" }}
+            </h3>
+            <div class="mt-2 small text-secondary">Year: {% now "Y" %}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div
+          class="card bg-primary bg-gradient border-0 shadow-sm h-100 text-white"
+        >
+          <div class="card-body">
+            <h6 class="text-white-50 text-uppercase fw-semibold small">
+              Lifetime Sales
+            </h6>
+            <h3 class="fw-bold mb-0 text-white">
+              ৳{{ lifetime_sales_price|default:"0" }}
+            </h3>
+            <div class="mt-2 small text-white-50">Cumulative total</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-body-tertiary border-0 shadow-sm">
+      <div
+        class="card-header bg-transparent py-3 border-bottom border-secondary border-opacity-25"
+      >
+        <form
+          id="date_input_form_action"
+          action="{% url 'sales_log' %}"
+          method="get"
+          class="row g-2 align-items-center"
+        >
+          <div class="col-auto">
+            <label for="date" class="form-label small text-secondary mb-0"
+              >Date Filter:</label
+            >
+          </div>
+          <div class="col-auto">
+            <input
+              type="date"
+              name="date"
+              id="date"
+              value="{{selected_date}}"
+              class="form-control form-control-sm bg-dark text-white border-secondary border-opacity-50"
+            />
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary btn-sm px-3">
+              Search
+            </button>
+            <a
+              href="{% url 'sales_log' %}"
+              class="btn btn-outline-secondary btn-sm px-3"
+              >Clear</a
+            >
+          </div>
         </form>
+      </div>
 
-        <p>Total Sales Price: {{ total_sales_price }}</p>
-        
-        <table class="table table-striped">
-          <thead>
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle mb-0">
+          <thead class="table-group-divider border-secondary border-opacity-25">
             <tr>
-              <th scope="col">Product Name</th>
-              <th scope="col">Quantity</th>
-              <th scope="col">Wight</th>
-              <th scope="col">Net Weight</th>
-              <th scope="col">Price</th>
-              <th scope="col">Date</th>
+              <th class="ps-4 py-3 text-uppercase small fw-bold text-secondary">
+                Product Name
+              </th>
+              <th
+                class="py-3 text-uppercase small fw-bold text-secondary text-center"
+              >
+                Qty
+              </th>
+              <th class="py-3 text-uppercase small fw-bold text-secondary">
+                Unit Wt.
+              </th>
+              <th class="py-3 text-uppercase small fw-bold text-secondary">
+                Net Weight
+              </th>
+              <th
+                class="py-3 text-uppercase small fw-bold text-secondary text-end px-4"
+              >
+                Price (BDT)
+              </th>
+              <th class="py-3 text-uppercase small fw-bold text-secondary">
+                Date
+              </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="border-top-0">
             {% for sales_log in sales_logs %}
-            <tr>
-              <td>{{ sales_log.product.product_name }}</td>
-              <td>{{ sales_log.quantity_sold }}</td>
-              <td>{{sales_log.weight}} {{sales_log.unit_label}}</td>
-              <td>{{sales_log.net_weight }} {{sales_log.unit_label}}</td>
-              <td>{{ sales_log.price }}</td>
-              <td>{{ sales_log.date|date:"Y-m-d" }}</td>
+            <tr class="border-bottom border-secondary border-opacity-10">
+              <td class="ps-4 fw-medium text-white">
+                {{ sales_log.product.product_name }}
+              </td>
+              <td class="text-center">
+                <span class="badge bg-dark border border-secondary text-light"
+                  >{{ sales_log.quantity_sold }}</span
+                >
+              </td>
+              <td>
+                {{sales_log.weight}}
+                <span class="text-secondary small"
+                  >{{sales_log.unit_label}}</span
+                >
+              </td>
+              <td>
+                <span class="text-info">{{sales_log.net_weight }}</span>
+                <span class="text-secondary small"
+                  >{{sales_log.unit_label}}</span
+                >
+              </td>
+              <td class="text-end px-4 fw-bold text-success">
+                ৳{{ sales_log.price }}
+              </td>
+              <td class="text-secondary small">
+                {{ sales_log.date|date:"Y-m-d" }}
+              </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="3" class="text-center text-muted">No sales found.</td>
+              <td colspan="6" class="py-5 text-center">
+                <div class="text-secondary opacity-25 mb-2">
+                  <i class="bi bi-clipboard-x fs-1"></i>
+                </div>
+                <p class="text-secondary mb-0">
+                  No sales records found for this selection.
+                </p>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
+      </div>
     </div>
+  </div>
 </section>
 
+<style>
+  /* Dark Mode Polish for BDT Values */
+  .bg-body-tertiary {
+    background-color: #212529 !important;
+  } /* Slightly deeper gray */
+  .table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+  .card {
+    border-radius: 12px;
+  }
 
+  /* Ensure the Taka symbol renders clearly */
+  .fw-bold {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
 
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+</style>
 {% endblock content %}

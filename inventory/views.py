@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib.postgres.search import TrigramSimilarity
 from django.utils.dateparse import parse_date
 from datetime import date
-from django.db.models import Sum, F
+from django.db.models import Sum, Value
+from django.db.models.functions import Coalesce
 # Create your views here.
 
 # TODO: create inventory create view
@@ -97,11 +98,26 @@ class SalesLogView(LoginRequiredMixin, ListView):
 
         total_sales_price = (
             SalesLog.objects.filter(business=self.request.user, date__date=parsed_date).aggregate(
-                total=Sum('price'),
-            ) or 0.00
+                total=Coalesce(Sum('price'), Value(0.00))
+            )
+        )['total']
+
+
+        lifetime_sales_price = (
+            SalesLog.objects.filter(business=self.request.user).exclude(date__date=parsed_date).aggregate(
+                total=Coalesce(Sum('price'), Value(0.00))
+            )
+        )['total']
+
+        current_year_sales = (
+            SalesLog.objects.filter(business=self.request.user, date__year=date.today().year).exclude(date__date=parsed_date).aggregate(
+                total=Coalesce(Sum('price'), Value(0.00))
+            )
         )['total']
 
 
         context["total_sales_price"] = total_sales_price
+        context['lifetime_sales_price'] = lifetime_sales_price + total_sales_price
+        context['current_year_sales_price'] = current_year_sales + total_sales_price
 
         return context

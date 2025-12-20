@@ -1,102 +1,116 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<section class="py-5">
+<section class="py-5 bg-dark text-light min-vh-100">
   <div class="container">
 
-    <!-- Header & Search -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="fw-bold text-light">Delivery Orders</h2>
+    <div class="row align-items-center mb-4 g-3">
+      <div class="col-md-6">
+        <h2 class="fw-bold text-white mb-0">Delivery Orders</h2>
+        <p class="text-secondary small mb-0">Track customer shipments and payment statuses</p>
+      </div>
 
-      <form action="{% url 'delivery_orders_list' %}" method="get" class="d-flex gap-2 w-auto">
-        <input
-          type="search"
-          name="delivery_order_id"
-          class="form-control form-control-sm bg-dark text-light border-secondary"
-          placeholder="Enter order id"
-        >
-        <button class="btn btn-primary btn-sm">
-          Search
-        </button>
-        {% if is_searched %}
-            <a class="btn btn-outline-danger btn-md" href="{% url 'delivery_orders_list' %}">Clear search</a>
-        {% endif %}
-      </form>
+      <div class="col-md-6">
+        <form action="{% url 'delivery_orders_list' %}" method="get" class="d-flex gap-2 justify-content-md-end">
+          <div class="input-group input-group-sm border border-secondary border-opacity-50 rounded" style="max-width: 300px;">
+            <span class="input-group-text bg-dark border-0 text-secondary">
+              <i class="bi bi-hash"></i>
+            </span>
+            <input
+              type="search"
+              name="delivery_order_id"
+              class="form-control bg-dark text-light border-0"
+              placeholder="Enter order ID..."
+              value="{{ request.GET.delivery_order_id|default:'' }}"
+            >
+          </div>
+          <button class="btn btn-primary btn-sm px-3 fw-bold">
+            Search
+          </button>
+          {% if is_searched %}
+              <a class="btn btn-outline-danger btn-sm px-3" href="{% url 'delivery_orders_list' %}">
+                <i class="bi bi-x-lg"></i> Clear
+              </a>
+          {% endif %}
+        </form>
+      </div>
     </div>
 
-    <!-- Orders Table -->
-    <div class="card bg-dark border border-secondary shadow-lg">
+    <div class="card bg-body-tertiary border-0 shadow-lg overflow-hidden">
       <div class="table-responsive">
         <table class="table table-dark table-hover align-middle mb-0">
-          <thead class="table-secondary text-dark">
-            <tr>
-              <th>Order Id</th>
-              <th>Customer</th>
-              <th>Ledger</th>
-              <th>Phone</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th class="text-end">Total</th>
-              <th class="text-end">Paid</th>
-              <th class="text-end">Due</th>
-              <th class="text-center">Action</th>
+          <thead class="bg-black">
+            <tr class="text-secondary small text-uppercase">
+              <th class="ps-4 py-3 border-0">ID</th>
+              <th class="py-3 border-0">Customer & Ledger</th>
+              <th class="py-3 border-0">Contact</th>
+              <th class="py-3 border-0">Date</th>
+              <th class="py-3 border-0">Status</th>
+              <th class="text-end py-3 border-0">Total</th>
+              <th class="text-end py-3 border-0">Paid</th>
+              <th class="text-end py-3 border-0">Due</th>
+              <th class="text-center py-3 border-0 pe-4">Action</th>
             </tr>
           </thead>
 
-          <tbody>
+          <tbody class="border-top-0">
             {% for delivery_order in delivery_orders %}
-            <tr>
-              <td>{{delivery_order.id}}</td>
-              <td class="fw-semibold">
-                {{ delivery_order.account_name }} 
-                <div class="small text-muted">
-                  {{ delivery_order.address }}
+            <tr class="border-bottom border-secondary border-opacity-10">
+              <td class="ps-4 text-secondary small">#{{delivery_order.id}}</td>
+              <td>
+                <div class="fw-bold text-white">{{ delivery_order.account_name }}</div>
+                <div class="x-small text-secondary d-flex align-items-center">
+                  <i class="bi bi-journal-bookmark me-1"></i> {{ delivery_order.ledger.account_name }}
+                </div>
+                <div class="x-small text-muted mt-1">
+                  <i class="bi bi-geo-alt me-1"></i> {{ delivery_order.address|truncatechars:30 }}
                 </div>
               </td>
 
-              <td>{{ delivery_order.ledger.account_name }}</td>
-              <td>{{ delivery_order.phone_number }}</td>
-              <td>{{ delivery_order.date }}</td>
+              <td class="small">{{ delivery_order.phone_number }}</td>
+              <td class="small text-secondary">{{ delivery_order.date }}</td>
 
               <td>
                 {% if delivery_order.due_amount == 0.0 %}
-                  <span class="badge bg-success">Paid</span>
+                  <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2">
+                    <i class="bi bi-check-circle me-1"></i> Paid
+                  </span>
                 {% else %}
-                  <span class="badge bg-warning text-dark">Unpaid</span>
+                  <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2">
+                    <i class="bi bi-clock-history me-1"></i> Unpaid
+                  </span>
                 {% endif %}
               </td>
 
-              <td class="text-end fw-bold">
-                ₹ {{ delivery_order.total_price }}
+              <td class="text-end fw-bold text-white">
+                ৳ {{ delivery_order.total_price }}
               </td>
 
-              <td class="text-end text-info">
-                ₹ {{ delivery_order.payment_amount }}
+              <td class="text-end text-info small">
+                ৳ {{ delivery_order.payment_amount }}
               </td>
 
-              <td class="text-end text-danger">
-                ₹ {{ delivery_order.due_amount }}
+              <td class="text-end">
+                <span class="{% if delivery_order.due_amount > 0 %}text-danger fw-bold{% else %}text-secondary{% endif %}">
+                  ৳ {{ delivery_order.due_amount }}
+                </span>
               </td>
 
-              <td class="text-center">
-                <a
-                  href="#"
-                  class="btn btn-outline-primary btn-sm"
-                >
+              <td class="text-center pe-4">
+                <a href="#" class="btn btn-outline-primary btn-sm rounded-pill px-3 transition-hover">
                   View
                 </a>
               </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="9" class="text-center text-muted py-4">
+              <td colspan="9" class="text-center py-5 text-secondary">
+                <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
                 No delivery orders found.
               </td>
             </tr>
             {% endfor %}
           </tbody>
-
         </table>
       </div>
     </div>
@@ -104,4 +118,16 @@
   </div>
 </section>
 
+<style>
+  .bg-body-tertiary { background-color: #2b3035 !important; }
+  .x-small { font-size: 0.75rem; }
+  .card { border-radius: 12px; }
+  .table-hover tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+  .transition-hover:hover { transform: scale(1.05); }
+  
+  /* Modern scrollbar for table responsive */
+  .table-responsive::-webkit-scrollbar { height: 8px; }
+  .table-responsive::-webkit-scrollbar-track { background: #1a1d20; }
+  .table-responsive::-webkit-scrollbar-thumb { background: #495057; border-radius: 10px; }
+</style>
 {% endblock content %}

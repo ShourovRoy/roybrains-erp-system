@@ -1,16 +1,105 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<section class="min-vh-100 d-flex align-items-center bg-dark py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+                
+                <div class="text-center mb-4">
+                    <div class="d-inline-block bg-primary bg-gradient p-3 rounded-circle mb-3 shadow">
+                        <i class="bi bi-shield-lock-fill text-white fs-2"></i>
+                    </div>
+                    <h2 class="fw-bold text-white tracking-wider">SAMVĀDA <span class="text-primary">ERP</span></h2>
+                    <p class="text-secondary small">Secure access to your business dashboard</p>
+                </div>
 
-    <form method="post" action="{% url 'business_login' %}">
-        {% csrf_token %}
-        <label class="form-label">Email:</label>
-        <input class="form-control" type="email" name="email" required>
-        <br />
-        <label class="form-label">Password:</label>
-        <input class="form-control" type="password" name="password" required>
-        <br />
-        <button class="btn btn-primary" type="submit">Login</button>
-    </form>
+                <div class="card bg-body-tertiary border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-body p-4 p-md-5">
+                        <form method="post" action="{% url 'business_login' %}">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label class="form-label small text-secondary fw-semibold text-uppercase">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <input class="form-control bg-dark text-white border-secondary border-opacity-25 py-2" 
+                                           type="email" name="email" placeholder="name@company.com" required>
+                                </div>
+                            </div>
 
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="form-label small text-secondary fw-semibold text-uppercase">Password</label>
+                                    <a href="#" class="small text-primary text-decoration-none">Forgot?</a>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                                        <i class="bi bi-key"></i>
+                                    </span>
+                                    <input class="form-control bg-dark text-white border-secondary border-opacity-25 py-2" 
+                                           type="password" name="password" placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary py-2 fw-bold shadow-sm" type="submit">
+                                    Login to Account
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer bg-dark bg-opacity-25 border-top border-secondary border-opacity-10 py-3 text-center">
+                        <span class="text-secondary small">Don't have an account?</span>
+                        <a href="{% url 'business_signup' %}" class="text-primary small fw-bold text-decoration-none ms-1">Create one</a>
+                    </div>
+                </div>
+
+                <div class="mt-5 text-center">
+                    <p class="text-secondary x-small mb-0">&copy; 2025 Samvāda ERP. All rights reserved.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Premium Dark Theme Adjustments */
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .tracking-wider { letter-spacing: 1px; }
+    .x-small { font-size: 0.75rem; }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .form-control:focus {
+        background-color: #1a1d20 !important;
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        color: white;
+    }
+
+    .input-group-text {
+        border-right: none;
+    }
+    
+    .form-control {
+        border-left: none;
+    }
+
+    /* Subtle animation for the card */
+    .card {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock content %}

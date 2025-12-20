@@ -1,84 +1,80 @@
 {% extends 'base.html' %} 
-{% block content %}
 
-<section class="py-5">
+{% block content %}
+<section class="py-5 bg-dark text-light min-vh-100">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="fw-bold text-light">Purchase Vouchers</h2>
-      <span class="text-muted">{{ vouchers|length }} total</span>
+      <h2 class="fw-bold text-white">Purchase Vouchers</h2>
+      <span class="text-secondary small">{{ vouchers|length }} total</span>
     </div>
 
     <div class="row g-4">
       {% for voucher in vouchers %}
       <div class="col-lg-4 col-md-6">
-        <div
-          class="card bg-dark text-light shadow-lg h-100 border border-secondary"
-        >
-          <!-- Card Header -->
-          <div
-            class="card-header d-flex justify-content-between align-items-center border-bottom border-secondary"
-          >
-            <h5 class="mb-0 fw-semibold">{{ voucher.supplier }}</h5>
-
+        <div class="card bg-body-tertiary h-100 border-0 shadow-sm">
+          
+          <div class="card-header border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-white">{{ voucher.supplier }}</h5>
             {% if voucher.is_completed %}
-            <span class="badge bg-success">Completed</span>
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Completed</span>
             {% else %}
-            <span class="badge bg-warning text-dark">Pending</span>
+            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Pending</span>
             {% endif %}
           </div>
 
-          <!-- Card Body -->
           <div class="card-body">
-            <p class="text-muted mb-2">
-              <i class="bi bi-geo-alt"></i> {{ voucher.address }}
+            <p class="text-secondary small mb-2">
+              <i class="bi bi-geo-alt me-1"></i> {{ voucher.address }}
             </p>
 
-            <p class="text-muted mb-2">
-              <i class="bi bi-telephone"></i> {{ voucher.phone_number }}
+            <p class="text-secondary small mb-3">
+              <i class="bi bi-telephone me-1"></i> {{ voucher.phone_number }}
             </p>
 
-            <hr class="border-secondary" />
+            <div class="p-3 rounded bg-dark mb-3 border border-secondary border-opacity-10">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-secondary small">Amount</span>
+                  <span class="fw-bold text-success">৳ {{ voucher.total_amount }}</span>
+                </div>
 
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Amount</span>
-              <span class="fw-bold fs-5 text-success">
-                ₹ {{ voucher.total_amount }}
-              </span>
-            </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-secondary small">Date</span>
+                  <span class="small">{{ voucher.date }}</span>
+                </div>
 
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted">Date</span>
-              <span>{{ voucher.date }}</span>
-            </div>
-
-            <div class="d-flex justify-content-between">
-              <span class="text-muted">Payment</span>
-              {% if voucher.is_purchased_in_cash %}
-              <span class="badge bg-info text-dark">Cash</span>
-              {% else %}
-              <span class="badge bg-primary">Credit</span>
-              {% endif %}
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-secondary small">Payment</span>
+                  {% if voucher.is_purchased_in_cash %}
+                  <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">Cash</span>
+                  {% else %}
+                  <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">Credit</span>
+                  {% endif %}
+                </div>
             </div>
           </div>
 
-          <!-- Card Footer -->
-          <div
-            class="card-footer border-top border-secondary d-flex justify-content-between"
-          >
-            <a href="{% url 'purchase_voucher_details' voucher.pk %}" class="btn btn-sm btn-outline-light"> View </a>
+          <div class="card-footer border-top border-secondary border-opacity-25 bg-transparent d-flex justify-content-between py-3">
+            <a href="{% url 'purchase_voucher_details' voucher.pk %}" class="btn btn-sm btn-outline-primary px-3"> View </a>
             {% if voucher.is_completed == False %}
-            <a href="#" class="btn btn-sm btn-outline-warning"> Edit </a>
+            <a href="#" class="btn btn-sm btn-outline-warning px-3"> Edit </a>
             {% endif %}
           </div>
         </div>
       </div>
       {% empty %}
       <div class="col-12">
-        <div class="alert alert-secondary text-center">No vouchers found.</div>
+        <div class="alert bg-body-tertiary border-secondary border-opacity-25 text-center text-secondary py-4">
+            No vouchers found.
+        </div>
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
 
+<style>
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .card { border-radius: 12px; }
+    .badge { font-weight: 500; font-size: 0.75rem; }
+</style>
 {% endblock content %}

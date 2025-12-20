@@ -1,111 +1,150 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="py-5">
+<section class="py-5 bg-dark text-light min-vh-100">
     <div class="container">
-        <div class="row">
-            <div class="col-6">
-                <div class="card shadow p-2">
-                    <h2 class="text-center">Add Purchase Items. {{request.GET.ledger_id}}</h2>
-                    <form method="POST">
-                        {% csrf_token %}
-                        {{ form.management_form }} 
-            
-                        <div class="py-2">
-                            <label class="form-label" for="id_supplier">
-                                {{form.product_name.label}}
-                            </label>
-                            {{form.product_name}}
-                        </div>
-            
-                        <div class="py-2">
-                            <label class="form-label" for="id_supplier">
-                                {{form.quantity.label}}
-                            </label>
-                            {{form.quantity}}
-                        </div>
-            
-                        <div class="py-2">
-                            <label class="form-label" for="id_supplier">
-                                {{form.weight.label}}
-                            </label>
-                            {{form.weight}}
-                        </div>
-            
-                        <div class="py-2">
-                            <label class="form-label" for="id_supplier">
-                                {{form.weight_label.label}}
-                            </label>
-                            {{form.weight_label}}
-                        </div>
-            
-                        <div class="py-2">
-                            <label class="form-label" for="id_supplier">
-                                {{form.unit_price.label}}
-                            </label>
-                            {{form.unit_price}}
-                        </div>
-            
-                        <button class="btn btn-primary" type="submit">Add Item</button>
-                    </form>
-                </div>
+        <div class="mb-4">
+            <h2 class="fw-bold text-white mb-1">Add Purchase Items</h2>
+            <p class="text-secondary small">Voucher Ref: <span class="text-info">#{{ voucher.id|default:"New" }}</span></p>
+        </div>
 
-            </div>
-            <div class="col-6">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="card bg-body-tertiary border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-bottom border-secondary border-opacity-10 py-3">
+                        <h5 class="mb-0 fw-bold text-white"><i class="bi bi-plus-circle me-2"></i>Item Details</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{ form.management_form }} 
                 
-                <div class="card shadow-sm p-3">
-                    <table class="table table-borderless mb-0">
-                        <tbody>
-                            <tr>
-                                <th scope="row">Supplier</th>
-                                <td>{{ voucher.supplier }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Date</th>
-                                <td>{{ voucher.date }}</td>
-                            </tr>
-                         
-                            <tr>
-                                <th scope="row">Total Amount</th>
-                                <td>{{ voucher.total_amount }}</td>
-                            </tr>
-                           
-                        </tbody>
-                    </table>
+                            <div class="mb-3">
+                                <label class="form-label small text-secondary text-uppercase fw-semibold">{{form.product_name.label}}</label>
+                                {{form.product_name}}
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary text-uppercase fw-semibold">{{form.quantity.label}}</label>
+                                    {{form.quantity}}
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary text-uppercase fw-semibold">{{form.unit_price.label}}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary border-opacity-50 text-secondary">৳</span>
+                                        {{form.unit_price}}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary text-uppercase fw-semibold">{{form.weight.label}}</label>
+                                    {{form.weight}}
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary text-uppercase fw-semibold">{{form.weight_label.label}}</label>
+                                    {{form.weight_label}}
+                                </div>
+                            </div>
+                
+                            <button class="btn btn-primary w-100 fw-bold py-2 shadow-sm" type="submit">
+                                <i class="bi bi-cart-plus me-1"></i> Add to List
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card bg-body-tertiary border-0 shadow-sm mb-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark mb-0 align-middle">
+                                <tbody>
+                                    <tr class="border-bottom border-secondary border-opacity-10">
+                                        <th class="ps-4 py-3 text-secondary small text-uppercase" scope="row">Supplier</th>
+                                        <td class="text-white fw-bold">{{ voucher.supplier }}</td>
+                                        <th class="py-3 text-secondary small text-uppercase" scope="row">Date</th>
+                                        <td class="text-white pe-4">{{ voucher.date }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="ps-4 py-3 text-secondary small text-uppercase" scope="row">Current Total</th>
+                                        <td colspan="3" class="text-success h4 fw-bold pe-4">৳ {{ voucher.total_amount }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="card mt-4 p-0">
-                    <table class="table table-sm table-bordered align-middle text-center">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Product</th>
-                                <th>Qty</th>
-                                <th>Unit</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in items %}
-                                <tr>
-                                    <td>{{ item.product_name }}</td>
-                                    <td>{{ item.quantity }}</td>
-                                    <td>{{ item.unit_price }}</td>
-                                    <td>{{ item.item_price }}</td>
+                <div class="card bg-body-tertiary border-0 shadow-sm overflow-hidden">
+                    <div class="card-header bg-transparent border-bottom border-secondary border-opacity-10">
+                        <h6 class="mb-0 fw-bold text-white py-1">Voucher Summary</h6>
+                    </div>
+                    <div class="table-responsive" style="max-height: 350px;">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead class="bg-black">
+                                <tr class="text-secondary small text-uppercase">
+                                    <th class="ps-3">Product</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Unit</th>
+                                    <th class="text-end pe-3">Total</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="border-top-0">
+                                {% for item in items %}
+                                    <tr class="border-bottom border-secondary border-opacity-10">
+                                        <td class="ps-3 fw-medium text-white">{{ item.product_name }}</td>
+                                        <td class="text-center"><span class="badge bg-dark border border-secondary">{{ item.quantity }}</span></td>
+                                        <td class="text-end">৳ {{ item.unit_price }}</td>
+                                        <td class="text-end pe-3 fw-bold text-success">৳ {{ item.item_price }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center text-secondary py-5">
+                                            No items added yet.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
+                <div class="mt-4">
+                    <a href="{% url 'complete_voucher' voucher.pk %}?ledger_id={{request.GET.ledger_id}}" 
+                       class="btn btn-success w-100 fw-bold py-3 shadow shadow-lg text-uppercase tracking-wider">
+                        <i class="bi bi-check2-all me-2"></i> Finalize Purchase Voucher
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="py-2">
-          
-                <a href="{% url 'complete_voucher' voucher.pk %}?ledger_id={{request.GET.ledger_id}}" class="btn btn-success w-100" type="submit">Finalize Purchase Voucher</a>
-          
-        </div>
-        
     </div>
 </section>
 
+<style>
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .card { border-radius: 12px; }
+    .tracking-wider { letter-spacing: 1px; }
+    
+    /* Input Styling */
+    input, select {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        color: #fff;
+        background-color: #1a1d20 !important;
+        border: 1px solid #495057 !important;
+        border-radius: 6px;
+    }
+
+    input:focus, select:focus {
+        border-color: #0d6efd !important;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+</style>
 {% endblock content %}

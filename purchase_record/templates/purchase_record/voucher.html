@@ -1,40 +1,88 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="py-5">
+<section class="py-5 bg-dark text-light min-vh-100">
     <div class="container">
-        <h1>Search Vendors to create Voucher</h1>
+        <div class="mb-4">
+            <h1 class="fw-bold text-white mb-1">Search Vendors</h1>
+            <p class="text-secondary">Find a vendor account to initiate a new purchase voucher</p>
+        </div>
 
-        <form method="GET" class="d-flex mb-4" action="{% url 'voucher_search_ledger_account' %}">
-            <input type="text" name="ledger_search_q" class="form-control me-2" placeholder="Search by name, phone, or address" value="{{ request.GET.q }}">
-            <button type="submit" class="btn btn-primary">Search</button>
-        </form>
+        <div class="card bg-body-tertiary border-0 shadow-sm mb-5">
+            <div class="card-body p-4">
+                <form method="GET" class="row g-2" action="{% url 'voucher_search_ledger_account' %}">
+                    <div class="col-md-10">
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary border-opacity-50 text-secondary">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="ledger_search_q" class="form-control bg-dark text-white border-secondary border-opacity-50" 
+                                   placeholder="Search by name, phone, or address..." value="{{ request.GET.ledger_search_q }}">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-        {% comment %} show ledger list with continue button {% endcomment %}
         <div class="mt-4">
             {% if ledgers %}
-                <h2>Found {{ ledgers.count }} vendor accounts Results</h2>
-                <ul class="list-group">
-                    {% for ledger in ledgers %}
-                        <li class="list-group-item">
-                            {{ ledger.account_name }} - {{ ledger.address }} - {{ ledger.phone_number }}
-                            <a href="{% url 'create_voucher' %}?ledger_id={{ ledger.id }}" class="btn btn-primary btn-sm float-end">Create Voucher</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                {% if searched %}
-                    <p>No results found.</p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-white mb-0">Found {{ ledgers.count }} Results</h4>
+                </div>
                 
-                    <a class="btn btn-primary" href="{% url 'create_voucher' %}">Create New Account with Voucher</a>
-                    <a class="btn btn-danger" href="{% url 'voucher_search_ledger_account' %}">Reset Search</a>
-                {% else %}
-                    <a class="btn btn-secondary" href="{% url 'create_voucher' %}">Create New Account with Voucher</a>
-                {% endif %}
+                <div class="row g-3">
+                    {% for ledger in ledgers %}
+                        <div class="col-12">
+                            <div class="card bg-body-tertiary border-0 border-start border-primary border-4 shadow-sm">
+                                <div class="card-body d-flex justify-content-between align-items-center py-3">
+                                    <div>
+                                        <h5 class="fw-bold text-white mb-1">{{ ledger.account_name }}</h5>
+                                        <div class="small text-secondary">
+                                            <span class="me-3"><i class="bi bi-geo-alt me-1"></i>{{ ledger.address }}</span>
+                                            <span><i class="bi bi-telephone me-1"></i>{{ ledger.phone_number }}</span>
+                                        </div>
+                                    </div>
+                                    <a href="{% url 'create_voucher' %}?ledger_id={{ ledger.id }}" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                                        Continue <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            {% else %}
+                <div class="text-center py-5 bg-body-tertiary rounded-4 border border-dashed border-secondary border-opacity-25">
+                    <i class="bi bi-person-exclamation fs-1 text-secondary opacity-25"></i>
+                    
+                    {% if searched %}
+                        <h5 class="text-white mt-3">No matching vendors found</h5>
+                        <p class="text-secondary small mb-4">Would you like to register a new account instead?</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a class="btn btn-primary px-4" href="{% url 'create_voucher' %}">
+                                <i class="bi bi-person-plus me-1"></i>Create New Account
+                            </a>
+                            <a class="btn btn-outline-danger px-4" href="{% url 'voucher_search_ledger_account' %}">Reset Search</a>
+                        </div>
+                    {% else %}
+                        <h5 class="text-white mt-3">Ready to create a voucher?</h5>
+                        <p class="text-secondary small mb-4">Search for an existing vendor above or start fresh.</p>
+                        <a class="btn btn-outline-secondary px-4 text-white border-secondary" href="{% url 'create_voucher' %}">
+                            <i class="bi bi-person-plus me-1"></i>Create New Account
+                        </a>
+                    {% endif %}
+                </div>
             {% endif %}
         </div>
     </div>
 </section>
+
+<style>
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .border-dashed { border-style: dashed !important; }
+    .input-group-text, .form-control:focus { box-shadow: none; }
+    .card { border-radius: 12px; }
+</style>
 {% endblock content %}
-
-
-

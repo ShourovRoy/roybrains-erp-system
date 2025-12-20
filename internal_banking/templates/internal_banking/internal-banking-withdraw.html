@@ -1,75 +1,154 @@
 {% extends 'internal_banking/internal_banking_base.html' %}
 
 {% block internal_banking_content %}
-
-<section class="py-5">
+<section class="py-5 bg-dark text-light min-vh-100">
     <div class="container">
-        <h1>Withdraw</h1>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="javascript:history.back()" class="text-secondary text-decoration-none small">
+                <i class="bi bi-chevron-left me-1"></i> Back to Control Panel
+            </a>
+            <span class="x-small-label text-warning tracking-widest text-uppercase">Internal Bank Withdrawal</span>
+        </div>
 
-        <!-- Account Details Card -->
-        <div class="card shadow border-0 mb-4">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Bank Account Details</h4>
-            </div>
-            <div class="card-body">
-                <h3 class="fw-bold">{{ bank_details.account_name }}</h3>
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="card bg-body-tertiary border-0 shadow-lg overflow-hidden">
+                    
+                    <div class="card-header bg-black bg-opacity-20 border-0 p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-7">
+                                <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Source Bank Account</label>
+                                <h4 class="fw-bold text-white mb-1">{{ bank_details.account_name }}</h4>
+                                <div class="d-flex gap-3">
+                                    <span class="text-secondary x-small">
+                                        <i class="bi bi-building me-1 text-warning"></i> {{ bank_details.branch }}
+                                    </span>
+                                    <span class="pill-tag pill-success-sm">
+                                        {{ bank_details.status }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                <div class="p-3 bg-dark bg-opacity-30 rounded-3 border border-secondary border-opacity-10 d-inline-block">
+                                    <label class="x-small-label text-secondary text-uppercase d-block mb-1 text-md-end">Current Balance</label>
+                                    <h4 class="fw-bold text-warning mb-0 text-md-end">৳ {{ bank_details.balance }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <p class="mb-1"><strong>Branch:</strong> {{ bank_details.branch }}</p>
-                        <p class="mb-1"><strong>Status:</strong> {{ bank_details.status }}</p>
+                    <div class="card-body p-4 p-md-5">
+                        <form action="{% url 'internal_banking_withdraw' bank_details.pk %}" method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row justify-content-center">
+                                <div class="col-md-9">
+                                    
+                                    <div class="mb-4">
+                                        <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Withdrawal Amount</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark border-secondary border-opacity-25 text-warning fw-bold px-3">
+                                                ৳
+                                            </span>
+                                            <input 
+                                                type="number" 
+                                                step="0.01" 
+                                                name="withdraw_amount" 
+                                                class="form-control bg-dark text-white border-secondary border-opacity-25 py-3 fw-bold fs-5" 
+                                                placeholder="0.00" 
+                                                required
+                                                autofocus
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Transaction Date</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary px-3">
+                                                <i class="bi bi-calendar-x"></i>
+                                            </span>
+                                            <input 
+                                                class="form-control bg-dark text-white border-secondary border-opacity-25 py-3" 
+                                                type="datetime-local" 
+                                                name="datetime" 
+                                                required
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-warning w-100 py-3 fw-bold shadow-sm mt-2 text-dark">
+                                        <i class="bi bi-dash-circle me-2"></i> Confirm Withdrawal
+                                    </button>
+
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <div class="col-md-6">
-                        <p class="mb-1"><strong>Balance:</strong> ₹{{ bank_details.balance }}</p>
-                        <p class="mb-1"><strong>Note:</strong> {{ bank_details.note }}</p>
+
+                    {% if bank_details.note %}
+                    <div class="card-footer bg-black bg-opacity-10 border-0 py-3 text-center">
+                        <small class="text-secondary italic x-small">
+                            <i class="bi bi-info-circle me-1"></i> Account Note: {{ bank_details.note }}
+                        </small>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-
-        <!-- Withdraw Form -->
-        <div class="card shadow border-0">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">Withdraw Money</h4>
-            </div>
-
-            <div class="card-body">
-                <form action="{% url 'internal_banking_withdraw' bank_details.pk %}" method="post" class="row g-3">
-                    {% csrf_token %}
-
-                    <div class="col-md-6">
-                        <label class="form-label">Withdraw Amount</label>
-                        <input 
-                            type="number" 
-                            step="0.01" 
-                            class="form-control" 
-                            name="withdraw_amount" 
-                            placeholder="Enter amount to withdraw..."
-                            required
-                        >
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Date & Time</label>
-                        <input 
-                            type="datetime-local" 
-                            class="form-control" 
-                            name="datetime"
-                            required
-                        >
-                    </div>
-
-                    <div class="col-12 d-grid">
-                        <button class="btn btn-success btn-lg" type="submit">
-                            Withdraw Now
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-
     </div>
 </section>
 
+<style>
+    /* THEME SYNC */
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .x-small-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; }
+    .x-small { font-size: 0.75rem; }
+    .italic { font-style: italic; }
+
+    /* Pill Tag Logic */
+    .pill-tag {
+        padding: 2px 10px;
+        border-radius: 50px;
+        font-size: 0.6rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .pill-success-sm {
+        background-color: rgba(40, 167, 69, 0.15);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+
+    /* Input Theme Match */
+    .form-control { border-left: none !important; }
+    .input-group-text {
+        border-right: none !important;
+        background-color: #1a1d20 !important;
+    }
+
+    .form-control:focus {
+        background-color: #1a1d20 !important;
+        border-color: #ffc107 !important;
+        box-shadow: none;
+        color: white;
+    }
+
+    /* Dark Mode Calendar Picker */
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.5;
+    }
+
+    .card { border-radius: 12px; }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        border: none;
+    }
+    .btn-warning:hover {
+        background-color: #e5ac00;
+    }
+</style>
 {% endblock internal_banking_content %}

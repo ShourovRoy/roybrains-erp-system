@@ -1,13 +1,100 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
+<section class="py-5" style="background-color: #1a1d20 !important; min-vh-100;">
+    <div class="container">
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                <div class="card border-0 shadow-lg" style="background-color: #2b3035 !important; border-radius: 8px;">
+                    
+                    <div class="p-4 border-bottom border-secondary border-opacity-10">
+                        <div class="d-flex align-items-center">
+                            <div style="width: 4px; height: 24px; background-color: var(--bs-primary); border-radius: 2px;" class="me-3"></div>
+                            <h4 class="fw-bold text-white mb-0">Create Expense Book</h4>
+                        </div>
+                        <p class="text-secondary small mt-2 mb-0 ms-4">Enter the details below to initialize a new expenditure ledger.</p>
+                    </div>
 
-<form action="{% url 'expense_record:create-expense-ledger' %}" method="post">
-    {% csrf_token %}
-{{form.as_p}}
+                    <div class="card-body p-4 p-md-5">
+                        <form action="{% url 'expense_record:create-expense-ledger' %}" method="post">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Ledger Name</label>
+                                <input type="text" 
+                                       name="name" 
+                                       class="form-control text-white border-secondary border-opacity-25 py-3 px-4" 
+                                       style="background-color: #1a1d20 !important; border-radius: 6px;"
+                                       placeholder="e.g. Monthly Marketing" 
+                                       required>
+                                {% if form.name.errors %}
+                                    <div class="text-danger x-small mt-2">{{ form.name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
 
-<button type="submit">Submit</button>
-</form>
+                            <div class="mb-4">
+                                <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Description</label>
+                                <textarea name="description" 
+                                          rows="4" 
+                                          class="form-control text-white border-secondary border-opacity-25 py-3 px-4" 
+                                          style="background-color: #1a1d20 !important; border-radius: 6px;"
+                                          placeholder="Purpose of this book..."></textarea>
+                                {% if form.description.errors %}
+                                    <div class="text-danger x-small mt-2">{{ form.description.errors.0 }}</div>
+                                {% endif %}
+                            </div>
 
+                            <div class="d-flex gap-3 mt-5">
+                                <button type="submit" class="btn btn-primary px-5 py-2 fw-bold" style="border-radius: 6px;">
+                                    Save Ledger
+                                </button>
+                                <a href="javascript:history.back()" class="btn btn-link text-secondary text-decoration-none small align-self-center">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* ERP THEME SYNC */
+    .x-small-label { 
+        font-size: 0.7rem; 
+        font-weight: 700; 
+        letter-spacing: 0.5px;
+        color: #adb5bd !important;
+    }
+
+    .x-small { font-size: 0.75rem; }
+
+    /* Input Focus State */
+    .form-control:focus {
+        background-color: #1a1d20 !important;
+        border-color: var(--bs-primary) !important;
+        box-shadow: none;
+        color: white;
+    }
+
+    /* Placeholder Styling */
+    ::placeholder {
+        color: #495057 !important;
+    }
+
+    /* Primary Button Polish */
+    .btn-primary {
+        background-color: var(--bs-primary);
+        border: none;
+        transition: opacity 0.2s;
+    }
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+</style>
 {% endblock content %}

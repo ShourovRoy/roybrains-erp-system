@@ -1,59 +1,121 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<section class="py-5">
+<section class="py-5 bg-dark text-light min-vh-100">
     <div class="container">
-
-        <!-- Main Account Card -->
-        <div class="card shadow-sm mb-4 border-0 rounded-3">
-            <div class="card-header bg-primary text-white rounded-top-3">
-                <h5 class="mb-0">Main Account Details</h5>
-            </div>
-            <div class="card-body">
-                <h4 class="fw-bold mb-3">{{ account.account_name }}</h4>
-
-                <p class="text-muted mb-1">Balance</p>
-                <span class="badge bg-success fs-5 px-3 py-2">
-                    {{ account.balance }}
-                </span>
-            </div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="javascript:history.back()" class="text-secondary text-decoration-none small">
+                <i class="bi bi-chevron-left me-1"></i> Back
+            </a>
+            <span class="x-small-label text-primary tracking-widest text-uppercase">Incoming Bank Deposit</span>
         </div>
 
-        <!-- Bank Details Card -->
-        <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-dark text-white rounded-top-3">
-                <h5 class="mb-0">Selected Bank Details</h5>
-            </div>
-            <div class="card-body">
-                <h4 class="fw-bold mb-3">{{ bank_details.account_name }}</h4>
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="card bg-body-tertiary border-0 shadow-lg overflow-hidden">
+                    
+                    <div class="card-header bg-black bg-opacity-30 border-0 p-4">
+                        <div class="row align-items-center text-center">
+                            <div class="col-5">
+                                <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Company Bank Account</label>
+                                <h5 class="fw-bold text-white mb-1 small">{{ bank_details.account_name }}</h5>
+                                <span class="text-info small fw-bold">৳ {{ bank_details.balance }}</span>
+                            </div>
+                            
+                            <div class="col-2 opacity-50">
+                                <i class="bi bi-arrow-left fs-4 text-secondary"></i>
+                            </div>
 
-                <p class="text-muted mb-1">Branch</p>
-                <p class="mb-3">{{ bank_details.branch }}</p>
+                            <div class="col-5">
+                                <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Source (From Client)</label>
+                                <h5 class="fw-bold text-white mb-1 small">{{ account.account_name }}</h5>
+                                <span class="text-success small fw-bold">৳ {{ account.balance }}</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <p class="text-muted mb-1">Balance</p>
-                <span class="badge bg-info text-dark fs-5 px-3 py-2">
-                    {{ bank_details.balance }}
-                </span>
+                    <div class="card-body p-4 p-md-5">
+                        <form action="{% url 'financial-inflow-bank-action' account.pk bank_details.pk %}" method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row justify-content-center">
+                                <div class="col-md-9">
+                                    
+                                    <div class="mb-4">
+                                        <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Deposit Amount</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark border-secondary border-opacity-25 text-primary fw-bold px-3">
+                                                ৳
+                                            </span>
+                                            <input 
+                                                type="number" 
+                                                step="0.01" 
+                                                name="amount" 
+                                                class="form-control bg-dark text-white border-secondary border-opacity-25 py-3 fw-bold" 
+                                                placeholder="Enter amount..." 
+                                                required
+                                                autofocus
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="x-small-label text-secondary text-uppercase mb-2 d-block">Transaction Time</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary px-3">
+                                                <i class="bi bi-calendar-check"></i>
+                                            </span>
+                                            <input 
+                                                class="form-control bg-dark text-white border-secondary border-opacity-25 py-3" 
+                                                type="datetime-local" 
+                                                name="datetime" 
+                                                required
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm mt-2">
+                                        <i class="bi bi-check2-circle me-2"></i> Confirm Bank Deposit
+                                    </button>
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 </section>
 
-<!-- Form Section -->
-<section class="py-4">
-    <div class="container">
-        <form action="{% url 'financial-inflow-bank-action' account.pk bank_details.pk %}" method="post">
-            {% csrf_token %}
-            <label for="">Amount</label>
-            <input required type="number" step="0.01" name="amount" id="" class="form-control" placeholder="1204">
-            
-            
-            <input class="form-control" type="datetime-local" name="datetime">
-            <button type="submit">submit</button>
-        </form>
-    </div>
-</section>
+<style>
+    /* Theme Consistency */
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .x-small-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; }
+    .tracking-widest { letter-spacing: 3px; }
 
+    /* Match Website Theme Inputs */
+    .form-control { border-left: none !important; }
+    .input-group-text {
+        border-right: none !important;
+        background-color: #1a1d20 !important;
+    }
+
+    .form-control:focus {
+        background-color: #1a1d20 !important;
+        border-color: #0d6efd !important; /* Inflow Primary Blue */
+        box-shadow: none;
+        color: white;
+    }
+
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 0.5;
+    }
+
+    .card { border-radius: 12px; }
+    .btn-primary { background-color: #0d6efd; border: none; }
+    .btn-primary:hover { background-color: #0b5ed7; transform: translateY(-1px); }
+</style>
 {% endblock content %}

@@ -1,73 +1,96 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<section class="py-5 bg-dark text-light min-vh-100">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold text-white mb-1">Cashbook Control Panel</h2>
+                <p class="text-secondary small mb-0">Monitor daily liquidity and capital distribution</p>
+            </div>
+            <div class="d-none d-md-block">
+                <i class="bi bi-wallet2 fs-1 text-primary opacity-50"></i>
+            </div>
+        </div>
 
-<div class="container py-4">
-
-    <h2 class="mb-4 fw-bold text-primary">💰 Cashbook Control Panel</h2>
-
-    {% if cashbooks %}
-        <div class="row g-4">
-
-            {% for cashbook in cashbooks %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card bg-gradient shadow-sm border-0">
-                        
-                        <div class="card-header bg-primary text-white">
-                            <strong>{{ cashbook.date|date:"F j, Y" }}</strong>
-                            <span class="badge bg-light text-dark float-end">
-                                {{ cashbook.status }}
-                            </span>
-                        </div>
-
-                        <div class="card-body">
-
-                            <p class="text-muted mb-1">
-                                <i class="bi bi-info-circle"></i>
-                                {{ cashbook.note|default:"No note available" }}
-                            </p>
-
-                            <hr>
-
-                            <p class="mb-1">
-                                <strong>Bank Amount:</strong>
-                                <span class="text-primary fw-semibold">
-                                    {{ cashbook.bank_amount }}
+        {% if cashbooks %}
+            <div class="row g-4">
+                {% for cashbook in cashbooks %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card bg-body-tertiary border-0 shadow-sm h-100 transition-hover">
+                            <div class="card-header bg-transparent border-bottom border-secondary border-opacity-10 d-flex justify-content-between align-items-center py-3">
+                                <span class="text-white fw-bold small">
+                                    <i class="bi bi-calendar3 me-2 text-primary"></i>{{ cashbook.date|date:"F j, Y" }}
                                 </span>
-                            </p>
-
-                            <p class="mb-0">
-                                <strong>Cash Amount:</strong>
-                                <span class="text-success fw-bold fs-5">
-                                    {{ cashbook.cash_amount }}
+                                <span class="badge rounded-pill {% if cashbook.status == 'Open' %}bg-success{% else %}bg-secondary{% endif %} bg-opacity-10 {% if cashbook.status == 'Open' %}text-success{% else %}text-secondary{% endif %} border border-opacity-25 px-3">
+                                    {{ cashbook.status }}
                                 </span>
-                            </p>
-
-
-                            <div class="py-2">
-                                <a class="btn btn-sm btn-warning w-100" href="{% url 'cashbook:cashbook-detail' cashbook.pk %}">Open Cashbook</a>
                             </div>
 
+                            <div class="card-body p-4">
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-secondary small text-uppercase fw-semibold">Bank Balance</span>
+                                        <span class="text-info fw-bold">৳ {{ cashbook.bank_amount }}</span>
+                                    </div>
+                                    <div class="progress bg-dark" style="height: 4px;">
+                                        <div class="progress-bar bg-info" style="width: 100%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-secondary small text-uppercase fw-semibold">Physical Cash</span>
+                                        <span class="text-success fs-5 fw-bold">৳ {{ cashbook.cash_amount }}</span>
+                                    </div>
+                                    <div class="progress bg-dark" style="height: 4px;">
+                                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 bg-dark bg-opacity-50 rounded-3 mb-4">
+                                    <p class="x-small text-secondary mb-1 text-uppercase fw-bold">Daily Note</p>
+                                    <p class="small text-white text-opacity-75 mb-0">
+                                        {{ cashbook.note|default:"Standard operating entries recorded." }}
+                                    </p>
+                                </div>
+
+                                <a href="{% url 'cashbook:cashbook-detail' cashbook.pk %}" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                                    View Detailed Ledger <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="text-center py-5 bg-body-tertiary rounded-4 border border-dashed border-secondary border-opacity-25 mt-4">
+                <div class="mb-4">
+                    <i class="bi bi-journal-x display-1 text-secondary opacity-25"></i>
                 </div>
-            {% endfor %}
+                <h4 class="text-white">No Cashbook Entries Found</h4>
+                <p class="text-secondary mb-4 mx-auto" style="max-width: 400px;">
+                    It looks like you haven't started your financial records yet. Please initialize your capital to begin.
+                </p>
+                <a class="btn btn-primary px-5 py-2 fw-bold shadow" href="{% url 'capital_management:capital_deposite_withdraw' %}">
+                    <i class="bi bi-plus-lg me-2"></i>Add Opening Capital
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
 
-        </div>
-
-    {% else %}
-
-        <div class="alert alert-info mt-4">
-            No cashbook entries available.
-
-            {% comment %} TODO: redirect to add capital view {% endcomment %}
-            <a class="btn btn-md btn-primary" href="{% url 'capital_management:capital_deposite_withdraw' %}">
-                Add Capital
-            </a>
-        </div>
-
-    {% endif %}
-
-</div>
-
+<style>
+    .bg-body-tertiary { background-color: #2b3035 !important; }
+    .card { border-radius: 16px; transition: all 0.3s ease; }
+    .transition-hover:hover { 
+        transform: translateY(-5px); 
+        background-color: #32383e !important;
+        box-shadow: 0 1rem 3rem rgba(0,0,0,0.175) !important;
+    }
+    .x-small { font-size: 0.7rem; }
+    .border-dashed { border-style: dashed !important; }
+    .progress-bar { opacity: 0.6; }
+</style>
 {% endblock content %}

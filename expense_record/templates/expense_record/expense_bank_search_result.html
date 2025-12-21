@@ -1,11 +1,62 @@
-<section>
-    {% for bank in banks %}
+<div class="list-group list-group-flush mt-2">
+  {% for bank in banks %}
+  <div class="bank-result-item p-3 mb-2 rounded-3 border border-secondary border-opacity-10 shadow-sm" 
+       style="background-color: #1a1d20; transition: all 0.2s ease;">
+    
+    <div class="d-flex justify-content-between align-items-start">
+      <div class="flex-grow-1">
+        <h6 class="text-white fw-bold mb-1" style="font-size: 0.95rem;">
+            {{bank.account_name}}
+        </h6>
+        
+        <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-geo-alt text-secondary small me-1"></i>
+            <span class="text-secondary" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                {{bank.branch|upper}} BRANCH
+            </span>
+        </div>
 
-        {{bank.account_name}}
+        <div class="d-inline-block px-2 py-1 rounded bg-black bg-opacity-25 border border-secondary border-opacity-10">
+            <span class="x-small-label text-warning d-inline me-1" style="margin-bottom: 0;">Balance:</span>
+            <span class="text-white fw-bold small">৳ {{bank.balance}}</span>
+        </div>
+      </div>
+
+      <div class="ms-3 align-self-center">
         <button
-        data-bank-name={{bank.account_name}}
-        data-bank-id={{bank.id}}
-        class="select-bank"
-        >From This Account</button>
-    {% endfor %}
-</section>
+          type="button"
+          data-bank-name="{{bank.account_name}}"
+          data-bank-id="{{bank.id}}"
+          data-bank-branch="{{bank.branch}}"
+          data-bank-balance="{{bank.balance}}"
+          class="select-bank btn btn-sm btn-primary px-3 fw-bold"
+          style="font-size: 0.7rem; text-transform: uppercase;"
+        >
+          Select
+        </button>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="text-center py-5">
+    <i class="bi bi-exclamation-circle text-secondary fs-2 d-block mb-2"></i>
+    <p class="text-secondary small">No matching accounts found.</p>
+  </div>
+  {% endfor %}
+</div>
+
+<style>
+  /* Hover effect for the entire row to make it feel interactive */
+  .bank-result-item:hover {
+    border-color: var(--bs-primary) !important;
+    background-color: rgba(13, 110, 253, 0.05) !important;
+    transform: translateX(4px);
+  }
+
+  .x-small-label { 
+    font-size: 0.6rem; 
+    font-weight: 800; 
+    letter-spacing: 1px; 
+    text-transform: uppercase;
+  }
+</style>

@@ -1,97 +1,279 @@
-{% extends 'base.html' %} {% block style %}
+{% extends 'base.html' %} 
 
+{% block style %}
 <style>
-  .hidden {
-    display: none;
+  /* Core Logic Classes */
+  .hidden { display: none !important; }
+  .show { display: block !important; }
+
+  :root {
+    --bg-canvas: #1a1d20;
+    --bg-card: #2b3035;
+    --accent: #0d6efd;
+    --border: rgba(255, 255, 255, 0.1);
   }
 
-  .show {
+  body { 
+    background-color: var(--bg-canvas); 
+    color: #e9ecef; 
+    font-family: 'Inter', sans-serif;
+  }
+
+  .x-small-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: #6c757d;
+    text-transform: uppercase;
+    margin-bottom: 8px;
     display: block;
   }
+
+  /* Theme-Matched Input Styling */
+  input, select {
+    background-color: var(--bg-canvas) !important;
+    border: 1px solid var(--border) !important;
+    color: white !important;
+    border-radius: 8px !important;
+    padding: 12px 14px !important;
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
+  }
+
+  /* Bank Section Well */
+  .bank-box {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 10px 0;
+  }
+
+  /* Switch Alignment Layout */
+  .bank-row-alignment {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+
+  .switch-wrapper {
+    background: var(--bg-canvas);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    height: 48px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15px;
+    min-width: 140px;
+  }
+
+  /* Custom Switch Styling */
+  .form-check.form-switch .form-check-input {
+    width: 2.5em;
+    height: 1.25em;
+    margin-top: 0;
+    cursor: pointer;
+    background-color: #343a40;
+    border-color: #495057;
+  }
+
+  .form-check.form-switch .form-check-input:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Input Group Addons (Icons and Currency) */
+  .input-group-text {
+    background-color: var(--bg-canvas) !important;
+    border: 1px solid var(--border) !important;
+    color: #6c757d !important;
+  }
+
+  /* Submit Button */
+  .btn-submit {
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    transition: filter 0.2s;
+  }
+
+  .btn-submit:hover {
+    filter: brightness(1.1);
+  }
+
+  /* Custom Scrollbar for search results */
+  #search-results::-webkit-scrollbar {
+    width: 6px;
+  }
+  #search-results::-webkit-scrollbar-track {
+    background: var(--bg-canvas);
+  }
+  #search-results::-webkit-scrollbar-thumb {
+    background: #495057;
+    border-radius: 10px;
+  }
 </style>
+{% endblock style %} 
 
-{% endblock style %} {% block content %}
-<form
-  action="{% url 'expense_record:expense-book-transaction' %}"
-  method="post"
->
-  {% csrf_token %} {{form.as_p}}
-  <button type="submit">Submit</button>
-</form>
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-lg" style="background-color: var(--bg-card); border-radius: 12px;">
+        
+        <div class="p-4 border-bottom border-secondary border-opacity-10">
+          <div class="d-flex align-items-center">
+            <div style="width: 4px; height: 20px; background-color: var(--accent); border-radius: 2px;" class="me-3"></div>
+            <h5 class="fw-bold m-0 text-white">Expense Transaction</h5>
+          </div>
+        </div>
 
-<div id="bank_search_div" class="hidden">
-  <h1>Bank Search</h1>
-  <input
-    hx-get="{% url 'expense_record:expense-bank-search' %}"
-    type="search"
-    name="bank_search"
-    id="#bank_search"
-    hx-trigger="keyup changed delay:500ms"
-    hx-target="#search-results"
-    placeholder="Search..."
-  />
-  <div id="search-results"></div>
+        <div class="card-body p-4 p-md-5">
+          <form action="{% url 'expense_record:expense-book-transaction' %}" method="post">
+            {% csrf_token %} 
+            {{form.management_form}}
+
+            <div class="row g-4">
+              <div class="col-12">
+                <label class="x-small-label">Expense Ledger</label>
+                {{form.select_expense_ledger}}
+              </div>
+
+              <div class="col-md-6">
+                <label class="x-small-label">Payment Source</label>
+                {{form.expense_source}}
+              </div>
+              <div class="col-md-6">
+                <label class="x-small-label">Posting Date</label>
+                {{form.date}}
+              </div>
+
+              <div class="col-12">
+                <div id="bank_details_section" class="bank-box hidden">
+                  
+                  <div class="bank-row-alignment mb-3">
+                    <div style="flex: 0 0 auto;">
+                      <label class="x-small-label text-primary">Direct Transfer</label>
+                      <div class="switch-wrapper">
+                        <div class="form-check form-switch m-0 p-0 d-flex align-items-center">
+                          {{form.is_bank_transfered}}
+                          <span class="ms-2 text-secondary small" style="font-size: 0.7rem;">YES</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div style="flex: 1 1 auto;">
+                      <label class="x-small-label text-primary">Linked Account Name</label>
+                      {{form.bank_name}}
+                    </div>
+                  </div>
+
+                  <div class="col-12 d-none">{{form.bank_id}}</div>
+
+                  <div id="bank_search_div" class="mt-4 pt-3 border-top border-secondary border-opacity-10">
+                    <label class="x-small-label text-white">Find Bank Account</label>
+                    <div class="input-group">
+                      <span class="input-group-text" style="border-right: none;">
+                        <i class="bi bi-search"></i>
+                      </span>
+                      <input
+                        hx-get="{% url 'expense_record:expense-bank-search' %}"
+                        type="search"
+                        name="bank_search"
+                        id="#bank_search"
+                        class="ps-2"
+                        style="border-left: none !important;"
+                        hx-trigger="keyup changed delay:500ms"
+                        hx-target="#search-results"
+                        placeholder="Search by name, branch or account..."
+                      />
+                    </div>
+                    <div id="search-results" style="max-height: 250px; overflow-y: auto;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label class="x-small-label text-warning">Total Amount</label>
+                <div class="input-group">
+                  <span class="input-group-text text-warning fw-bold" style="border-right: none;">৳</span>
+                  {{form.amount}}
+                </div>
+              </div>
+
+              <div class="col-12 pt-2">
+                <button type="submit" class="btn-submit">Confirm Transaction</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
   function loader() {
     const expenseSourceField = document.getElementById("id_expense_source");
     const isBankCheckbox = document.getElementById("id_is_bank_transfered");
-    const bankDiv = document.getElementById("bank_search_div");
-    const descriptionField = document.getElementById("id_description");
+    const bankDetailsSection = document.getElementById("bank_details_section");
+    const bankSearchDiv = document.getElementById("bank_search_div");
     const bankIdField = document.getElementById("id_bank_id");
     const bankNameField = document.getElementById("id_bank_name");
     const bankTransferField = document.getElementById("id_is_bank_transfered");
-    bankTransferField.setAttribute("class", "hidden")
+
+    // Inject bootstrap toggle class into Django's default checkbox
+    if(bankTransferField) bankTransferField.classList.add("form-check-input");
 
     function handleChange() {
-      const selectBankButtons = document.querySelectorAll(".select-bank");
+      if (expenseSourceField.value === "bank") {
+        bankDetailsSection.classList.replace("hidden", "show");
+        bankSearchDiv.classList.replace("hidden", "show");
+        bankIdField.classList.replace("hidden", "show");
+        bankNameField.classList.replace("hidden", "show");
 
-      const expenseSource = expenseSourceField.value;
-      const isBank = isBankCheckbox.checked;
-
-      if (expenseSource === "bank") {
-        bankDiv.classList.replace("hidden", "show");
-        bankIdField.classList.replace("hidden","show");
-        bankNameField.classList.replace("hidden","show");
-        bankTransferField.classList.replace("hidden","show");
-
-        const selectBankButtons = document.querySelectorAll(".select-bank");
-        selectBankButtons.forEach((button) => {
+        // Attach listeners to select buttons (HTMX results)
+        document.querySelectorAll(".select-bank").forEach((button) => {
           button.addEventListener("click", function () {
-            console.log(this.getAttribute("data-bank-id"));
             bankNameField.value = this.getAttribute("data-bank-name");
             bankIdField.value = this.getAttribute("data-bank-id");
+            document.getElementById("search-results").innerHTML = "";
           });
         });
       } else {
-        bankDiv.classList.replace("show", "hidden");
+        bankDetailsSection.classList.replace("show", "hidden");
+        bankSearchDiv.classList.replace("show", "hidden");
         bankIdField.classList.replace("show", "hidden");
         bankNameField.classList.replace("show", "hidden");
-        bankTransferField.classList.replace("show", "hidden");
-
+        
+        // Reset bank-related data
         isBankCheckbox.checked = false;
         bankNameField.value = null;
         bankIdField.value = null;
-
       }
-
-
     }
 
-    // initial run
     handleChange();
-
     expenseSourceField.addEventListener("change", handleChange);
     isBankCheckbox.addEventListener("change", handleChange);
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    loader();
-  });
-  document.addEventListener("htmx:afterSwap", function () {
-    loader();
-  });
+  // Initialize on load and after HTMX swaps
+  document.addEventListener("DOMContentLoaded", loader);
+  document.addEventListener("htmx:afterSwap", loader);
 </script>
-
 {% endblock content %}

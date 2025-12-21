@@ -1,45 +1,112 @@
-<div class="py-5">
-  <div class="container">
-
-    <h2 class="mb-4 text-center">Bank Accounts</h2>
+<div class="py-4">
+  <div class="container px-0">
+    <div class="d-flex align-items-center mb-4 px-2">
+      <div
+        style="
+          width: 3px;
+          height: 18px;
+          background-color: var(--accent);
+          border-radius: 2px;
+        "
+        class="me-2"
+      ></div>
+      <h6 class="x-small-label m-0 text-white" style="letter-spacing: 2px">
+        Available Accounts
+      </h6>
+    </div>
 
     {% if banks.exists %}
-    <div class="list-group shadow-sm">
-
+    <div class="d-flex flex-column gap-2">
       {% for bank in banks %}
-      <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+      <div
+        class="bank-result-item p-3 rounded-3 border border-secondary border-opacity-10 shadow-sm"
+        style="background-color: #1a1d20; transition: all 0.2s ease"
+      >
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="flex-grow-1">
+            <h6 class="text-white fw-bold mb-1" style="font-size: 0.95rem">
+              {{ bank.account_name }}
+            </h6>
+            <div class="d-flex align-items-center">
+              <span
+                class="badge bg-dark text-secondary border border-secondary border-opacity-25 fw-normal"
+                style="font-size: 0.65rem"
+              >
+                REF: #{{ bank.id }}
+              </span>
+            </div>
+          </div>
 
-        <div>
-          <h5 class="mb-1">{{ bank.account_name }}</h5>
-          <small class="text-muted">ID: {{ bank.id }}</small>
-        </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="text-end me-2">
+              <label
+                class="x-small-label text-secondary mb-0"
+                style="font-size: 0.55rem"
+                >Current Balance</label
+              >
+              <div class="text-warning fw-bold" style="font-size: 1rem">
+                ৳ {{ bank.balance }}
+              </div>
+            </div>
 
-        <div class="d-flex align-items-center gap-3">
-
-          <span class="badge bg-primary fs-6 px-3 py-2">
-            {{ bank.balance }}
-          </span>
-
-          <button bank-id="{{ bank.id }}" bank-name="{{ bank.account_name }}" class="select-bank btn btn-outline-primary btn-sm">
-            Select Bank
-          </button>
-
+            <button
+              type="button"
+              bank-id="{{ bank.id }}"
+              bank-name="{{ bank.account_name }}"
+              class="select-bank btn btn-primary btn-sm px-3 fw-bold shadow-sm"
+              style="
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                border-radius: 6px;
+              "
+            >
+              Select
+            </button>
+          </div>
         </div>
       </div>
       {% endfor %}
-
     </div>
 
     {% else %}
-
-    <div class="text-center py-5">
-      <h5 class="text-muted mb-3">No banks found.</h5>
-      <a class="btn btn-secondary" href="{% url 'create-ledger' %}">
-        Create a new bank
+    <div
+      class="text-center py-5 border border-secondary border-opacity-10 rounded-3 border-dashed"
+      style="border-style: dashed !important"
+    >
+      <div class="opacity-25 mb-3">
+        <i class="bi bi-bank fs-1 text-secondary"></i>
+      </div>
+      <h6 class="text-secondary mb-3">No matching bank accounts found.</h6>
+      <a
+        class="btn btn-outline-secondary btn-sm px-4"
+        href="{% url 'create-ledger' %}"
+        style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700"
+      >
+        Create New Bank
       </a>
     </div>
-
     {% endif %}
-
   </div>
 </div>
+
+<style>
+  /* Result Item Hover State */
+  .bank-result-item:hover {
+    border-color: var(--accent) !important;
+    background-color: rgba(13, 110, 253, 0.05) !important;
+    transform: translateX(4px);
+  }
+
+  /* Scrollbar Polish for search container */
+  #toitoi::-webkit-scrollbar {
+    width: 4px;
+  }
+  #toitoi::-webkit-scrollbar-thumb {
+    background: #495057;
+    border-radius: 10px;
+  }
+
+  .border-dashed {
+    border-width: 2px !important;
+  }
+</style>

@@ -1,102 +1,227 @@
-{% extends 'base.html' %} {% block style %}
+{% extends 'base.html' %} 
+
+{% block style %}
 <style>
-  .hidden {
-    display: none;
+  .hidden { display: none !important; }
+  .show { display: block !important; }
+
+  :root {
+    --bg-canvas: #1a1d20;
+    --bg-card: #2b3035;
+    --accent: #0d6efd;
+    --border: rgba(255, 255, 255, 0.1);
   }
 
-  .show {
+  body { background-color: var(--bg-canvas); color: #e9ecef; }
+
+  .x-small-label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: #6c757d;
+    text-transform: uppercase;
+    margin-bottom: 4px;
     display: block;
   }
+
+  input, select {
+    background-color: var(--bg-canvas) !important;
+    border: 1px solid var(--border) !important;
+    color: white !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important; 
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
+  .bank-box {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+
+  /* NEW: Style for the top-aligned selection well */
+  .selected-display {
+    background: rgba(13, 110, 253, 0.1);
+    border: 1px dashed rgba(13, 110, 253, 0.3);
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border: none;
+    padding: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    border-radius: 6px;
+    width: 100%;
+  }
+
+  #toitoi {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+    margin-top: 8px;
+  }
+
+  .card-compact {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    max-width: 550px;
+    margin: 0 auto;
+  }
+
+  .input-group-text {
+    background-color: var(--bg-canvas) !important;
+    border: 1px solid var(--border) !important;
+    padding: 0 10px;
+    color: #6c757d;
+  }
 </style>
+{% endblock style %} 
 
-{% endblock style %} {% block content %}
-
-<section>
+{% block content %}
+<section class="py-4">
   <div class="container">
-    <h3>Add Capital</h3>
-    <div class="row">
-      <div class="col-md-6">
-        <form action="" method="post">
-          {% csrf_token %} {{ form.as_p }}
-          <label for="#bank">Bank Name</label>
-          <input id="bank" type="text" placeholder="Bank name" class="show">
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+    <div class="card card-compact shadow-lg">
+      
+      <div class="px-4 py-3 border-bottom border-secondary border-opacity-10 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <div style="width: 3px; height: 16px; background-color: var(--accent); border-radius: 2px;" class="me-2"></div>
+          <h6 class="fw-bold m-0" id="header-text">Add Capital</h6>
+        </div>
+        <span class="badge bg-dark text-secondary fw-normal" style="font-size: 0.6rem;">VOUCHER #AUTO</span>
       </div>
 
-      <div id="search-bank-div" class="col-md-6 hidden">
-        <label class="form-label" for="">Search Account</label>
-        <input
-          hx-trigger="keyup changed delay:500ms"
-          hx-get="{% url 'capital_management:search_banks' %}"
-          hx-target="#toitoi"
-          class="form-control"
-          type="search"
-          name="search_query"
-          id=""
-          placeholder="start typeing to search account.."
-        />
-        <div id="toitoi"></div>
+      <div class="card-body p-4">
+        <form action="" method="post" onkeydown="return event.key != 'Enter';">
+          {% csrf_token %} 
+          {{form.management_form}}
+
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="x-small-label">Transaction Type</label>
+              {{form.transaction_type}}
+            </div>
+            <div class="col-6">
+              <label class="x-small-label">Invest In</label>
+              {{form.invest_in}}
+            </div>
+
+            <div class="col-6">
+              <label class="x-small-label text-warning">Amount</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">৳</span>
+                {{form.amount}}
+              </div>
+            </div>
+            <div class="col-6">
+              <label class="x-small-label">Date</label>
+              {{form.date}}
+            </div>
+
+            <div id="search-bank-div" class="col-12 hidden">
+              <div class="bank-box">
+                
+                <div id="bank-selected-well" class="selected-display hidden">
+                   <div class="d-flex align-items-center justify-content-between">
+                     <div>
+                        <label class="x-small-label text-info" style="font-size: 0.55rem; color: var(--accent) !important;">Linked Account</label>
+                        <input id="bank" type="text" placeholder="No bank selected" readonly class="bg-transparent border-0 fw-bold text-white p-0" style="font-size: 0.85rem; outline: none;">
+                     </div>
+                     <i class="bi bi-patch-check-fill text-primary"></i>
+                   </div>
+                </div>
+
+                <label class="x-small-label text-primary">Search Bank Account</label>
+                <div class="input-group input-group-sm mb-2">
+                  <span class="input-group-text"><i class="bi bi-search" style="font-size: 0.7rem;"></i></span>
+                  <input
+                    id="bank-search-input"
+                    hx-trigger="keyup changed delay:500ms"
+                    hx-get="{% url 'capital_management:search_banks' %}"
+                    hx-target="#toitoi"
+                    type="search"
+                    name="search_query"
+                    placeholder="Type to search..."
+                    class="form-control"
+                  />
+                </div>
+                
+                <div id="toitoi"></div>
+              </div>
+            </div>
+
+            <div class="d-none">
+               {{form.bank_account_id}}
+            </div>
+
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn btn-primary">Confirm & Save</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </section>
 
 <script>
-
   function selectBank() {
     const investmentTypeField = document.getElementById("id_invest_in");
     let value = investmentTypeField.value;
+    const headerTitle = document.getElementById("header-text");
+    const searchInput = document.getElementById("bank-search-input");
+    
     toggleBankSearchDiv(value);
 
-    investmentTypeField.addEventListener("change", function (value) {
-      value = value.target.value;
-      document.querySelector("h3").innerText =
-        value === "bank" ? "Add Bank Capital" : "Add Cash Capital";
-      toggleBankSearchDiv(value);
+    investmentTypeField.addEventListener("change", function (e) {
+      const val = e.target.value;
+      headerTitle.innerText = val === "bank" ? "Add Bank Capital" : "Add Cash Capital";
+      toggleBankSearchDiv(val);
     });
 
-
-    if (event.detail.target.id === "toitoi") {
-      const selectBankButtons = document.querySelectorAll(".select-bank");
-      selectBankButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-          const bankId = this.getAttribute("bank-id");
-          const bankName = this.getAttribute("bank-name");
-          console.log("Selected Bank ID:", bankId);
-          document.getElementById("id_bank_account").value = bankId;
-          document.getElementById("bank").value = bankName;
-        });
-      });
-    }
+    // Unified click listener using delegation
+    document.body.addEventListener('click', function(e) {
+      const btn = e.target.closest('.select-bank');
+      if (btn) {
+        const bankId = btn.getAttribute("bank-id");
+        const bankName = btn.getAttribute("bank-name");
+        
+        document.getElementById("id_bank_account").value = bankId;
+        document.getElementById("bank").value = bankName;
+        
+        // Show selected well, clear results and search input
+        document.getElementById("bank-selected-well").classList.remove("hidden");
+        document.getElementById("toitoi").innerHTML = ""; 
+        if(searchInput) searchInput.value = "";
+      }
+    });
 
     if (value !== "bank") {
-      document.getElementById("id_bank_account").value = "";
+      const bankAccField = document.getElementById("id_bank_account");
+      if(bankAccField) bankAccField.value = "";
     }
   }
 
-
-  document.addEventListener("DOMContentLoaded", function () {
-    selectBank()
-  });
-
-  document.addEventListener("htmx:afterSwap", (event) => {
-    selectBank()
-  });
+  document.addEventListener("DOMContentLoaded", selectBank);
+  document.addEventListener("htmx:afterSwap", selectBank);
 
   function toggleBankSearchDiv(value) {
+    const searchDiv = document.getElementById("search-bank-div");
     if (value === "bank") {
-      document.getElementById("search-bank-div").classList.remove("hidden");
-      document.getElementById("search-bank-div").classList.add("show");
-      document.getElementById("bank").classList.remove("hidden");
-      document.getElementById("bank").classList.add("show");
+      searchDiv.classList.replace("hidden", "show");
     } else {
-      document.getElementById("search-bank-div").classList.remove("show");
-      document.getElementById("search-bank-div").classList.add("hidden");
-      document.getElementById("bank").classList.remove("show");
-      document.getElementById("bank").classList.add("hidden");
+      searchDiv.classList.replace("show", "hidden");
     }
   }
 </script>
-
 {% endblock content %}

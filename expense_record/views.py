@@ -333,7 +333,7 @@ class ExpenseBankSearch(LoginRequiredMixin, ListView):
     login_url = "/login/"
     model = Ledger
     context_object_name = "banks"
-    template_name = "expense_record/expense_bank_search_result.html"
+    template_name = "expense_record/partials/expense_bank_search_result.html"
 
 
     def get_queryset(self):

@@ -30,12 +30,13 @@ class FincialAccountSearchView(LoginRequiredMixin, ListView):
         query = self.request.GET.get("search_query", None)
 
         if query:
+            # search and return only customer and vendor accounts
             return super().get_queryset().annotate(
-                 similarity=TrigramSimilarity('account_name', query) + TrigramSimilarity(Coalesce('address', Value('')), query) + TrigramSimilarity(Coalesce('branch', Value('')), query)
-                + TrigramSimilarity(Coalesce('phone_number', Value('')), query)
+                 similarity=TrigramSimilarity('account_name', query) + TrigramSimilarity(Coalesce('address', Value('')), query) + TrigramSimilarity(Coalesce('phone_number', Value('')), query)
             ).filter(
                 business=self.request.user,
                 similarity__gt=0.2,
+                account_type__in=['Vendor', 'Customer']
             )
         return super().get_queryset().none
 

@@ -349,25 +349,27 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                 )
 
 
-                account_ledger = get_object_or_404(self.model, business=self.request.user, pk=account_id)
-                bank_ledger = get_object_or_404(self.model, business=self.request.user, pk=bank_id)
+                account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
+                bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
 
                 
                 # accounts credit for cash
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
-                    description="Gave cash in liquide",
+                    description="Cash",
                     debit=0.0,
                     credit=cash_amount,
                     date=date_time,
                 )
 
+                
+
                 # accounts credit for bank
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
-                    description=f"Send in {bank_ledger.account_name} - {bank_ledger.branch}",
+                    description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
                     debit=0.0,
                     credit=bank_amount,
                     date=date_time,
@@ -377,7 +379,7 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=bank_ledger,
-                    description=f"{account_ledger.account_name} - {account_ledger.address}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     debit=bank_amount,
                     credit=0.0,
                     date=date_time,
@@ -387,7 +389,7 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"Cash in by {account_ledger.account_name} - {account_ledger.address}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     is_bank=False,
                     debit=cash_amount,
                     credit=0.00,
@@ -398,7 +400,7 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"{bank_ledger.account_name} - {bank_ledger.address}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     is_bank=True,
                     debit=bank_amount,
                     credit=0.00,

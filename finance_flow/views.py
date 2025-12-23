@@ -229,7 +229,7 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
                 self.model.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
-                    description=f"Deposite at {bank_ledger.account_name} - {bank_ledger.branch}",
+                    description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
                     date=date_time,
                     credit=float(amount),
                     debit=0.0
@@ -239,7 +239,7 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
                 self.model.objects.create(
                     business=self.request.user,
                     ledger=bank_ledger,
-                    description=f"Money came from {account_ledger.account_name} - {account_ledger.address}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     date=date_time,
                     debit=float(amount),
                     credit=0.0
@@ -249,7 +249,7 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"{bank_ledger.account_name} - {bank_ledger.address}",
+                    description=f"{account_ledger.account_name}, {account_ledger.address} -> {bank_ledger.account_name} {bank_ledger.branch}",
                     is_bank=True,
                     debit=amount,
                     credit=0.00,

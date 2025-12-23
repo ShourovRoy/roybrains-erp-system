@@ -104,7 +104,7 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"Cash in by {ledger.account_name} - {ledger.address}",
+                        description=f"{ledger.account_name.capitalize()} - {ledger.address}",
                         is_bank=False,
                         debit=amount,
                         credit=0.00,
@@ -117,7 +117,7 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
                         ledger=ledger,
                         credit=amount,
                         debit=0.0,
-                        description=f"Cash in",
+                        description=f"Cash",
                         date=date_time
                     )
 

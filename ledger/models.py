@@ -20,6 +20,7 @@ class Ledger(models.Model):
     phone_number = models.CharField(max_length=14, blank=True, null=True)
     account_type = models.CharField(max_length=100, choices=ACCOUNT_TYPE_CHOICES, default="Customer")
     branch = models.CharField(max_length=255, null=True, blank=True)
+    bank_account_number = models.CharField(max_length=100, null=True, blank=True)
     balance = models.FloatField(default=0.00)
     status = models.CharField(max_length=50, choices=ACCOUNT_STATUS_CHOICES, default="Balanced")
     note = models.TextField(max_length=500, blank=True, null=True)

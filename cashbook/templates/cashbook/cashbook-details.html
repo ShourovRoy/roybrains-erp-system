@@ -31,6 +31,9 @@
     <div class="card bg-body-tertiary border-0 shadow-lg overflow-hidden">
       <div class="table-responsive">
         <table class="table table-dark align-middle mb-0 ledger-table">
+          <colgroup>
+            <col span="1"> <col style="width: 85px;"> <col style="width: 85px;"> <col span="1"> <col style="width: 85px;"> <col style="width: 85px;"> </colgroup>
+
           <thead>
             <tr class="bg-black text-center">
               <th colspan="3" class="py-3 border-end-divider text-success small fw-bold tracking-wider">
@@ -42,12 +45,12 @@
             </tr>
             <tr class="x-small-label text-secondary text-center bg-dark bg-opacity-50">
               <th class="ps-3 text-start">PARTICULARS</th>
-              <th style="width: 100px;">CASH</th>
-              <th style="width: 100px;" class="border-end-divider">BANK</th>
+              <th>CASH</th>
+              <th class="border-end-divider">BANK</th>
               
               <th class="ps-3 text-start">PARTICULARS</th>
-              <th style="width: 100px;">CASH</th>
-              <th style="width: 100px;">BANK</th>
+              <th>CASH</th>
+              <th>BANK</th>
             </tr>
           </thead>
           <tbody>
@@ -57,14 +60,14 @@
                 
                 {% if entry.debit > 0 %}
                     <td class="ps-3">
-                        <div class="text-white small fw-bold">{{ entry.description }}</div>
+                        <div class="text-white small fw-bold text-wrap">{{ entry.description }}</div>
                         <div class="x-small text-muted">{{ entry.date|date:"H:i" }}</div>
                     </td>
-                    <td class="text-center text-success fw-bold">
-                        {% if not entry.is_bank %}৳{{ entry.debit }}{% else %}-{% endif %}
+                    <td class="text-center text-success fw-bold amount-font">
+                        {% if not entry.is_bank %}{{ entry.debit }}{% else %}-{% endif %}
                     </td>
-                    <td class="text-center text-info fw-bold border-end-divider">
-                        {% if entry.is_bank %}৳{{ entry.debit }}{% else %}-{% endif %}
+                    <td class="text-center text-info fw-bold border-end-divider amount-font">
+                        {% if entry.is_bank %}{{ entry.debit }}{% else %}-{% endif %}
                     </td>
                     
                     <td class="bg-black bg-opacity-25"></td>
@@ -77,14 +80,14 @@
                     <td class="bg-black bg-opacity-25 border-end-divider"></td>
 
                     <td class="ps-3">
-                        <div class="text-white small fw-bold">{{ entry.description }}</div>
+                        <div class="text-white small fw-bold text-wrap">{{ entry.description }}</div>
                         <div class="x-small text-muted">{{ entry.date|date:"H:i" }}</div>
                     </td>
-                    <td class="text-center text-warning fw-bold">
-                        {% if not entry.is_bank %}৳{{ entry.credit }}{% else %}-{% endif %}
+                    <td class="text-center text-warning fw-bold amount-font">
+                        {% if not entry.is_bank %}{{ entry.credit }}{% else %}-{% endif %}
                     </td>
-                    <td class="text-center text-danger fw-bold">
-                        {% if entry.is_bank %}৳{{ entry.credit }}{% else %}-{% endif %}
+                    <td class="text-center text-danger fw-bold amount-font">
+                        {% if entry.is_bank %}{{ entry.credit }}{% else %}-{% endif %}
                     </td>
                 {% endif %}
 
@@ -115,27 +118,34 @@
   .x-small-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; }
   .x-small { font-size: 0.7rem; }
   
-  /* The Vertical Central Line */
   .border-end-divider {
       border-right: 2px solid rgba(255, 255, 255, 0.15) !important;
   }
 
-  /* Fixed Column Widths for Symmetry */
-  .ledger-table { table-layout: fixed; }
-  .ledger-table td, .ledger-table th {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+  .ledger-table { 
+    table-layout: fixed; 
+    width: 100%;
+    min-width: 900px; /* Ensures columns don't collapse on small screens */
   }
 
-  /* Row Hover Effect */
+  /* Fixed Amount Styling */
+  .amount-font {
+    font-size: 0.85rem;
+  }
+
+  /* Allow text to wrap and use the expanded space */
+  .text-wrap {
+    white-space: normal !important;
+    word-break: break-word;
+    line-height: 1.2;
+  }
+
   .ledger-table tbody tr:hover {
       background-color: rgba(255, 255, 255, 0.02);
   }
 
-  /* Shading the 'Dead' side of a transaction */
   .bg-black.bg-opacity-25 {
-      background-color: rgba(0, 0, 0, 0.1) !important;
+      background-color: rgba(0, 0, 0, 0.15) !important;
   }
 </style>
 {% endblock content %}

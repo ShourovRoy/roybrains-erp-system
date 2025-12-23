@@ -490,7 +490,7 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
                     ledger=ledger_details,
                     debit=cash_amount,
                     credit=0.0,
-                    description="Cash given in liquide",
+                    description="Cash",
                     date=date_time,
                 )
 
@@ -498,7 +498,7 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"Cash payment to {ledger_details.account_name} - {ledger_details.address}",
+                    description=f"{ledger_details.account_name.capitalize()} - {ledger_details.address}",
                     is_bank=False,
                     debit=0.00,
                     credit=cash_amount,
@@ -581,13 +581,14 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
         
 
-        # get cashbook
-        cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
 
 
         try:
         
             with transaction.atomic():
+                # get cashbook
+                cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
+                
                 account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
                 bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
 
@@ -601,7 +602,7 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
                 self.model.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
-                    description=f"Transferred from {bank_ledger.account_name} - {bank_ledger.branch}",
+                    description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
                     date=date_time,
                     debit=float(amount),
                     credit=0.0
@@ -611,7 +612,7 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
                 self.model.objects.create(
                     business=self.request.user,
                     ledger=bank_ledger,
-                    description=f"Money has been sent to {account_ledger.account_name} - {account_ledger.address}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     date=date_time,
                     credit=float(amount),
                     debit=0.0
@@ -621,7 +622,7 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"{bank_ledger.account_name} transafer payment to {account_ledger.account_name} - {account_ledger.address}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     is_bank=True,
                     debit=0.00,
                     credit=amount,
@@ -709,21 +710,23 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
             form.add_error(None, "Invalid date format.")
             return self.form_invalid(form)
         
-        # get cashbook
-        cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
 
 
-        # check if cash amount available in cashbook cash balance 
-        if cash_amount > cash_book.cash_amount or cash_book.cash_amount == 0.0:
-            messages.error(request=self.request, message=f"{cash_amount} is not available in cashbook cash balance!")
-            return redirect("financial-outflow-partial-action", pk=account_id, bank_id=bank_id)
         
         try:
 
 
             with transaction.atomic():
-                account_ledger = get_object_or_404(self.model, business=self.request.user, pk=account_id)
-                bank_ledger = get_object_or_404(self.model, business=self.request.user, pk=bank_id)
+                # get cashbook
+                cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
+                
+                # check if cash amount available in cashbook cash balance 
+                if cash_amount > cash_book.cash_amount or cash_book.cash_amount == 0.0:
+                    messages.error(request=self.request, message=f"{cash_amount} is not available in cashbook cash balance!")
+                    return redirect("financial-outflow-partial-action", pk=account_id, bank_id=bank_id)
+                
+                account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
+                bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
                 
                 # check if bank amount is available in bank account
                 if bank_ledger.balance < bank_amount or bank_ledger.balance == 0.0:
@@ -735,7 +738,7 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
-                    description="Cash given in liquide",
+                    description="Cash",
                     credit=0.0,
                     debit=cash_amount,
                     date=date_time,
@@ -745,7 +748,7 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=account_ledger,
-                    description=f"Given from {bank_ledger.account_name} - {bank_ledger.branch}",
+                    description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
                     credit=0.0,
                     debit=bank_amount,
                     date=date_time,
@@ -755,7 +758,7 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                 LedgerTransaction.objects.create(
                     business=self.request.user,
                     ledger=bank_ledger,
-                    description=f"Money given to {account_ledger.account_name} - {account_ledger.address}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     credit=bank_amount,
                     debit=0.0,
                     date=date_time,
@@ -766,7 +769,7 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"Cash payment to {account_ledger.account_name}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     is_bank=False,
                     debit=0.00,
                     credit=cash_amount,
@@ -777,7 +780,7 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"{bank_ledger.account_name} payment to {account_ledger.account_name}",
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
                     is_bank=True,
                     debit=0.00,
                     credit=bank_amount,

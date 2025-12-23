@@ -114,7 +114,7 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                     LedgerTransaction.objects.create(
                         business=self.request.user,
                         ledger=bank_ledger,
-                        description=f"Transfered to {expense_ledger.name} account of business.",
+                        description=f"{expense_ledger.name.capitalize()} Expense.",
                         debit=0.00,
                         credit=float(form.cleaned_data["amount"]),
                         date=form.cleaned_data["date"],
@@ -124,14 +124,14 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"Given to {expense_ledger.name}",
+                        description=f"{expense_ledger.name.capitalize()} Expense.",
                         is_bank=True,
                         credit=float(form.cleaned_data["amount"]),
                         debit=0.00,
                         date=form.cleaned_data["date"],
                     )
 
-                    expense_desc = f"{bank_ledger.account_name} - {bank_ledger.branch}"
+                    expense_desc = f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}"
 
                     # update bank and cash balance in cashbook
                     cash_book.bank_amount -= float(form.cleaned_data["amount"])
@@ -143,7 +143,7 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                     LedgerTransaction.objects.create(
                         business=self.request.user,
                         ledger=bank_ledger,
-                        description=f"Cash withdrawn",
+                        description=f"Cash",
                         debit=0.00,
                         credit=float(form.cleaned_data["amount"]),
                         date=form.cleaned_data["date"],
@@ -154,7 +154,7 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"Cash withdrawn",
+                        description=f"Cash",
                         is_bank=True,
                         credit=float(form.cleaned_data["amount"]),
                         debit=0.00,
@@ -165,7 +165,7 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"{bank_ledger.account_name} - {bank_ledger.branch}",
+                        description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
                         is_bank=False,
                         debit=float(form.cleaned_data["amount"]),
                         credit=0.00,
@@ -176,7 +176,7 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"{expense_ledger.name} account",
+                        description=f"{expense_ledger.name.capitalize()} Expense",
                         is_bank=False,
                         credit=float(form.cleaned_data["amount"]),
                         debit=0.00,
@@ -196,7 +196,7 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"{expense_ledger.name} account",
+                        description=f"{expense_ledger.name.capitalize()} Expense",
                         is_bank=False,
                         credit=float(form.cleaned_data["amount"]),
                         debit=0.00,

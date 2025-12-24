@@ -84,7 +84,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
                     ledger=bank_details_ledger,
                     credit=withdraw_amount,
                     debit=0.0,
-                    description="Withdrawn",
+                    description="Cash",
                     date=date_time
                 )
 
@@ -92,7 +92,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"withdraw from {bank_details_ledger.account_name} - {bank_details_ledger.branch}",
+                    description=f"Cash ({bank_details_ledger.account_name.capitalize()} - {bank_details_ledger.branch})",
                     credit=withdraw_amount,
                     debit=0.00,
                     is_bank=True,
@@ -103,7 +103,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
                 CashTransaction.objects.create(
                     business=self.request.user,
                     cashbook=cash_book,
-                    description=f"Cash in",
+                    description=f"{bank_details_ledger.account_name.capitalize()} - {bank_details_ledger.branch}",
                     debit=withdraw_amount,
                     credit=0.00,
                     is_bank=False,
@@ -187,7 +187,7 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
                     ledger=bank_details_ledger,
                     debit=deposite_amount,
                     credit=0.0,
-                    description="Cash deposite",
+                    description="Cash",
                     date=date_time
                 )
 
@@ -195,7 +195,7 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
                 CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"Deposit cash",
+                        description=f"Cash ({bank_details_ledger.account_name.capitalize()} - {bank_details_ledger.branch})",
                         debit=deposite_amount,
                         credit=0.00,
                         is_bank=True,
@@ -206,7 +206,7 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
                 CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"Deposit to {bank_details_ledger.account_name} - {bank_details_ledger.branch}",
+                        description=f"{bank_details_ledger.account_name.capitalize()} - {bank_details_ledger.branch}",
                         credit=deposite_amount,
                         debit=0.00,
                         is_bank=False,

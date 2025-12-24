@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'cashbook',
     'capital_management',
     'expense_record',
+    'journal',
 ]
 
 MIDDLEWARE = [

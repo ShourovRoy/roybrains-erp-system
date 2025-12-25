@@ -8,6 +8,8 @@ from django.db import transaction
 from django.contrib import messages
 from utils.helper import get_cashbook_on_date_or_previous, encode_date_time
 from cashbook.models import CashTransaction
+from utils.helper import get_or_create_journal_book
+from journal.models import JournalTransaction
 # Create your views here.
 
 
@@ -39,7 +41,11 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
 
             with transaction.atomic():
 
+
                 date_time = encode_date_time(form.cleaned_data['date'])
+
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=date_time)
 
                 capital_obj, capital_created = Capital.objects.get_or_create(
                     business=self.request.user,
@@ -48,10 +54,8 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
                     }
                 )
 
-                print(form.cleaned_data['date'])
-
                 # get latest cash book
-                cash_book = get_cashbook_on_date_or_previous(self.request.user, encode_date_time(form.cleaned_data['date']))
+                cash_book = get_cashbook_on_date_or_previous(self.request.user, date_time)
 
 
                 # handle bank capital
@@ -103,11 +107,57 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
                         capital=capital_obj,
                         debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
                         credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
-                        description=f"Capital Investment at Bank - {bank_details.account_name}" if form.cleaned_data['transaction_type'] == 'deposit' else f"Capital Withdrawal from Bank - {bank_details.account_name}",
+                        description=f"Capital Investment - {bank_details.account_name}" if form.cleaned_data['transaction_type'] == 'deposit' else f"Capital Withdrawal from Bank - {bank_details.account_name}",
                         date=date_time,
                     )
 
-                    
+
+                    # make the journal entry for bank debit and capital credit on deposit
+                    if form.cleaned_data['transaction_type'] == 'deposit':
+                        # bank debit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            date=date_time,
+                            debit=float(form.cleaned_data['amount']),
+                            credit=0.00,
+                            description=f"{bank_details.account_name.capitalize()} - {bank_details.branch}"
+                        )
+
+                        # capital credit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            date=date_time,
+                            debit=0.00,
+                            credit=float(form.cleaned_data['amount']),
+                            description=f"Capital"
+                        )
+                    else:
+
+                        # bank credit and capital debit on withdraw
+                        # capital debit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            date=date_time,
+                            debit=float(form.cleaned_data['amount']),
+                            credit=0.00,
+                            description=f"Capital"
+                        )
+
+                        # bank credit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            date=date_time,
+                            debit=0.00,
+                            credit=float(form.cleaned_data['amount']),
+                            description=f"{bank_details.account_name.capitalize()} - {bank_details.branch}"
+                        )
+
+
+                   
                 
                 # handle cash capital
                 else:
@@ -122,7 +172,7 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
                     CashTransaction.objects.create(
                         business=self.request.user,
                         cashbook=cash_book,
-                        description=f"Capital Investment via Cash" if form.cleaned_data['transaction_type'] == "deposit" else "Capital Withdrawal in cash",
+                        description=f"Capital Investment" if form.cleaned_data['transaction_type'] == "deposit" else "Capital Withdrawal",
                         is_bank=False,
                         debit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'deposit' else 0.00,
                         credit=float(form.cleaned_data['amount']) if form.cleaned_data['transaction_type'] == 'withdrawal' else 0.00,
@@ -148,6 +198,52 @@ class CapitalDepositWithdrawView(LoginRequiredMixin, FormView):
                         description="Capital Investment in cash" if form.cleaned_data['transaction_type'] == 'deposit' else "Capital Withdrawal in cash",
                         date=date_time,
                     )
+
+
+                    # make the journal entry for cash debit and capital credit on deposit
+                    if form.cleaned_data['transaction_type'] == 'deposit':
+                        # cash debit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            date=date_time,
+                            debit=float(form.cleaned_data['amount']),
+                            credit=0.00,
+                            description=f"Cash"
+                        )
+
+                        # capital credit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            date=date_time,
+                            debit=0.00,
+                            credit=float(form.cleaned_data['amount']),
+                            description=f"Capital"
+                        )
+                    else:
+
+                        # cash credit and capital debit on withdraw
+                        # capital debit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            date=date_time,
+                            debit=float(form.cleaned_data['amount']),
+                            credit=0.00,
+                            description=f"Capital"
+                        )
+
+                        # cash credit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            date=date_time,
+                            debit=0.00,
+                            credit=float(form.cleaned_data['amount']),
+                            description=f"Cash"
+                        )
+
 
 
 

@@ -1,18 +1,48 @@
 from datetime import datetime
 from django.utils.dateparse import parse_date
 from cashbook.models import CashBook
+from journal.models import JournalBook
+
+from django.utils.timezone import make_aware
 
 def encode_date_time(date_time):
-    return datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+    naive_datetime = datetime.strptime(date_time, "%Y-%m-%dT%H:%M")
+    return make_aware(naive_datetime)
 
+
+from django.utils import timezone
 
 # Function to parse a date string into a date object
 def parse_date_else_today_string(date_string = None):
     if not date_string:
-        return parse_date(datetime.today().isoformat())
+        return timezone.localdate()
     else:
         return parse_date(date_string)
     
+
+
+# get journal book
+def get_or_create_journal_book(business, date):
+
+
+    # get todays journal
+    journal_book, journal_book_created = JournalBook.objects.get_or_create(
+        business=business,
+        date__date=date,
+        defaults={
+            "total_debit": float(0.00),
+            "total_credit": float(0.00),
+            "date": date
+        }
+    )
+
+    return journal_book
+
+    
+
+
+
+
 
 # check cashbook available on the given date else get previous date cashbook
 def get_cashbook_on_date_or_previous(business, date):

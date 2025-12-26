@@ -115,7 +115,7 @@
             <div class="date-badge text-secondary">
               <i class="bi bi-calendar3 me-1"></i> {{ journal.date|date:"M d, Y" }}
             </div>
-            <a href="#" class="text-accent text-decoration-none small fw-bold">
+            <a href="{% url 'journal:journal-details' journal.pk %}" class="text-accent text-decoration-none small fw-bold">
               Details <i class="bi bi-arrow-right ms-1"></i>
             </a>
           </div>

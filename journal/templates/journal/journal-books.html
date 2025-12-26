@@ -1,0 +1,138 @@
+{% extends 'base.html' %} 
+
+{% block style %}
+<style>
+  :root {
+    --bg-canvas: #1a1d20;
+    --bg-card: #2b3035;
+    --accent: #0d6efd;
+    --border: rgba(255, 255, 255, 0.1);
+  }
+
+  .x-small-label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: #6c757d;
+    text-transform: uppercase;
+  }
+
+  .journal-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .journal-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+  }
+
+  .business-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(13, 110, 253, 0.1);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: bold;
+  }
+
+  .balance-well {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .divider-vertical {
+    width: 1px;
+    background: var(--border);
+    height: 30px;
+  }
+
+  .date-badge {
+    background: var(--bg-canvas);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+  }
+</style>
+{% endblock style %}
+
+{% block content %}
+<section class="py-5 bg-dark min-vh-100">
+  <div class="container">
+    
+    <div class="d-flex align-items-center justify-content-between mb-5">
+      <div>
+        <div class="d-flex align-items-center mb-1">
+          <div style="width: 3px; height: 20px; background-color: var(--accent); border-radius: 2px;" class="me-2"></div>
+          <h2 class="fw-bold text-white m-0">Journal Archive</h2>
+        </div>
+        <p class="text-secondary small ms-3">Viewing all recorded journal books for your businesses.</p>
+      </div>
+      <a href="#" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm" style="border-radius: 6px; text-transform: uppercase; font-size: 0.75rem;">
+        <i class="bi bi-plus-lg me-1"></i> New Entry
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for journal in journals %}
+      <div class="col-md-6 col-lg-4">
+        <div class="journal-card p-4 shadow-lg h-100 d-flex flex-column">
+          
+          <div class="d-flex align-items-start gap-3 mb-4">
+            <div class="business-icon">
+              {{ journal.business.business_name|slice:":1"|upper }}
+            </div>
+            <div class="overflow-hidden">
+              <h6 class="text-white fw-bold mb-0 text-truncate">{{ journal.business.business_name }}</h6>
+              <p class="text-secondary x-small-label mb-0 text-truncate" style="font-weight: 400; letter-spacing: 0;">
+                <i class="bi bi-geo-alt me-1"></i>{{ journal.business.business_address }}
+              </p>
+            </div>
+          </div>
+
+          <div class="balance-well mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <label class="x-small-label d-block text-success mb-1">Total Debit</label>
+                <span class="text-white fw-bold" style="font-size: 1.1rem;">৳ {{ journal.total_debit }}</span>
+              </div>
+              <div class="divider-vertical"></div>
+              <div class="text-end">
+                <label class="x-small-label d-block text-danger mb-1">Total Credit</label>
+                <span class="text-white fw-bold" style="font-size: 1.1rem;">৳ {{ journal.total_credit }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-10">
+            <div class="date-badge text-secondary">
+              <i class="bi bi-calendar3 me-1"></i> {{ journal.date|date:"M d, Y" }}
+            </div>
+            <a href="#" class="text-accent text-decoration-none small fw-bold">
+              Details <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center py-5">
+        <div class="opacity-25 mb-3">
+          <i class="bi bi-journal-text fs-1 text-secondary"></i>
+        </div>
+        <h5 class="text-secondary">No Journal Books Found</h5>
+        <p class="text-muted small">Start by creating your first business transaction.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock content %}

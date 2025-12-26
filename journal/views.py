@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from .models import JournalBook, JournalTransaction
 # Create your views here.
 
-
+# journal book dist view
 class JournalBookList(LoginRequiredMixin, ListView):
     login_url = "/login/"
     template_name = "journal/journal-books.html"

@@ -11,11 +11,12 @@ from django.urls import reverse
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from cashbook.models import CashTransaction
-from utils.helper import get_cashbook_on_date_or_previous
+from utils.helper import get_cashbook_on_date_or_previous, get_or_create_journal_book
+from journal.models import JournalTransaction
 # Create your views here.
 
      
-
+# TODO: 27-12-25 fix cashbook problem
 
 # account search view for voucher creation
 class PurchaseVoucherLedgerAccountSearchView(LoginRequiredMixin, ListView):
@@ -61,7 +62,7 @@ class PurchaseItemAddView(LoginRequiredMixin, CreateView, ListView, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['voucher'] = PurchaseVoucher.objects.get(pk=int(self.kwargs['pk']))
-  
+        print(context['voucher'])
         return context
 
     def form_valid(self, form):
@@ -171,6 +172,7 @@ class PurchaseVoucherCreateView(LoginRequiredMixin, CreateView):
 
                 if form.instance.is_purchased_in_cash:
                     voucher_creation_date = form.cleaned_data.get('date', None)
+                    print("create voucher purchase date: ", voucher_creation_date)
 
                     # check cashbook available on the given date else get previous lastest date cashbook
                     cash_book = get_cashbook_on_date_or_previous(self.request.user, voucher_creation_date.date())
@@ -229,12 +231,15 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
     def get_object(self, queryset=None):
         voucher_id = int(self.kwargs.get('pk'))
         voucher = get_object_or_404(self.model, pk=voucher_id, business=self.request.user)
+        print("voucher date ++",voucher.date)
         return voucher
     
     def get(self, request, *args, **kwargs):
         voucher = self.get_object()
         ledger_id = request.GET.get('ledger_id', None)
         ledger = None
+
+        print(voucher)
 
         if ledger_id is not None:
             try:
@@ -251,14 +256,29 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
         
         try: 
             with transaction.atomic():
+
+                voucher_formate_date = voucher.date.date()
                 
                 voucher.is_completed = True
                 voucher.save()
 
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=voucher_formate_date)
+
+                # purchase debit in journal
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    date=voucher_formate_date,
+                    ledger_ref=ledger,
+                    debit=float(voucher.total_amount),
+                    credit=0.00,
+                    description=f"Purchase id {voucher.pk} - {ledger.account_name}"
+                )
 
                 # update ledger entry if purchased in cash
                 if voucher.is_purchased_in_cash:
-                    ledger = LedgerTransaction.objects.create(
+                    LedgerTransaction.objects.create(
                         business=self.request.user, 
                         purchase_voucher=voucher,
                         ledger=ledger,
@@ -267,8 +287,6 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                         date=voucher.date,
                     )
 
-                    voucher_formate_date = voucher.date.date()
-
                     # get cashbook on voucher date or previous lastest date
                     cash_book = get_cashbook_on_date_or_previous(self.request.user, voucher_formate_date)
 
@@ -276,7 +294,7 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                     if cash_book.cash_amount < float(voucher.total_amount):
                         raise ValueError("Insufficient cash in cash book to complete this purchase voucher.")
                        
-
+                    print(voucher)
                     # make cash book entry
                     CashTransaction.objects.create(
                         business=self.request.user,
@@ -287,11 +305,35 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                         debit=0.0,
                     )
 
+                    # cash credit in journal
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        date=voucher_formate_date,
+                        ledger_ref=ledger,
+                        credit=float(voucher.total_amount),
+                        debit=0.00,
+                        description=f"Cash payment to {ledger.account_name}"
+                    )
+
                     # deduct cash from cash book
                     cash_book.cash_amount -= float(voucher.total_amount)
                     cash_book.save()
                 
-                messages.success(request, "Purchase voucher completed successfully.")
+
+                else:
+                    # purchase account credit in journal cashless credit purchase
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        date=voucher_formate_date,
+                        ledger_ref=ledger,
+                        credit=float(voucher.total_amount),
+                        debit=0.00,
+                        description=f"{ledger.account_name.capitalize()} - {ledger.address}"
+                    )
+                    
+                messages.success(request, f"Purchase voucher completed successfully. {voucher.date}")
                 
                 return super().get(request, *args, **kwargs)
         

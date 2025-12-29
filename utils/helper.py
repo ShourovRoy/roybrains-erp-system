@@ -46,6 +46,7 @@ def get_or_create_journal_book(business, date):
 
 # check cashbook available on the given date else get previous date cashbook
 def get_cashbook_on_date_or_previous(business, date):
+    print("cash book get date: ", date)
     # get todays cashbook
     cash_book = CashBook.objects.filter(
         business=business,

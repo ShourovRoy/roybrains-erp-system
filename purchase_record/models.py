@@ -27,7 +27,7 @@ class PurchaseVoucher(models.Model):
     is_completed = models.BooleanField(default=False, blank=True, null=True)
 
     def __str__(self):
-        return self.supplier
+        return f"{self.supplier} {self.pk} {self.date}"
     
 
 class PurchaseItem(models.Model):

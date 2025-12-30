@@ -10,8 +10,9 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 from datetime import datetime
 from utils.helper import encode_date_time
-from utils.helper import get_cashbook_on_date_or_previous
+from utils.helper import get_cashbook_on_date_or_previous, get_or_create_journal_book
 from cashbook.models import CashTransaction
+from journal.models import JournalTransaction
 # Create your views here.
 
 # financial control panel
@@ -100,6 +101,9 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
                         date=date_time.date()
                     )
 
+                    # get journal book
+                    journal_book = get_or_create_journal_book(business=self.request.user, date=date_time.date())
+
                     # cash debit
                     CashTransaction.objects.create(
                         business=self.request.user,
@@ -119,6 +123,29 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
                         debit=0.0,
                         description=f"Cash",
                         date=date_time
+                    )
+
+
+                    # create journal
+                    # cash debit
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        date=date_time.date(),
+                        debit=float(amount),
+                        credit=0.00,
+                        description=f"Cash",
+                    )
+                    
+                    # accounts credit
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        ledger_ref=ledger,
+                        date=date_time.date(),
+                        debit=0.00,
+                        credit=float(amount),
+                        description=f"{ledger.account_name.capitalize()} - {ledger.address}",
                     )
 
                     # update cash book cash amount

@@ -117,6 +117,16 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
 
 
                 # update journal
+                # cash debit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    date=date_time.date(),
+                    credit=0.00,
+                    debit=float(withdraw_amount),
+                    description=f"Cash",
+                )
+                
                 # bank credit
                 JournalTransaction.objects.create(
                     business=self.request.user,
@@ -128,16 +138,6 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
                     description=f"{bank_details_ledger.account_name.capitalize()} - {bank_details_ledger.branch}",
                 )
 
-                # cash debit
-                JournalTransaction.objects.create(
-                    business=self.request.user,
-                    journal=journal_book,
-                    date=date_time.date(),
-                    credit=0.00,
-                    debit=float(withdraw_amount),
-                    description=f"Cash",
-                )
-                
                 
                 # udpate the cashbook balance
                 cash_book.cash_amount += withdraw_amount

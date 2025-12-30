@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.db import transaction
 from utils.helper import encode_date_time, get_cashbook_on_date_or_previous
 from cashbook.models import CashTransaction
+from utils.helper import get_or_create_journal_book
+from journal.models import JournalTransaction
 # Create your views here.
 
 # Internal banking control panel view
@@ -110,6 +112,33 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
                     date=date_time,
                 )
 
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=date_time.date())
+
+
+                # update journal
+                # bank credit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    date=date_time.date(),
+                    ledger_ref=bank_details_ledger,
+                    debit=0.00,
+                    credit=float(withdraw_amount),
+                    description=f"{bank_details_ledger.account_name.capitalize()} - {bank_details_ledger.branch}",
+                )
+
+                # cash debit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    date=date_time.date(),
+                    credit=0.00,
+                    debit=float(withdraw_amount),
+                    description=f"Cash",
+                )
+                
+                
                 # udpate the cashbook balance
                 cash_book.cash_amount += withdraw_amount
                 cash_book.bank_amount -= withdraw_amount

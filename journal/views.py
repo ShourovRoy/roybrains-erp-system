@@ -42,7 +42,7 @@ class JournalBookDetailsView(LoginRequiredMixin, DeleteView):
         journals = JournalTransaction.objects.filter(
             business=self.request.user,
             journal=self.journal_book,
-        ).order_by("date", "id")
+        ).order_by("-date", "id")
 
         context["journals"] = journals
 

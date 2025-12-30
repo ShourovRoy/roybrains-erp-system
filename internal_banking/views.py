@@ -242,6 +242,31 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
                         date=date_time,
                 )
 
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=date_time.date())
+                
+                # create journal entry
+                # bank debit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    date=date_time.date(),
+                    ledger_ref=bank_details_ledger,
+                    debit=float(deposite_amount),
+                    credit=0.00,
+                    description=f"{bank_details_ledger.account_name.capitalize()} - {bank_details_ledger.branch}",
+                )
+ 
+                # cash credit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    date=date_time.date(),
+                    debit=0.00,
+                    credit=float(deposite_amount),
+                    description=f"Cash",
+                )
+
                 # udpate the cashbook balance
                 cash_book.cash_amount -= deposite_amount
                 cash_book.bank_amount += deposite_amount

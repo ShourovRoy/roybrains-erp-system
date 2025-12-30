@@ -121,7 +121,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
                 JournalTransaction.objects.create(
                     business=self.request.user,
                     journal=journal_book,
-                    date=date_time.date(),
+                    date=date_time,
                     credit=0.00,
                     debit=float(withdraw_amount),
                     description=f"Cash",
@@ -131,7 +131,7 @@ class InternalBankingWithdraw(LoginRequiredMixin, CreateView, DetailView):
                 JournalTransaction.objects.create(
                     business=self.request.user,
                     journal=journal_book,
-                    date=date_time.date(),
+                    date=date_time,
                     ledger_ref=bank_details_ledger,
                     debit=0.00,
                     credit=float(withdraw_amount),
@@ -250,7 +250,7 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
                 JournalTransaction.objects.create(
                     business=self.request.user,
                     journal=journal_book,
-                    date=date_time.date(),
+                    date=date_time,
                     ledger_ref=bank_details_ledger,
                     debit=float(deposite_amount),
                     credit=0.00,
@@ -261,7 +261,7 @@ class InternalBankingDeposite(LoginRequiredMixin, CreateView, DetailView):
                 JournalTransaction.objects.create(
                     business=self.request.user,
                     journal=journal_book,
-                    date=date_time.date(),
+                    date=date_time,
                     debit=0.00,
                     credit=float(deposite_amount),
                     description=f"Cash",

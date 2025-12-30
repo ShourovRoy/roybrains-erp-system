@@ -246,6 +246,8 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
                     date=date_time.date()
                 )
 
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=date_time.date())
 
 
                 account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
@@ -281,6 +283,29 @@ class FinancialBankInflowActionView(LoginRequiredMixin, CreateView):
                     debit=amount,
                     credit=0.00,
                     date=date_time,
+                )
+
+                # create journal
+                # bank debit 
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=bank_ledger,
+                    debit=float(amount),
+                    credit=0.00,
+                    description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
+                    date=date_time
+                )
+
+                # accounts credit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=account_ledger,
+                    debit=0.00,
+                    credit=float(amount),
+                    description=f"{account_ledger.account_name.capitalize()} - {bank_ledger.address}",
+                    date=date_time
                 )
 
 

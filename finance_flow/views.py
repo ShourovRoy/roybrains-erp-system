@@ -131,7 +131,7 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
                     JournalTransaction.objects.create(
                         business=self.request.user,
                         journal=journal_book,
-                        date=date_time.date(),
+                        date=date_time,
                         debit=float(amount),
                         credit=0.00,
                         description=f"Cash",
@@ -142,7 +142,7 @@ class FinancialCashInFlow(LoginRequiredMixin, CreateView):
                         business=self.request.user,
                         journal=journal_book,
                         ledger_ref=ledger,
-                        date=date_time.date(),
+                        date=date_time,
                         debit=0.00,
                         credit=float(amount),
                         description=f"{ledger.account_name.capitalize()} - {ledger.address}",

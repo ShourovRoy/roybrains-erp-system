@@ -400,6 +400,9 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                     date=date_time.date()
                 )
 
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=date_time.date())
+
 
                 account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
                 bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
@@ -457,6 +460,39 @@ class FinancialPartialInflowActionView(LoginRequiredMixin, CreateView, DetailVie
                     debit=bank_amount,
                     credit=0.00,
                     date=date_time,
+                )
+
+
+                # create journal entry
+                # bank debit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=bank_ledger,
+                    debit=float(bank_amount),
+                    credit=0.00,
+                    description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
+                    date=date_time
+                )
+                # cash debit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    debit=float(cash_amount),
+                    credit=0.00,
+                    description=f"Cash",
+                    date=date_time
+                )
+
+                # accounts credit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=account_ledger,
+                    debit=0.00,
+                    credit=float(cash_amount + bank_amount),
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
+                    date=date_time
                 )
 
                 # update cashbook balance

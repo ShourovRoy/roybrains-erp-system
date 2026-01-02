@@ -1,8 +1,5 @@
 from django.db import models
 
-# TODO: work on cash book
-# TODO: challange, per day cashbook with previous day balance 
-
 # Create your models here.
 class CashBook(models.Model):
     business = models.ForeignKey("business.BusinessUser", on_delete=models.CASCADE)

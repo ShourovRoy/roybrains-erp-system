@@ -16,7 +16,6 @@ from journal.models import JournalTransaction
 # Create your views here.
 
      
-# TODO: 27-12-25 fix cashbook problem
 
 # account search view for voucher creation
 class PurchaseVoucherLedgerAccountSearchView(LoginRequiredMixin, ListView):

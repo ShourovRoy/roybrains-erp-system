@@ -12,6 +12,8 @@ from ledger.models import Ledger, Transaction as LedgerTransaction
 from django.contrib.postgres.search import TrigramSimilarity
 from utils.helper import get_cashbook_on_date_or_previous
 from cashbook.models import CashTransaction
+from utils.helper import get_or_create_journal_book
+from journal.models import JournalTransaction
 
 # Create your views here.
 # create a expense book
@@ -72,6 +74,9 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
         # get lastest cashbook
         cash_book = get_cashbook_on_date_or_previous(self.request.user, form.cleaned_data["date"].date())
 
+        # get journal book
+        journal_book = get_or_create_journal_book(business=self.request.user, date=form.cleaned_data["date"].date())
+
 
         # check for empty transactions
         if not form.cleaned_data["amount"] or float(form.cleaned_data["amount"]) < 0.00:
@@ -107,6 +112,16 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
             with transaction.atomic():
                 expense_desc = None
 
+                # create journal transaction for expense
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    description=f"{expense_ledger.name.capitalize()} Expense.",
+                    debit=float(form.cleaned_data["amount"]),
+                    credit=0.00,
+                    date=form.cleaned_data["date"],
+                )
+
                 # if expense done using direct bank transfer
                 if bank_ledger and is_bank_transfered:
 
@@ -131,10 +146,21 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                         date=form.cleaned_data["date"],
                     )
 
+                    # journal transaction for bank credit
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
+                        debit=0.00,
+                        credit=float(form.cleaned_data["amount"]),
+                        date=form.cleaned_data["date"],
+                    )
+
                     expense_desc = f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}"
 
                     # update bank and cash balance in cashbook
                     cash_book.bank_amount -= float(form.cleaned_data["amount"])
+
 
                 # if expense done by withdrawing from bank
                 if bank_ledger and is_bank_transfered == False:
@@ -183,6 +209,36 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
                         date=form.cleaned_data["date"],
                     )
 
+                    # journal transaction for cash debit
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        description=f"Cash",
+                        debit=float(form.cleaned_data["amount"]),
+                        credit=0.00,
+                        date=form.cleaned_data["date"],
+                    )
+
+                    # journal transaction for bank credit
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
+                        debit=0.00,
+                        credit=float(form.cleaned_data["amount"]),
+                        date=form.cleaned_data["date"],
+                    )
+
+                    # journal cash credit for expense
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        description=f"Cash Expense",
+                        debit=0.00,
+                        credit=float(form.cleaned_data["amount"]),
+                        date=form.cleaned_data["date"],
+                    )
+
                     # udpate the expense description
                     expense_desc = f"Cash"
 
@@ -208,6 +264,16 @@ class ExpenseBookTransactionView(LoginRequiredMixin, FormView):
 
                     # deduct cash balance from cashbook 
                     cash_book.cash_amount -= float(form.cleaned_data["amount"])
+
+                    # journal transaction for cash credit
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        description=f"Cash Expense",
+                        debit=0.00,
+                        credit=float(form.cleaned_data["amount"]),
+                        date=form.cleaned_data["date"],
+                    )
 
 
 

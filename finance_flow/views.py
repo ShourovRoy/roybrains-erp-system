@@ -572,6 +572,10 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
                 # get ledger details 
                 ledger_details = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
 
+
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=date_time.date());
+
                 # make ledger entry
                 LedgerTransaction.objects.create(
                     business=self.request.user, 
@@ -592,6 +596,31 @@ class FinancialOutflowInCashView(LoginRequiredMixin, CreateView):
                     credit=cash_amount,
                     date=date_time,
                 )
+
+
+                # create journal entry
+                # accounts debit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=ledger_details,
+                    debit=float(cash_amount),
+                    credit=0.00,
+                    description=f"{ledger_details.account_name.capitalize()} - {ledger_details.address}",
+                    date=date_time
+                )
+
+                # cash credit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=ledger_details,
+                    debit=0.00,
+                    credit=float(cash_amount),
+                    description="Cash",
+                    date=date_time
+                )
+
 
                 # update the cash amount in cashbook
                 cash_book.cash_amount -= cash_amount

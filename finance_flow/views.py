@@ -705,6 +705,10 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
             with transaction.atomic():
                 # get cashbook
                 cash_book = get_cashbook_on_date_or_previous(business=self.request.user, date=date_time.date())
+
+
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=date_time.date())
                 
                 account_ledger = get_object_or_404(Ledger, business=self.request.user, pk=account_id)
                 bank_ledger = get_object_or_404(Ledger, business=self.request.user, pk=bank_id)
@@ -744,6 +748,29 @@ class FinancialOutflowBankActionView(LoginRequiredMixin, CreateView):
                     debit=0.00,
                     credit=amount,
                     date=date_time,
+                )
+
+                # create journal entry
+                # account debit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=account_ledger,
+                    debit=float(amount),
+                    credit=0.00,
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
+                    date=date_time
+                )
+                
+                # bank credit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=bank_ledger,
+                    debit=0.00,
+                    credit=float(amount),
+                    description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
+                    date=date_time
                 )
 
                 # deduct bank amount from cash book

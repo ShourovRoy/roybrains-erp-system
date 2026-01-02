@@ -877,6 +877,9 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                     messages.error(request=self.request, message=f"{bank_amount} is not available in {bank_ledger.account_name}")
                     return redirect("financial-outflow-partial-action", pk=account_id, bank_id=bank_id)
 
+                # get journal book
+                journal_book = get_or_create_journal_book(business=self.request.user, date=date_time.date())
+
 
                 # accounts debit by cash
                 LedgerTransaction.objects.create(
@@ -929,8 +932,40 @@ class FinancialPartialOutflowActionView(LoginRequiredMixin, CreateView, DetailVi
                     debit=0.00,
                     credit=bank_amount,
                     date=date_time,
-                )                 
+                )   
 
+                # create journal entry
+                # accounts debit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=account_ledger,
+                    debit=float(cash_amount + bank_amount),
+                    credit=0.00,
+                    description=f"{account_ledger.account_name.capitalize()} - {account_ledger.address}",
+                    date=date_time
+                )
+                  
+                # cash credit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    debit=0.00,
+                    credit=float(cash_amount),
+                    description="Cash",
+                    date=date_time
+                )
+
+                # bank credit
+                JournalTransaction.objects.create(
+                    business=self.request.user,
+                    journal=journal_book,
+                    ledger_ref=bank_ledger,
+                    debit=0.00,
+                    credit=float(bank_amount),
+                    description=f"{bank_ledger.account_name.capitalize()} - {bank_ledger.branch}",
+                    date=date_time
+                )
 
                 # update cashbook balance and deduct both cash balance and bank balance
                 cash_book.cash_amount -= cash_amount

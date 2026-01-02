@@ -268,7 +268,7 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                 JournalTransaction.objects.create(
                     business=self.request.user,
                     journal=journal_book,
-                    date=voucher_formate_date,
+                    date=voucher.date,
                     ledger_ref=ledger,
                     debit=float(voucher.total_amount),
                     credit=0.00,
@@ -308,7 +308,7 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                     JournalTransaction.objects.create(
                         business=self.request.user,
                         journal=journal_book,
-                        date=voucher_formate_date,
+                        date=voucher.date,
                         ledger_ref=ledger,
                         credit=float(voucher.total_amount),
                         debit=0.00,
@@ -325,7 +325,7 @@ class PurchaseVoucherCompleteView(LoginRequiredMixin, DetailView, ListView):
                     JournalTransaction.objects.create(
                         business=self.request.user,
                         journal=journal_book,
-                        date=voucher_formate_date,
+                        date=voucher.date,
                         ledger_ref=ledger,
                         credit=float(voucher.total_amount),
                         debit=0.00,

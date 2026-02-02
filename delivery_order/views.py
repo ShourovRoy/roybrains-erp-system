@@ -9,7 +9,11 @@ from django.db import transaction
 from django.contrib import messages
 from django.contrib.postgres.search import TrigramSimilarity
 from cashbook.models import CashTransaction
-from utils.helper import get_cashbook_on_date_or_previous
+from utils.helper import get_cashbook_on_date_or_previous, get_or_create_journal_book
+from journal.models import JournalTransaction
+
+# TODO: 3-1-26 implement journal
+
 # Create your views here.
 
 class SaleManagementView(LoginRequiredMixin, ListView):
@@ -142,6 +146,38 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
                     self.object.grand_total = (self.object.previous_due or 0) + self.object.total_price
                     self.object.save()
 
+                    
+
+                    # get journal book
+                    journal_book = get_or_create_journal_book(business=self.request.user, date=self.object.date)
+                    
+                    #  journal entry for cash received debit
+                    JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            ledger_ref=account_details,
+                            date=self.object.date,
+                            description="Cash",
+                            debit=float(self.object.payment_amount),
+                            credit=0.00
+                    )
+
+
+
+                    # create journal entries 
+                    if total_product_price > self.object.payment_amount:
+                        # account receivable debit
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            ledger_ref=account_details,
+                            date=self.object.date,
+                            description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                            debit=float(total_product_price - self.object.payment_amount),
+                            credit=0.00
+                        )
+
+
                     # insert ledger transaction if any amount is paid
                     if self.object.payment_amount is not None and float(self.object.payment_amount) > 0: 
                         LedgerTransaction.objects.create(
@@ -168,10 +204,42 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
                             date=self.object.date
                         )
 
+                        
+                        # handle the extra payment and make credit journal of the account
+
+                        if float(self.object.grand_total) < float(self.object.payment_amount):
+                            print("grand total: ",self.object.grand_total)
+                            print("payment amount: ",self.object.payment_amount)
+
+                            # accounts credit the amount that is extra than grand total
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                ledger_ref=account_details,
+                                date=self.object.date,
+                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                                debit=0.00,
+                                credit=float(self.object.payment_amount-self.object.grand_total),
+                            )
+
+
                         # update cash book amount
                         cash_book.cash_amount += float(self.object.payment_amount)
                         cash_book.save()
                     
+
+                    # journal sales credit
+                    JournalTransaction.objects.create(
+                        business=self.request.user,
+                        journal=journal_book,
+                        ledger_ref=account_details,
+                        date=self.object.date,
+                        description="Sales",
+                        debit=0.00,
+                        credit=float(total_product_price),
+                    )
+
+
                     messages.success(request=self.request, message=f"Delivery Order has been created.")
 
 

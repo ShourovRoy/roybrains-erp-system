@@ -146,6 +146,8 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
                     self.object.grand_total = (self.object.previous_due or 0) + self.object.total_price
                     self.object.save()
 
+                    print("previous due: ", self.object.previous_due)
+                    print("grand total: ", self.object.grand_total)
 
                     # insert ledger transaction if any amount is paid
                     if self.object.payment_amount is not None and float(self.object.payment_amount) > 0: 
@@ -178,70 +180,208 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
                         cash_book.save()
                     
                     # get journal book
-                    journal_book = get_or_create_journal_book(self.request.user, "")
+                    journal_book = get_or_create_journal_book(self.request.user, self.object.date)
+
+
+                    # check if the total bill is 0 then fake order
+                    if (float(total_product_price) == float(0)):
+                        raise ValueError("Fake order")
 
 
                     # start creating journal
-                    
-                    # TODO: 3-2-26 check if the sale (DO) is on credit
-                    if (self.object.payment_amount is None or float(self.object.payment_amount) == float(0)):
-                        pass
-                        # TODO: journal account debit
+                    # journal account debit
+                    JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            ledger_ref=account_details,
+                            description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                            debit=float(total_product_price),
+                            credit=0.00,
+                            date=self.object.date
+                        )
+                    # journal sales credit
+                    JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            description=f"Sales - x{len(items)}",
+                            debit=0.00,
+                            credit=float(total_product_price),
+                            date=self.object.date
+                        )
+                        
+                       
+                    # check if the sale is paid with exact amount
+                    if (float(self.object.payment_amount) == float(total_product_price) and (float(self.object.payment_amount)> 0 and float(total_product_price) > 0)):
+
+                        print("---paid---")
+
+                        # journal cash debit (with voucher id)
                         JournalTransaction.objects.create(
                             business=self.request.user,
+                            journal=journal_book,
+                            description="Cash",
+                            debit=float(total_product_price),
+                            credit=0.00,
+                            date=self.object.date
                         )
-                        # TODO: journal sales credit
-
-                    # TODO: check if the sale is paid with exact amount
-                    if (self.object.payment_amount == total_product_price):
-                        pass
-                        # TODO: journal account debit
-                        # TODO: journal sales credit
-
-                        # TODO: journal cash debit (with voucher id)
-                        # TODO: journal account credit (with voucher id)
-
-                    # TODO: check if the payment amount is less than the actual sale amount
-                    if (self.object.payment_amount < total_product_price):
-                        pass
-                        # TODO: journal account debit 
-                        # TODO: journal sales credit 
-
-                        # TODO: journal cash debit (paid cash amount)
-                        # TODO: journal accounts credit (with voucher id)
 
 
-                    # TODO: check if the payment amount is more than the actual sale amount
-                    if (self.object.payment_amount > total_product_price):
-                        # TODO: check if the payment amount is less than grand total
-                        if (self.object.payment_amount < self.object.grand_total):
-                            pass
-                            # TODO: journal account debit (sale amount)
-                            # TODO: journal sales credit (sale amount)
+                        # journal account credit (with voucher id)
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            ledger_ref=account_details, 
+                            description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                            debit=0.00,
+                            credit=float(total_product_price),
+                            date=self.object.date
+                        )
 
-                            # TODO: journal cash debit (sale amount)
-                            # TODO: journal account credit (with voucher id, sale amount)
-
-                            # TODO: journal cash debit (payment amount - sales amount)
-                            # TODO: journal accounts credit (payment amount - sales amount)
-
-                        # TODO: check if the payment amount is more than the grand total
-                        if (self.object.payment_amount > self.object.grand_total):
-                            pass
-
-                            # TODO: journal account debit (sale amount)
-                            # TODO: journal sales credit (sale amount)
-
-                            # TODO: journal cash debit (sale amount)
-                            # TODO: journal acocunts credit (sale amount)
-                        
-                            # TODO: journal cash debit (payment amount - grand total)
-                            # TODO: journal accounts credit (payment amount - grand total) 
-                         
+                
                     
+                    # check if the payment amount is less than the actual sale amount
+                    if ((float(self.object.payment_amount) < float(total_product_price)) and (self.object.payment_amount is not None and float(self.object.payment_amount) > 0)):
+
+                        print("---partial paid---")
+
+                        # journal cash debit (paid cash amount)
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            description="Cash",
+                            debit=float(total_product_price - self.object.payment_amount),
+                            credit=0.00,
+                            date=self.object.date
+                        )
+
+                        # journal accounts credit (with voucher id)
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            ledger_ref=account_details,
+                            description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                            debit=0.00,
+                            credit=float(total_product_price - self.object.payment_amount),
+                            date=self.object.date
+                        )
 
 
-                    messages.success(request=self.request, message=f"Delivery Order has been created.")
+                    # check if the payment amount is more than the actual sale amount
+                    if (float(self.object.payment_amount) > float(total_product_price)):
+                        
+                        # check if the payment amount is less than grand total
+                        if (float(self.object.payment_amount) < float(self.object.grand_total)):
+                            
+                            # journal cash debit (sale amount)
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                description="Cash",
+                                debit=float(total_product_price),
+                                credit=0.00,
+                                date=self.object.date
+                            )
+
+                            # journal account credit (with voucher id, sale amount)
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                ledger_ref=account_details,
+                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                                debit=0.00,
+                                credit=float(total_product_price),
+                                date=self.object.date
+                            )
+
+                            # journal cash debit (payment amount - sales amount)
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                description="Cash",
+                                debit=float(self.object.payment_amount - total_product_price),
+                                credit=0.00,
+                                date=self.object.date
+                            )
+                            # journal accounts credit (payment amount - sales amount)
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                ledger_ref=account_details,
+                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                                debit=0.00,
+                                credit=float(self.object.payment_amount - total_product_price),
+                                date=self.object.date
+                            )
+
+                        # check if the payment amount is more than the grand total
+                        if (float(self.object.payment_amount) > float(self.object.grand_total)):
+
+                            # pay the current bill journal
+                            # cash debit
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                description=f"Cash",
+                                debit=float(self.object.grand_total - self.object.previous_due),
+                                credit=float(0),
+                                date=self.object.date,
+                            )
+
+                            # accounts credit
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                ledger_ref=account_details, 
+                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                                debit=float(0),
+                                credit=float(self.object.grand_total - self.object.previous_due),
+                                date=self.object.date,
+                            )
+                            
+                            # pay previous bill
+                            # cash debit
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                description=f"Cash",
+                                debit=float(self.object.grand_total - total_product_price),
+                                credit=float(0),
+                                date=self.object.date,
+                            )
+
+                            # accounts credit
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                ledger_ref=account_details, 
+                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                                debit=float(0),
+                                credit=float(self.object.grand_total - total_product_price),
+                                date=self.object.date,
+                            )
+                            
+
+                            # advance the remaining
+                            # cash debit
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                description=f"Cash",
+                                debit=float(self.object.payment_amount - self.object.grand_total),
+                                credit=float(0),
+                                date=self.object.date,
+                            )
+
+                            # accounts credit
+                            JournalTransaction.objects.create(
+                                business=self.request.user,
+                                journal=journal_book,
+                                ledger_ref=account_details, 
+                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                                debit=float(0),
+                                credit=float(self.object.payment_amount - self.object.grand_total),
+                                date=self.object.date,
+                            )                    
 
 
 
@@ -249,6 +389,8 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
             messages.warning(request=self.request, message=f"{e}")
                 
             return self.form_invalid(form)
+        
+        messages.success(request=self.request, message=f"Delivery Order has been created.")
 
         return redirect("create_delivery_order")
 

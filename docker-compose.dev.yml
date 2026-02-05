@@ -1,0 +1,29 @@
+services:
+  erp-web:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: erp-docker
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_PASS=${DB_PASS}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+
+    volumes:
+      - .:/app
+    command: >
+      sh -c "python manage.py makemigrations && python manage.py migrate &&  python manage.py runserver 0.0.0.0:8000"
+
+    networks:
+      - roy-brains-erp-net
+
+
+networks:
+  roy-brains-erp-net:
+    driver: bridge

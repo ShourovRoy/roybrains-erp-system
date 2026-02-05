@@ -1,4 +1,3 @@
-from django.shortcuts import redirect
 from django.views.generic import ListView, FormView
 from .models import Capital, CapitalTransaction
 from .forms import CapitalForm

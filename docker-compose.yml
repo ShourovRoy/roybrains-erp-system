@@ -2,7 +2,7 @@ services:
   erp-web:
     build: 
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: erp-docker
     ports:
       - "8000:8000"

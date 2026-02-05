@@ -36,7 +36,11 @@ class BusinessSignupView(TemplateView):
         user.save()
 
         return render(request, 'business/login.html')
-    
+
+
+
+
+# Business login
 class BusinessLoginView(View):
     def get(self, request):
         if request.user.is_authenticated:

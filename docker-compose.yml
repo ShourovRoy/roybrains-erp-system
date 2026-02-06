@@ -1,4 +1,14 @@
 services:
+  nginx:
+    build: nginx
+    restart: always
+    ports:
+      - 80:80
+    depends_on:
+      - erp-web
+    networks:
+      - roy-brains-erp-net
+      
   erp-web:
     build: 
       context: .

@@ -43,8 +43,7 @@ db.sqlite3-journal
 # Media and static files (generated)
 media/
 staticfiles/
-static/
-
+static/admin
 # Local settings
 # (Uncomment if you have sensitive info like API keys in settings_local.py)
 # settings_local.py

@@ -1,6 +1,6 @@
 services:
   erp-web:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.dev
     container_name: erp-docker
@@ -9,20 +9,32 @@ services:
     env_file:
       - .env
     environment:
+      - DEBUG=True
+      - ENVIRONMENT=${ENVIRONMENT}
       - DB_URL=${DB_URL}
       - DB_PASS=${DB_PASS}
       - DB_USER=${DB_USER}
       - DB_NAME=${DB_NAME}
       - DB_PORT=${DB_PORT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
+      - AWS_S3_REGION_NAME=${AWS_S3_REGION_NAME}
+      - AWS_S3_SIGNATURE_VERSION=${AWS_S3_SIGNATURE_VERSION}
+      - AWS_QUERYSTRING_EXPIRE=${AWS_QUERYSTRING_EXPIRE}
+      - AWS_S3_CUSTOM_DOMAIN=${AWS_S3_CUSTOM_DOMAIN}
+      - AWS_LOCATION=${AWS_LOCATION}
 
     volumes:
       - .:/app
     command: >
-      sh -c "python manage.py makemigrations && python manage.py migrate &&  python manage.py runserver 0.0.0.0:8000"
+      sh -c "python manage.py collectstatic --noinput &&
+         python manage.py makemigrations &&
+         python manage.py migrate &&
+         python manage.py runserver 0.0.0.0:8000"
 
     networks:
       - roy-brains-erp-net
-
 
 networks:
   roy-brains-erp-net:

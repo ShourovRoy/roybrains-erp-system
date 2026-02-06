@@ -18,4 +18,4 @@ urlpatterns = [
     path('', include('capital_management.urls')),
     path('', include('expense_record.urls')),
     path('', include('journal.urls')),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] 

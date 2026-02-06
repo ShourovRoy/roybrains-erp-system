@@ -9,10 +9,11 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from dotenv import load_dotenv
 from pathlib import Path
 import os
 
+load_dotenv()
 
 DB_URL=os.getenv("DB_URL")
 DB_USER=os.getenv("DB_USER")
@@ -32,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*770!z+0a93+25bb650j*g@&d25htg2iyt!fst-^cc(zvwi9@o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = bool(os.getenv("ENVIRONMENT", True))
 
 ALLOWED_HOSTS = ["*"]
 
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
     'capital_management',
     'expense_record',
     'journal',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -68,7 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -95,6 +97,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 if DEBUG:
+    print("debugging ++++++++++")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -154,15 +157,45 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'  # Change this from '/staticfiles/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+if DEBUG == False:
 
-MEDIA_URL = '/media/'  # Also change this from '/mediafiles/'
-MEDIA_ROOT = BASE_DIR / 'mediafiles'
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID"),
+                "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY"),
+                "AWS_STORAGE_BUCKET_NAME": os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                "AWS_S3_CUSTOM_DOMAIN": os.getenv("AWS_S3_CUSTOM_DOMAIN"),
+                "AWS_S3_REGION_NAME":os.getenv("AWS_S3_REGION_NAME"),
+                "AWS_S3_SIGNATURE_VERSION": os.getenv("AWS_S3_SIGNATURE_VERSION"),
+                "AWS_QUERYSTRING_EXPIRE": os.getenv("AWS_QUERYSTRING_EXPIRE"),
+                "AWS_LOCATION": "static",
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+                "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
+                "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                "region_name": os.getenv("AWS_S3_REGION_NAME"),
+                "custom_domain": os.getenv("AWS_S3_CUSTOM_DOMAIN"),
+                "location": os.getenv("AWS_LOCATION", "static"),
+            },
+        },
+    }
+    STATIC_URL = f'https://{os.getenv("AWS_S3_CUSTOM_DOMAIN")}/'
+    
+else:
+
+    STATIC_URL = '/static/' 
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -170,5 +203,3 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "business.BusinessUser"
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

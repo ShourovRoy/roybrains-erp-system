@@ -35,8 +35,11 @@ SECRET_KEY = 'django-insecure-*770!z+0a93+25bb650j*g@&d25htg2iyt!fst-^cc(zvwi9@o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv("ENVIRONMENT", True))
 
+# Add allowed hosts in the list eg: example.com
 ALLOWED_HOSTS = ["*"]
 
+# Add your trusted origin in the list eg: https://example.com
+CSRF_TRUSTED_ORIGINS = []
 
 # Application definition
 

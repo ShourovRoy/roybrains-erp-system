@@ -2,8 +2,13 @@
   <div class="container-fluid px-4">
     <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
       <span class="bg-primary bg-gradient text-white px-2 py-1 rounded me-2">M</span>
-      
-      <span class="text-white tracking-wider">MogTok<small class="text-secondary" style="font-size: 0.6rem; letter-spacing: 1px;"> ERP</small></span>
+      <div class="d-flex flex-column">
+        <div class="d-flex align-items-center">
+            <span class="text-white tracking-wider">MogTok</span>
+            <span class="ms-2 badge rounded-pill border border-warning text-warning" style="font-size: 0.5rem; letter-spacing: 0.5px; background: rgba(255, 193, 7, 0.1); padding: 2px 6px;">BETA</span>
+        </div>
+        <small class="text-secondary" style="font-size: 0.55rem; letter-spacing: 1px; margin-top: -3px;">ERP SYSTEM</small>
+      </div>
     </a>
 
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,7 +27,7 @@
         
         <li class="nav-item">
           <a class="nav-link px-3 small text-uppercase fw-semibold" href="{% url 'journal:journal-books-list' %}">
-            <i class="bi bi-box-seam me-1"></i> Journal 
+            <i class="bi bi-journal-bookmark me-1"></i> Journal 
           </a>
         </li>
         
@@ -71,12 +76,17 @@
             <li><a class="dropdown-item" href="{% url 'sales_log' %}"><i class="bi bi-clock-history me-2"></i>Sales Log</a></li>
           </ul>
         </li>
-
         {% endif %}
       </ul>
 
       <ul class="navbar-nav ms-auto align-items-center">
         {% if user.is_authenticated %}
+        <li class="nav-item me-3 d-none d-xl-block">
+          <a href="#" class="nav-link small text-warning opacity-75 hover-opacity-100" style="font-size: 0.75rem;">
+            <i class="bi bi-bug me-1"></i> Report Bug
+          </a>
+        </li>
+
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle d-flex align-items-center bg-secondary bg-opacity-10 rounded-pill px-3 py-1 border border-secondary border-opacity-25" href="#" role="button" data-bs-toggle="dropdown">
             <i class="bi bi-person-circle fs-5 me-2 text-primary"></i>
@@ -107,28 +117,38 @@
     box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
   }
+  
   .navbar-dark .nav-link {
     color: rgba(255, 255, 255, 0.7);
     transition: all 0.2s ease;
     font-size: 0.85rem;
   }
+  
   .navbar-dark .nav-link:hover, .navbar-dark .nav-link.active {
     color: #fff;
   }
+  
   .dropdown-item {
     font-size: 0.9rem;
     padding: 0.5rem 1.25rem;
   }
+  
   .dropdown-item:hover {
     background-color: rgba(13, 110, 253, 0.2);
     color: #0d6efd;
   }
+  
   .dropdown-header {
     letter-spacing: 1px;
     font-size: 0.7rem !important;
     padding-top: 1rem;
   }
-  .navbar-brand {
-    letter-spacing: 1px;
+  
+  .hover-opacity-100:hover {
+    opacity: 1 !important;
+  }
+
+  .tracking-wider {
+    letter-spacing: 1.5px;
   }
 </style>

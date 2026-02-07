@@ -1,5 +1,294 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block style %}
+<style>
+  :root {
+    --primary-glow: rgba(13, 110, 253, 0.15);
+    --glass-bg: rgba(43, 48, 53, 0.6);
+    --border-color: rgba(255, 255, 255, 0.1);
+  }
 
-{% block content %}
-    <h1>Home Page</h1>
+  .hero-section {
+    padding: 100px 0;
+    background: radial-gradient(
+      circle at top right,
+      var(--primary-glow),
+      transparent
+    );
+  }
+
+  .beta-badge {
+    background: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+    border: 1px solid rgba(13, 110, 253, 0.3);
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .feature-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 30px;
+    height: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .feature-card:hover {
+    border-color: #0d6efd;
+    transform: translateY(-5px);
+    background: rgba(43, 48, 53, 0.8);
+  }
+
+  .feature-icon {
+    width: 50px;
+    height: 50px;
+    background: #0d6efd;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 15px rgba(13, 110, 253, 0.2);
+  }
+
+  .upcoming-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed var(--border-color);
+    opacity: 0.7;
+  }
+
+  .stats-well {
+    background: #1a1d20;
+    border-radius: 20px;
+    padding: 40px;
+    border: 1px solid var(--border-color);
+  }
+
+  .nav-btn {
+    border-radius: 8px;
+    padding: 10px 25px;
+    font-weight: 600;
+  }
+</style>
+{% endblock style %} {% block content %}
+<div class="bg-dark text-white">
+  <header class="hero-section">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <div class="mb-3">
+            <span class="beta-badge">Beta v1.0.4 - Testing Phase</span>
+          </div>
+          <h1 class="display-3 fw-bold mb-4">
+            Smart ERP for <br /><span class="text-primary"
+              >Modern Business.</span
+            >
+          </h1>
+          <p class="lead text-secondary mb-5">
+            MogTok streamlines your financial flow, inventory, and procurement
+            in one unified workspace. Built for precision, designed for speed.
+          </p>
+          <div class="d-flex gap-3">
+            <a
+              href="{% url 'business_signup' %}"
+              class="btn btn-primary nav-btn shadow-lg"
+              >Get Started for Free</a
+            >
+            <a href="#features" class="btn btn-outline-light nav-btn"
+              >Explore Features</a
+            >
+          </div>
+        </div>
+        <div class="col-lg-6 d-none d-lg-block">
+          <div class="stats-well shadow-2xl">
+            <div class="row g-3">
+              <div class="col-6">
+                <div
+                  class="p-3 bg-dark border border-secondary border-opacity-25 rounded"
+                >
+                  <small class="text-secondary d-block">Monthly Revenue</small>
+                  <span class="fs-4 fw-bold">৳ 452,000</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div
+                  class="p-3 bg-dark border border-secondary border-opacity-25 rounded"
+                >
+                  <small class="text-secondary d-block">Active Ledgers</small>
+                  <span class="fs-4 fw-bold">128</span>
+                </div>
+              </div>
+              <div class="col-12 text-center py-4">
+                <i
+                  class="bi bi-graph-up-arrow text-primary display-1 opacity-50"
+                ></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features" class="py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Core Modules</h2>
+        <p class="text-secondary">
+          Everything you need to manage your business financials.
+        </p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-receipt"></i></div>
+            <h5 class="fw-bold">Purchase Vouchers</h5>
+            <p class="text-secondary small">
+              Generate professional procurement vouchers and track item-wise
+              stock entry automatically.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-journal-text"></i></div>
+            <h5 class="fw-bold">Ledger & Journals</h5>
+            <p class="text-secondary small">
+              Automated double-entry bookkeeping. Maintains real-time balance
+              for all accounts.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-bank"></i></div>
+            <h5 class="fw-bold">Bank & Cash</h5>
+            <p class="text-secondary small">
+              Manage deposits and withdrawals with integrated cashbook
+              synchronization.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-wallet2"></i></div>
+            <h5 class="fw-bold">Capital & Expense</h5>
+            <p class="text-secondary small">
+              Track owner investments and daily operational expenses with
+              categorized reporting.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-cart-check"></i></div>
+            <h5 class="fw-bold">Sales Management</h5>
+            <p class="text-secondary small">
+              Log sales, generate delivery orders, and track customer
+              receivables effortlessly.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card upcoming-card">
+            <div class="feature-icon bg-secondary">
+              <i class="bi bi-hourglass-split"></i>
+            </div>
+            <h5 class="fw-bold">Inventory Control</h5>
+            <p class="text-secondary small">
+              Real-time stock alerts, trigram similarity search, and automated
+              weight calculations.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="py-5 bg-black bg-opacity-25 border-top border-secondary border-opacity-10"
+  >
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-4">
+          <h3 class="fw-bold">Future Roadmap</h3>
+          <p class="text-secondary small">
+            We are constantly evolving. Here is what our engineering team is
+            working on right now.
+          </p>
+        </div>
+        <div class="col-lg-8">
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <div
+                class="p-3 border border-secondary border-opacity-25 rounded d-flex align-items-center"
+              >
+                <i class="bi bi-file-earmark-ruled text-primary fs-4 me-3"></i>
+                <div>
+                  <span class="d-block fw-bold small text-white"
+                    >Letter of Credit (LC)</span
+                  >
+                  <small class="text-muted">International Trade Tracking</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div
+                class="p-3 border border-secondary border-opacity-25 rounded d-flex align-items-center"
+              >
+                <i class="bi bi-pie-chart text-primary fs-4 me-3"></i>
+                <div>
+                  <span class="d-block fw-bold small text-white"
+                    >Profit & Loss</span
+                  >
+                  <small class="text-muted">Advanced Financial Analytics</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-5 text-center">
+    <div class="container">
+      <hr class="border-secondary border-opacity-10 mb-5" />
+
+      <div
+        class="alert alert-warning d-inline-block bg-transparent border-warning border-opacity-25 text-warning small px-4"
+      >
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Beta Warning:</strong> This system is currently in testing.
+        Please do not use it for final tax filing until the stable release.
+      </div>
+
+      <div class="mt-5">
+        <p class="text-secondary small mb-1">
+          Powered by
+          <a
+            href="https://roybrains.com"
+            target="_blank"
+            class="text-white text-decoration-none fw-bold"
+            >Roybrains.com</a
+          >
+        </p>
+        <p class="text-secondary x-small mb-0 opacity-75">
+          Architected & Developed by
+          <span class="text-primary">Shourov Roy</span>
+        </p>
+      </div>
+
+      <p class="text-secondary x-small mt-4" style="font-size: 0.7rem">
+        &copy; 2026 MogTok ERP. All rights reserved.
+      </p>
+    </div>
+  </footer>
+</div>
 {% endblock content %}

@@ -93,3 +93,4 @@ htmlcov/
 # celery
 celerybeat-schedule
 celerybeat.pid
+test-nginx.conf

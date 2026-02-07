@@ -1,8 +1,9 @@
 <nav class="navbar navbar-expand-lg sticky-top navbar-dark bg-dark border-bottom border-secondary border-opacity-25 shadow-sm" style="backdrop-filter: blur(10px); background-color: rgba(33, 37, 41, 0.9) !important;">
   <div class="container-fluid px-4">
     <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
-      <span class="bg-primary bg-gradient text-white px-2 py-1 rounded me-2">S</span>
-      <span class="text-white tracking-wider">SAMVĀDA<small class="text-secondary" style="font-size: 0.6rem; letter-spacing: 1px;"> ERP</small></span>
+      <span class="bg-primary bg-gradient text-white px-2 py-1 rounded me-2">M</span>
+      
+      <span class="text-white tracking-wider">MogTok<small class="text-secondary" style="font-size: 0.6rem; letter-spacing: 1px;"> ERP</small></span>
     </a>
 
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,6 +103,10 @@
 
 <style>
   /* Premium Dark Navbar Tweaks */
+  .navbar-brand span.bg-primary {
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
   .navbar-dark .nav-link {
     color: rgba(255, 255, 255, 0.7);
     transition: all 0.2s ease;

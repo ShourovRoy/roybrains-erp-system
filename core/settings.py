@@ -33,13 +33,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*770!z+0a93+25bb650j*g@&d25htg2iyt!fst-^cc(zvwi9@o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.getenv("ENVIRONMENT", True))
+DEBUG = os.environ.get("ENVIRONMENT") == "DEVELOPMENT"
 
 # Add allowed hosts in the list eg: example.com
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 # Add your trusted origin in the list eg: https://example.com
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 # Application definition
 

@@ -9,6 +9,7 @@ services:
     env_file:
       - .env
     environment:
+      - DB_TYPE=${DB_TYPE}
       - ENVIRONMENT=${ENVIRONMENT}
       - DB_URL=${DB_URL}
       - DB_PASS=${DB_PASS}

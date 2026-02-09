@@ -94,8 +94,13 @@ if DEBUG:
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASS,
             'HOST': DB_URL,
-            'PORT': DB_PORT
+            'PORT': DB_PORT,
+            'OPTIONS': {
+                'sslmode': 'require' if os.environ.get("DB_TYPE") == "REMOTE" else None,
+            },
         }
     }
 else:

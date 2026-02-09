@@ -15,6 +15,7 @@ from journal.models import JournalTransaction
 
 # Create your views here.
 
+# sale management view to 
 class SaleManagementView(LoginRequiredMixin, ListView):
     template_name = 'delivery_order/sale-management.html'
     model = Ledger
@@ -40,7 +41,7 @@ class SaleManagementView(LoginRequiredMixin, ListView):
             )
         return super().get_queryset().none
 
-
+# create delivery order view
 class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
     template_name = "delivery_order/create-delivery-order.html"
     login_url = '/login/'
@@ -297,7 +298,7 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
 
         return redirect("create_delivery_order")
 
-
+# search product in delivery order page through htmx ajax call view
 class SearchInventoryProductView(LoginRequiredMixin, ListView):
     template_name = "delivery_order/partials/search-result.html"
     model = Inventory
@@ -312,7 +313,7 @@ class SearchInventoryProductView(LoginRequiredMixin, ListView):
         return []
 
 
-# list delivery orders
+# list delivery orders view
 class DeliveryOrdersList(LoginRequiredMixin, ListView):
     template_name = "delivery_order/delivery-orders-list.html"
     login_url = "/login/"

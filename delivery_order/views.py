@@ -39,7 +39,7 @@ class SaleManagementView(LoginRequiredMixin, ListView):
                 business=self.request.user,
                 similarity__gt=0.2,
             )
-        return super().get_queryset().none
+        return super().get_queryset().all().order_by("-id")
 
 # create delivery order view
 class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):

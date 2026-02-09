@@ -100,6 +100,9 @@ ALLOWED_HOSTS=example.com
 # Multiple: https://learn.example.com,https://example.com
 CSRF_TRUSTED_ORIGINS=https://learn.example.com,https://example.com
 
+# database type
+DB_TYPE="LOCAL" # LOCAL or REMOTE
+
 # Database (PostgreSQL)
 DB_URL=ep-ad-df-182938-pooler.asp-southeast-2.aws.neon.tech
 DB_PASS=akjncadlcoirv

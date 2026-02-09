@@ -79,8 +79,6 @@ Your app will be available at:
 http://127.0.0.1:8000/
 ```
 
-````
-
 ---
 
 ## 📁 Environment Configuration
@@ -90,7 +88,7 @@ Create a `.env` file in the project root using the following template:
 ### `.env.example`
 
 ```env
-DEBUG="PRODUCTION" # PRODUCTION or DEVELOPMENT
+ENVIRONMENT="PRODUCTION" # PRODUCTION or DEVELOPMENT
 
 # Hosts
 # Single: example.com
@@ -120,9 +118,39 @@ AWS_S3_SIGNATURE_VERSION=s3v4
 AWS_QUERYSTRING_EXPIRE=3600
 AWS_S3_CUSTOM_DOMAIN=ajhbcakdhbckdbjv.cloudfront.net
 AWS_LOCATION=static
-````
+```
 
 > ⚠️ **Important:** Never commit your real `.env` file to GitHub.
+
+---
+
+## 🗄️ PostgreSQL Required Extension (Important)
+
+Before running the application for the first time, you must enable the `pg_trgm` extension in your PostgreSQL database.
+
+This extension is required for advanced text search and similarity features used in the system.
+
+### Run This SQL Command
+
+Connect to your PostgreSQL database and execute:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+```
+
+### Example (Using psql)
+
+```bash
+psql -h <DB_HOST> -U <DB_USER> -d <DB_NAME>
+```
+
+Then run:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+```
+
+> ⚠️ **Note:** Make sure your database user has sufficient privileges to create extensions.
 
 ---
 
@@ -136,9 +164,9 @@ For local development without password authentication, configure your database i
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'erp-db-one',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'NAME': DB_NAME,
+        'HOST': DB_URL,
+        'PORT': DB_PORT # default postgres port 5432
     }
 }
 ```

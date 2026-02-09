@@ -12,7 +12,6 @@ from cashbook.models import CashTransaction
 from utils.helper import get_cashbook_on_date_or_previous, get_or_create_journal_book
 from journal.models import JournalTransaction
 
-# TODO: 3-1-26 implement journal
 
 # Create your views here.
 
@@ -268,122 +267,26 @@ class CreateDeliveryOrderView(LoginRequiredMixin, CreateView):
 
                     # check if the payment amount is more than the actual sale amount
                     if (float(self.object.payment_amount) > float(total_product_price)):
-                        
-                        # check if the payment amount is less than grand total
-                        if (float(self.object.payment_amount) < float(self.object.grand_total)):
-                            
-                            # journal cash debit (sale amount)
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                description="Cash",
-                                debit=float(total_product_price),
-                                credit=0.00,
-                                date=self.object.date
-                            )
 
-                            # journal account credit (with voucher id, sale amount)
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                ledger_ref=account_details,
-                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
-                                debit=0.00,
-                                credit=float(total_product_price),
-                                date=self.object.date
-                            )
-
-                            # journal cash debit (payment amount - sales amount)
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                description="Cash",
-                                debit=float(self.object.payment_amount - total_product_price),
-                                credit=0.00,
-                                date=self.object.date
-                            )
-                            # journal accounts credit (payment amount - sales amount)
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                ledger_ref=account_details,
-                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
-                                debit=0.00,
-                                credit=float(self.object.payment_amount - total_product_price),
-                                date=self.object.date
-                            )
-
-                        # check if the payment amount is more than the grand total
-                        if (float(self.object.payment_amount) > float(self.object.grand_total)):
-
-                            # pay the current bill journal
-                            # cash debit
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                description=f"Cash",
-                                debit=float(self.object.grand_total - self.object.previous_due),
-                                credit=float(0),
-                                date=self.object.date,
-                            )
-
-                            # accounts credit
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                ledger_ref=account_details, 
-                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
-                                debit=float(0),
-                                credit=float(self.object.grand_total - self.object.previous_due),
-                                date=self.object.date,
-                            )
-                            
-                            # pay previous bill
-                            # cash debit
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                description=f"Cash",
-                                debit=float(self.object.grand_total - total_product_price),
-                                credit=float(0),
-                                date=self.object.date,
-                            )
-
-                            # accounts credit
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                ledger_ref=account_details, 
-                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
-                                debit=float(0),
-                                credit=float(self.object.grand_total - total_product_price),
-                                date=self.object.date,
-                            )
-                            
-
-                            # advance the remaining
-                            # cash debit
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                description=f"Cash",
-                                debit=float(self.object.payment_amount - self.object.grand_total),
-                                credit=float(0),
-                                date=self.object.date,
-                            )
-
-                            # accounts credit
-                            JournalTransaction.objects.create(
-                                business=self.request.user,
-                                journal=journal_book,
-                                ledger_ref=account_details, 
-                                description=f"{account_details.account_name.capitalize()} - {account_details.address}",
-                                debit=float(0),
-                                credit=float(self.object.payment_amount - self.object.grand_total),
-                                date=self.object.date,
-                            )                    
-
-
+                        # journal cash debit (payment amount - sales amount)
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            description="Cash",
+                            debit=float(self.object.payment_amount),
+                            credit=0.00,
+                            date=self.object.date
+                        )
+                        # journal accounts credit (payment amount - sales amount)
+                        JournalTransaction.objects.create(
+                            business=self.request.user,
+                            journal=journal_book,
+                            ledger_ref=account_details,
+                            description=f"{account_details.account_name.capitalize()} - {account_details.address}",
+                            debit=0.00,
+                            credit=float(self.object.payment_amount),
+                            date=self.object.date
+                        )
 
         except Exception as e :
             messages.warning(request=self.request, message=f"{e}")
